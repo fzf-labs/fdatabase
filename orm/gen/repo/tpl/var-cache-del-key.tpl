@@ -1,0 +1,1 @@
+		keys = append(keys, {{.firstTableChar}}.cache.Key( cache{{.upperTableName}}By{{.cacheField}}Prefix, {{.cacheFieldsJoin}}))
