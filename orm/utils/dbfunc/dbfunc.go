@@ -2,6 +2,7 @@ package dbfunc
 
 import (
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -120,4 +121,35 @@ func getPartitionChildTable(db *gorm.DB) ([]string, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+// GetPartitionTableToChildTables 获取分区表到子表的映射
+func GetPartitionTableToChildTables(db *gorm.DB) (resp map[string][]string, err error) {
+	switch db.Dialector.Name() {
+	case Postgres:
+		resp, err = getPartitionTableToChildTables(db)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// getPartitionTableToChildTable 获取PG分区表到子表的映射
+func getPartitionTableToChildTables(db *gorm.DB) (map[string][]string, error) {
+	resp := make(map[string][]string)
+	type tmp struct {
+		PartitionedTable string `gorm:"column:partitioned_table" json:"partitioned_table"`
+		ChildTables      string `gorm:"column:child_tables" json:"child_tables"`
+	}
+	result := make([]tmp, 0)
+	sql := `SELECT p.relname AS partitioned_table,array_to_string(array_agg(c.relname),',')AS child_tables FROM pg_catalog.pg_class c JOIN pg_catalog.pg_inherits i ON c.oid=i.inhrelid JOIN pg_catalog.pg_class p ON p.oid=i.inhparent GROUP BY p.relname;`
+	err := db.Raw(sql).Scan(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range result {
+		resp[v.PartitionedTable] = append(resp[v.PartitionedTable], strings.Split(v.ChildTables, ",")...)
+	}
+	return resp, nil
 }

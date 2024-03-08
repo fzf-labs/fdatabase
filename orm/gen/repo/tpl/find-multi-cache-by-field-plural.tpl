@@ -4,7 +4,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiCacheBy{{.upperFiel
 	cacheKeys := make([]string, 0)
 	keyToParam := make(map[string]{{.dataType}})
 	for _, v := range {{.lowerFieldPlural}} {
-	    cacheKey := {{.firstTableChar}}.cache.Key( cache{{.upperTableName}}By{{.upperField}}Prefix, v)
+	    cacheKey := {{.firstTableChar}}.cache.Key( Cache{{.upperTableName}}By{{.upperField}}Prefix, v)
 		cacheKeys = append(cacheKeys,cacheKey)
 		keyToParam[cacheKey] = v
 	}
@@ -27,7 +27,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiCacheBy{{.upperFiel
 			if err != nil {
 				return nil, err
 			}
-			value[{{.firstTableChar}}.cache.Key( cache{{.upperTableName}}By{{.upperField}}Prefix, v.{{.upperField}})] = string(marshal)
+			value[{{.firstTableChar}}.cache.Key( Cache{{.upperTableName}}By{{.upperField}}Prefix, v.{{.upperField}})] = string(marshal)
 		}
 		return value, nil
 	})

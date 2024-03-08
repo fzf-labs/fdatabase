@@ -38,6 +38,7 @@ type GenerationDB struct {
 	opts             []gen.ModelOpt                                                // 特殊处理逻辑函数
 	dbNameOpt        func(*gorm.DB) string                                         // 指定数据库名
 	generateModelOpt func(g *gen.Generator) map[string]any                         // 指定表对应的model
+	fieldNullable    bool                                                          // 字段是否可空
 }
 
 func NewGenerationDB(db *gorm.DB, outPutPath string, opts ...OptionDB) *GenerationDB {
@@ -101,6 +102,13 @@ func WithGenerateModel(fn func(g *gen.Generator) map[string]any) OptionDB {
 	}
 }
 
+// WithFieldNullable 选项函数-字段是否可空
+func WithFieldNullable() OptionDB {
+	return func(r *GenerationDB) {
+		r.fieldNullable = true
+	}
+}
+
 // Do 生成
 func (g *GenerationDB) Do() {
 	// 获取数据库名
@@ -114,7 +122,8 @@ func (g *GenerationDB) Do() {
 	generator := gen.NewGenerator(gen.Config{
 		OutPath:          daoPath,
 		ModelPkgPath:     modelPath,
-		FieldWithTypeTag: true,
+		FieldWithTypeTag: true, // gorm tag 中会增加type类型
+		FieldNullable:    g.fieldNullable,
 	})
 	// 使用数据库
 	generator.UseDB(g.db)
@@ -141,16 +150,26 @@ func (g *GenerationDB) Do() {
 	if len(g.tables) > 0 {
 		tables = g.tables
 	}
-	// 查询分区所有子表
-	partitionChildTables, err := dbfunc.GetPartitionChildTable(g.db)
+	// 查询分区表父级到子表的映射
+	partitionTableToChildTables, err := dbfunc.GetPartitionTableToChildTables(g.db)
 	if err != nil {
 		return
+	}
+	partitionChildTables := make([]string, 0)
+	for _, v := range partitionTableToChildTables {
+		partitionChildTables = append(partitionChildTables, v...)
 	}
 	// 去掉tables中的partitionChildTables
 	tables = utils.SliRemove(tables, partitionChildTables)
 	models := make(map[string]any, len(tables))
 	for _, tableName := range tables {
-		models[tableName] = generator.GenerateModel(tableName)
+		generateModel := generator.GenerateModel(tableName)
+		if _, ok := partitionTableToChildTables[tableName]; ok {
+			generatePartitionChildModel := generator.GenerateModel(partitionTableToChildTables[tableName][0])
+			generateModel.Fields = generatePartitionChildModel.Fields
+			generatePartitionChildModel.Generated = false
+		}
+		models[tableName] = generateModel
 	}
 	if g.generateModelOpt != nil {
 		customModels := g.generateModelOpt(generator)
@@ -187,7 +206,7 @@ func (g *GenerationDB) Do() {
 		columnNameToFieldType := make(map[string]string)
 		queryStructMeta := generator.GenerateModel(table)
 		for _, vv := range queryStructMeta.Fields {
-			columnNameToDataType[vv.ColumnName] = vv.Type
+			columnNameToDataType[vv.ColumnName] = strings.TrimLeft(vv.Type, "*")
 			columnNameToName[vv.ColumnName] = vv.Name
 			columnNameToFieldType[vv.ColumnName] = vv.GenType()
 		}
@@ -383,6 +402,13 @@ func (g *GenerationPb) Do() {
 	if err != nil {
 		return
 	}
+	// 查询分区所有子表
+	partitionChildTables, err := dbfunc.GetPartitionChildTable(g.db)
+	if err != nil {
+		return
+	}
+	// 去掉tables中的partitionChildTables
+	tables = utils.SliRemove(tables, partitionChildTables)
 	var wg sync.WaitGroup
 	wg.Add(len(tables))
 	for _, v := range tables {
