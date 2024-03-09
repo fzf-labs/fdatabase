@@ -131,6 +131,8 @@ func GetPartitionTableToChildTables(db *gorm.DB) (resp map[string][]string, err 
 		if err != nil {
 			return nil, err
 		}
+	default:
+		return nil, fmt.Errorf(" db type err")
 	}
 	return resp, nil
 }

@@ -49,6 +49,7 @@ func TestRueidisCache_TakeBatch(t *testing.T) {
 		"d",
 	}
 	take, err := rueidisCache.FetchBatch(ctx, keys, func(miss []string) (map[string]string, error) {
+		fmt.Println(miss)
 		return map[string]string{
 			"a": "test1",
 			"b": "test2",

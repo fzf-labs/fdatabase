@@ -1,22 +1,19 @@
 package rueidiscache
 
 import (
-	"github.com/fzf-labs/fdatabase/cache/rueidiscache/rueidisotel"
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/rueidisaside"
 	"github.com/redis/rueidis/rueidiscompat"
+	"github.com/redis/rueidis/rueidisotel"
 )
 
 // NewRueidis  redis客户端rueidis
 // redis > 6.0
 func NewRueidis(clientOption *rueidis.ClientOption) (rueidis.Client, error) {
-	// 初始化rueidis
-	client, err := rueidis.NewClient(*clientOption)
+	client, err := rueidisotel.NewClient(*clientOption)
 	if err != nil {
 		return nil, err
 	}
-	// 链路追踪
-	client = rueidisotel.WithClient(client)
 	return client, nil
 }
 

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package custom;
 
-option go_package = "github.com/fzf-labs/fdatabase/custom;custom";
+option go_package = "github.com/fzf-labs/fdatabase/orm/custom;custom";
 
 // SearchParam
 message SearchParam {

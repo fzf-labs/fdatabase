@@ -48,7 +48,7 @@ func TestNewRueidisAside(t *testing.T) {
 	if err != nil {
 		return
 	}
-	val, err := client.Get(context.Background(), time.Minute, "mykey", func(ctx context.Context, key string) (val string, err error) {
+	val, err := client.Get(context.Background(), time.Minute, "mykey", func(_ context.Context, _ string) (val string, err error) {
 		return "abcd", nil
 	})
 	fmt.Println(err)

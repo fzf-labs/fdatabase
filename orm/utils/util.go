@@ -36,7 +36,7 @@ func StrSliFind(collection []string, element string) bool {
 }
 
 // SliRemove 删除字符串切片中的某个元素
-func SliRemove(collection []string, element []string) []string {
+func SliRemove(collection, element []string) []string {
 	for _, s := range element {
 		for i, v := range collection {
 			if s == v {

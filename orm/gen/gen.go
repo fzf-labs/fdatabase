@@ -291,8 +291,8 @@ func ModelOptionRemoveDefault() gen.ModelOpt {
 // PGDataTypeMap 自定义字段类型映射
 func PGDataTypeMap() map[string]func(columnType gorm.ColumnType) (dataType string) {
 	return map[string]func(columnType gorm.ColumnType) (dataType string){
-		"json":  func(columnType gorm.ColumnType) string { return "datatypes.JSON" },
-		"jsonb": func(columnType gorm.ColumnType) string { return "datatypes.JSON" },
+		"json":  func(_ gorm.ColumnType) string { return "datatypes.JSON" },
+		"jsonb": func(_ gorm.ColumnType) string { return "datatypes.JSON" },
 		"timestamptz": func(columnType gorm.ColumnType) string {
 			if utils.StrSliFind([]string{"deleted_at", "deletedAt", "deleted_time", "deleted_time"}, columnType.Name()) {
 				return "gorm.DeletedAt"
@@ -303,16 +303,16 @@ func PGDataTypeMap() map[string]func(columnType gorm.ColumnType) (dataType strin
 			}
 			return TimeTime
 		},
-		"character varying[]": func(columnType gorm.ColumnType) (dataType string) {
+		"character varying[]": func(_ gorm.ColumnType) (dataType string) {
 			return "pq.StringArray"
 		},
-		"smallint[]": func(columnType gorm.ColumnType) (dataType string) {
+		"smallint[]": func(_ gorm.ColumnType) (dataType string) {
 			return "pq.Int32Array"
 		},
-		"integer[]": func(columnType gorm.ColumnType) (dataType string) {
+		"integer[]": func(_ gorm.ColumnType) (dataType string) {
 			return "pq.Int32Array"
 		},
-		"bigint[]": func(columnType gorm.ColumnType) (dataType string) {
+		"bigint[]": func(_ gorm.ColumnType) (dataType string) {
 			return "pq.Int64Array"
 		},
 	}

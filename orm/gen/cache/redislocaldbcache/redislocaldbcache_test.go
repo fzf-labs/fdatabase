@@ -50,6 +50,7 @@ func TestCache_FetchBatch(t *testing.T) {
 	ctx := context.Background()
 	for i := 0; i < 10; i++ {
 		result, err2 := redisLocalDBCache.FetchBatch(ctx, []string{"test1", "test1", "test2", "test3", "test4", "test5", "test6", "test7", "test8", "test9", "test10", "test11", "test12", "test13", "test14", "test15"}, func(miss []string) (map[string]string, error) {
+			fmt.Println(miss)
 			// 15个假数据
 			return map[string]string{
 				"test1":  "test1",

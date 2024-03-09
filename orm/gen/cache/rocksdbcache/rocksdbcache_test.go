@@ -48,6 +48,7 @@ func TestRocksCache_FetchBatch(t *testing.T) {
 		"RocksCache_FetchBatch_c",
 	}
 	take, err := cache.FetchBatch(ctx, keys, func(miss []string) (map[string]string, error) {
+		fmt.Println(miss)
 		return map[string]string{
 			"RocksCache_FetchBatch_a": "test1",
 			"RocksCache_FetchBatch_b": "test2",

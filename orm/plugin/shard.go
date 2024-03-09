@@ -33,7 +33,7 @@ func NewMonthShardingPlugin(table, shardingKey string) *sharding.Sharding {
 				t = *value
 			default:
 				// 时间转换
-				t = carbon.Parse(utils.ConvToString(columnValue)).Carbon2Time()
+				t = carbon.Parse(utils.ConvToString(columnValue)).StdTime()
 			}
 			return "_" + t.Format("200601"), nil
 		},
