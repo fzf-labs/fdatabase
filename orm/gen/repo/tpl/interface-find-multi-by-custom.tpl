@@ -1,2 +1,3 @@
-// FindMultiByCustom 自定义查询数据(通用)
-FindMultiByCustom(ctx context.Context, customReq *custom.PaginatorReq) ([]*{{.dbName}}_model.{{.upperTableName}}, *custom.PaginatorReply, error)
+// Deprecated
+// 请使用FindMultiByCondition替代
+FindMultiByCustom(ctx context.Context, customReq *custom.Req) ([]*{{.dbName}}_model.{{.upperTableName}}, *custom.Reply, error)

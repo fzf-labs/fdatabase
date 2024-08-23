@@ -2,11 +2,13 @@ import (
     "context"
 	"encoding/json"
 	"errors"
-
-    "github.com/fzf-labs/fdatabase/orm/custom"
-    "github.com/fzf-labs/fdatabase/orm/gen/cache"
     "{{.daoPkgPath}}"
     "{{.modelPkgPath}}"
-    "gorm.io/gorm"
-    "gorm.io/gorm/clause"
+	"gitlab.yc345.tv/backend/utils/v2/orm"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/cache"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/condition"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/custom"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/encoding"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )

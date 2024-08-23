@@ -1,3 +1,4 @@
+//{{.tableNameComment}}
 service {{.upperTableName}} {
   //{{.tableNameComment}}-创建一条数据
   rpc Create{{.upperTableName}}(Create{{.upperTableName}}Req) returns (Create{{.upperTableName}}Reply) {
@@ -21,11 +22,11 @@ service {{.upperTableName}} {
     };
   }
   //{{.tableNameComment}}-单条数据查询
-  rpc Get{{.upperTableName}}(Get{{.upperTableName}}Req) returns (Get{{.upperTableName}}Reply) {
-    option (google.api.http) = {get: "/{{.tableNameUnderScore}}/v1/{{.tableNameUnderScore}}/get"};
+  rpc Get{{.upperTableName}}Info(Get{{.upperTableName}}InfoReq) returns (Get{{.upperTableName}}InfoReply) {
+    option (google.api.http) = {get: "/{{.tableNameUnderScore}}/v1/{{.tableNameUnderScore}}/info"};
   }
   //{{.tableNameComment}}-列表数据查询
-  rpc List{{.upperTableName}}(List{{.upperTableName}}Req) returns (List{{.upperTableName}}Reply) {
+  rpc Get{{.upperTableName}}List(Get{{.upperTableName}}ListReq) returns (Get{{.upperTableName}}ListReply) {
     option (google.api.http) = {
       post: "/{{.tableNameUnderScore}}/v1/{{.tableNameUnderScore}}/list",
       body: "*"

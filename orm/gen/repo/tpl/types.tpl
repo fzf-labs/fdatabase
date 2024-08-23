@@ -3,7 +3,8 @@ type (
 		{{.methods}}
 	}
 	{{.upperTableName}}Repo struct {
-		db    *gorm.DB
-		cache cache.IDBCache
+		db       *gorm.DB
+		cache    cache.IDBCache
+		encoding encoding.API
 	}
 )

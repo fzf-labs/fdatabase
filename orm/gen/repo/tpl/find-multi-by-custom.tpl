@@ -1,5 +1,6 @@
-// FindMultiByCustom 自定义查询数据(通用)
-func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiByCustom(ctx context.Context, customReq *custom.PaginatorReq) ([]*{{.dbName}}_model.{{.upperTableName}}, *custom.PaginatorReply, error) {
+// Deprecated
+// 请使用FindMultiByCondition替代
+func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiByCustom(ctx context.Context, customReq *custom.Req) ([]*{{.dbName}}_model.{{.upperTableName}}, *custom.Reply, error) {
 	result := make([]*{{.dbName}}_model.{{.upperTableName}}, 0)
 	var total int64
 	whereExpressions, orderExpressions, err := customReq.ConvertToGormExpression({{.dbName}}_model.{{.upperTableName}}{})
@@ -13,14 +14,16 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiByCustom(ctx contex
 	if total == 0 {
 		return result, nil, nil
 	}
-	customReply,err := customReq.ConvertToPage(int32(total))
+	customReply,err := customReq.ConvertToPage(int(total))
 	if err != nil {
 		return result, nil, err
 	}
 	query := {{.firstTableChar}}.db.WithContext(ctx).Model(&{{.dbName}}_model.{{.upperTableName}}{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
-	if customReply.Page != 0 && customReply.PageSize != 0 {
-		query = query.Offset(int((customReply.Page - 1) * customReply.PageSize))
-		query = query.Limit(int(customReply.PageSize))
+	if customReply.Offset != 0 {
+		query = query.Offset(customReply.Offset)
+	}
+	if customReply.Limit != 0 {
+		query = query.Limit(customReply.Limit)
 	}
 	err = query.Find(&result).Error
 	if err != nil {

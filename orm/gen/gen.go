@@ -7,14 +7,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/fzf-labs/fdatabase/orm/gen/proto"
-	"github.com/fzf-labs/fdatabase/orm/gen/repo"
-	"github.com/fzf-labs/fdatabase/orm/utils"
-	"github.com/fzf-labs/fdatabase/orm/utils/dbfunc"
-	"github.com/fzf-labs/fdatabase/orm/utils/file"
 	"github.com/iancoleman/strcase"
-	"gorm.io/driver/mysql"
-	"gorm.io/driver/postgres"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/proto"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/repo"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/dbfunc"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/file"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/util"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 	"gorm.io/gorm"
@@ -160,7 +158,7 @@ func (g *GenerationDB) Do() {
 		partitionChildTables = append(partitionChildTables, v...)
 	}
 	// 去掉tables中的partitionChildTables
-	tables = utils.SliRemove(tables, partitionChildTables)
+	tables = util.SliRemove(tables, partitionChildTables)
 	models := make(map[string]any, len(tables))
 	for _, tableName := range tables {
 		generateModel := generator.GenerateModel(tableName)
@@ -288,13 +286,13 @@ func ModelOptionRemoveDefault() gen.ModelOpt {
 	})
 }
 
-// PGDataTypeMap 自定义字段类型映射
-func PGDataTypeMap() map[string]func(columnType gorm.ColumnType) (dataType string) {
+// DataTypeMap 自定义字段类型映射
+func DataTypeMap() map[string]func(columnType gorm.ColumnType) (dataType string) {
 	return map[string]func(columnType gorm.ColumnType) (dataType string){
-		"json":  func(_ gorm.ColumnType) string { return "datatypes.JSON" },
-		"jsonb": func(_ gorm.ColumnType) string { return "datatypes.JSON" },
+		"json":  func(columnType gorm.ColumnType) string { return "datatypes.JSON" },
+		"jsonb": func(columnType gorm.ColumnType) string { return "datatypes.JSON" },
 		"timestamptz": func(columnType gorm.ColumnType) string {
-			if utils.StrSliFind([]string{"deleted_at", "deletedAt", "deleted_time", "deleted_time"}, columnType.Name()) {
+			if util.StrSliFind([]string{"deleted_at", "deletedAt", "deleted_time", "deletedTime"}, columnType.Name()) {
 				return "gorm.DeletedAt"
 			}
 			nullable, _ := columnType.Nullable()
@@ -303,16 +301,16 @@ func PGDataTypeMap() map[string]func(columnType gorm.ColumnType) (dataType strin
 			}
 			return TimeTime
 		},
-		"character varying[]": func(_ gorm.ColumnType) (dataType string) {
+		"character varying[]": func(columnType gorm.ColumnType) (dataType string) {
 			return "pq.StringArray"
 		},
-		"smallint[]": func(_ gorm.ColumnType) (dataType string) {
+		"smallint[]": func(columnType gorm.ColumnType) (dataType string) {
 			return "pq.Int32Array"
 		},
-		"integer[]": func(_ gorm.ColumnType) (dataType string) {
+		"integer[]": func(columnType gorm.ColumnType) (dataType string) {
 			return "pq.Int32Array"
 		},
-		"bigint[]": func(_ gorm.ColumnType) (dataType string) {
+		"bigint[]": func(columnType gorm.ColumnType) (dataType string) {
 			return "pq.Int64Array"
 		},
 	}
@@ -326,27 +324,6 @@ func DBNameOpts() func(*gorm.DB) string {
 		tableName = strings.ReplaceAll(tableName, " ", "")
 		return tableName
 	}
-}
-
-// ConnectDB 数据库连接
-func ConnectDB(dbType, dsn string) *gorm.DB {
-	var db *gorm.DB
-	var err error
-	switch dbType {
-	case "mysql":
-		db, err = gorm.Open(mysql.Open(dsn))
-		if err != nil {
-			panic(fmt.Errorf("connect mysql db fail: %s", err))
-		}
-	case "postgres":
-		db, err = gorm.Open(postgres.Open(dsn))
-		if err != nil {
-			panic(fmt.Errorf("connect postgres db fail: %s", err))
-		}
-	default:
-		panic(fmt.Errorf(" db type err"))
-	}
-	return db
 }
 
 ////////////////////////////////////////
@@ -408,7 +385,7 @@ func (g *GenerationPb) Do() {
 		return
 	}
 	// 去掉tables中的partitionChildTables
-	tables = utils.SliRemove(tables, partitionChildTables)
+	tables = util.SliRemove(tables, partitionChildTables)
 	var wg sync.WaitGroup
 	wg.Add(len(tables))
 	for _, v := range tables {

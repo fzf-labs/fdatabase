@@ -30,22 +30,23 @@ message Delete{{.upperTableName}}Req {
 message Delete{{.upperTableName}}Reply {}
 
 //请求-{{.tableNameComment}}-单条数据查询
-message Get{{.upperTableName}}Req {
+message Get{{.upperTableName}}InfoReq {
   {{.getReq}}
 }
 
 //响应-{{.tableNameComment}}-单条数据查询
-message Get{{.upperTableName}}Reply {
+message Get{{.upperTableName}}InfoReply {
   {{.upperTableName}}Info info = 1;
 }
 
 //请求-{{.tableNameComment}}-列表数据查询
-message List{{.upperTableName}}Req {
-  paginator.PaginatorReq paginator = 1; //分页
+message Get{{.upperTableName}}ListReq {
+  int32 page = 1; //页码
+  int32 pageSize = 2; //页数
 }
 
 //响应-{{.tableNameComment}}-列表数据查询
-message List{{.upperTableName}}Reply {
-  paginator.PaginatorReply paginator = 1; // 分页
+message Get{{.upperTableName}}ListReply {
+  int32 total = 1; //总数
   repeated {{.upperTableName}}Info list = 2; // 列表数据
 }

@@ -15,7 +15,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiCacheBy{{.upperFiel
         }
 		dao := {{.dbName}}_dao.Use({{.firstTableChar}}.db).{{.upperTableName}}
 		result, err := dao.WithContext(ctx).Where(dao.{{.upperField}}.In(parameters...)).Find()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		if err != nil {
 			return nil, err
 		}
 		value := make(map[string]string)
@@ -23,7 +23,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiCacheBy{{.upperFiel
 			value[v] = ""
 		}
 		for _, v := range result {
-			marshal, err := json.Marshal(v)
+			marshal, err := {{.firstTableChar}}.encoding.Marshal(v)
 			if err != nil {
 				return nil, err
 			}
@@ -34,15 +34,16 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiCacheBy{{.upperFiel
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range cacheValue {
-		tmp := new({{.dbName}}_model.{{.upperTableName}})
-		if v != ""{
-			err := json.Unmarshal([]byte(v), tmp)
+	for _, v := range {{.lowerFieldPlural}} {
+	    cacheKey := {{.firstTableChar}}.cache.Key( Cache{{.upperTableName}}By{{.upperField}}Prefix, v)
+		if cacheValue[cacheKey] != ""{
+			tmp := new({{.dbName}}_model.{{.upperTableName}})
+			err := {{.firstTableChar}}.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
 			if err != nil {
 				return nil, err
 			}
+			resp = append(resp, tmp)
 		}
-		resp = append(resp, tmp)
 	}
 	return resp, nil
 }

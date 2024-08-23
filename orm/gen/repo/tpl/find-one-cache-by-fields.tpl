@@ -8,7 +8,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindOneCacheBy{{.upperFields
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", err
 		}
-		marshal, err := json.Marshal(result)
+		marshal, err := {{.firstTableChar}}.encoding.Marshal(result)
 		if err != nil {
 			return "", err
 		}
@@ -18,7 +18,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindOneCacheBy{{.upperFields
 		return nil, err
 	}
 	if cacheValue != "" {
-		err = json.Unmarshal([]byte(cacheValue), resp)
+		err = {{.firstTableChar}}.encoding.Unmarshal([]byte(cacheValue), resp)
 		if err != nil {
 			return nil, err
 		}

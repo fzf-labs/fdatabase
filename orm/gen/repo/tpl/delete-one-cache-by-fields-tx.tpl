@@ -1,4 +1,4 @@
-// DeleteOneCacheBy{{.upperFields}} 根据{{.lowerField}}删除一条数据并清理缓存
+// DeleteOneCacheBy{{.upperFields}}Tx 根据{{.lowerField}}删除一条数据并清理缓存
 func ({{.firstTableChar}} *{{.upperTableName}}Repo) DeleteOneCacheBy{{.upperFields}}Tx(ctx context.Context,tx *{{.dbName}}_dao.Query, {{.fieldAndDataTypes}}) error {
 	dao := tx.{{.upperTableName}}
 	result, err := dao.WithContext(ctx).Where({{.whereFields}}).First()

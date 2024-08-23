@@ -14,7 +14,7 @@ func NewRedisLock(rd *redis.Client) *RedisLock {
 	}
 }
 
-// RedisLock 实际key参数
+// RedisLock Redis分布式锁
 type RedisLock struct {
 	rd *redis.Client
 }

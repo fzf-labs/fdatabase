@@ -1,6 +1,7 @@
-func New{{.upperTableName}}Repo(db *gorm.DB,cache cache.IDBCache) *{{.upperTableName}}Repo {
+func New{{.upperTableName}}Repo(cfg *config.Repo) *{{.upperTableName}}Repo {
 	return &{{.upperTableName}}Repo{
-		db: db,
-		cache:  cache,
+		db:       cfg.DB,
+		cache:    cfg.Cache,
+		encoding: cfg.Encoding,
 	}
 }

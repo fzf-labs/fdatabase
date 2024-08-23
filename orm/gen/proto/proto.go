@@ -8,12 +8,12 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/fzf-labs/fdatabase/orm/utils"
-	"github.com/fzf-labs/fdatabase/orm/utils/file"
-	"github.com/fzf-labs/fdatabase/orm/utils/template"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 	"github.com/pkg/errors"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/file"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/template"
+	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/util"
 	"gorm.io/gorm"
 )
 
@@ -154,11 +154,11 @@ func (p *Proto) genMessage() string {
 		pbType := columnTypeToPbType(v.DatabaseTypeName())
 		pbName := lowerFieldName(p.columnNameToName[v.Name()])
 		comment, _ := v.Comment()
-		if utils.StrSliFind([]string{"deletedAt", "deleted_at", "deletedTime", "deleted_time"}, v.Name()) {
+		if util.StrSliFind([]string{"deletedAt", "deleted_at", "deletedTime", "deleted_time"}, v.Name()) {
 			continue
 		}
 		info += fmt.Sprintf("	%s %s = %d; // %s\n", pbType, pbName, num, comment)
-		if utils.StrSliFind([]string{"createdAt", "created_at", "createdTime", "created_time", "updatedAt", "updated_at", "updatedTime", "updated_time"}, v.Name()) {
+		if util.StrSliFind([]string{"createdAt", "created_at", "createdTime", "created_time", "updatedAt", "updated_at", "updatedTime", "updated_time"}, v.Name()) {
 			continue
 		}
 		if v.Name() != primaryKeyColumn {
@@ -222,13 +222,15 @@ func (p *Proto) lowerName(s string) string {
 
 // lowerFieldName 字段名称小写
 func lowerFieldName(str string) string {
-	words := []string{"API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM", "RHS", "RPC", "SLA", "SMTP", "SSH", "TLS", "ttl", "UID", "UI", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XSRF", "XSS"}
+	words := []string{"API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "IP", "JSON", "LHS", "QPS", "RAM", "RHS", "RPC", "SLA", "SMTP", "SSH", "TLS", "ttl", "UID", "UI", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XSRF", "XSS"}
 	// 如果第一个单词命中  则不处理
 	for _, v := range words {
 		if strings.HasPrefix(str, v) {
 			return str
 		}
 	}
+	// 替换ID为Id
+	str = strings.ReplaceAll(str, "ID", "Id")
 	rs := []rune(str)
 	f := rs[0]
 	if 'A' <= f && f <= 'Z' {

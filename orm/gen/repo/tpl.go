@@ -16,6 +16,9 @@ var Var string
 //go:embed tpl/var-cache.tpl
 var VarCache string
 
+//go:embed tpl/var-cache-all.tpl
+var VarCacheAll string
+
 //go:embed tpl/var-cache-keys.tpl
 var VarCacheKeys string
 
@@ -52,6 +55,12 @@ var InterfaceCreateBatch string
 //go:embed tpl/create-batch.tpl
 var CreateBatch string
 
+//go:embed tpl/interface-create-batch-by-tx.tpl
+var InterfaceCreateBatchByTx string
+
+//go:embed tpl/create-batch-by-tx.tpl
+var CreateBatchByTx string
+
 //go:embed tpl/interface-delete-multi-by-field-plural.tpl
 var InterfaceDeleteMultiByFieldPlural string
 
@@ -87,6 +96,30 @@ var InterfaceDeleteOneCacheByFields string
 
 //go:embed tpl/delete-one-cache-by-fields.tpl
 var DeleteOneCacheByFields string
+
+//go:embed tpl/interface-delete-multi-by-fields.tpl
+var InterfaceDeleteMultiByFields string
+
+//go:embed tpl/delete-multi-by-fields.tpl
+var DeleteMultiByFields string
+
+//go:embed tpl/interface-delete-multi-cache-by-fields.tpl
+var InterfaceDeleteMultiCacheByFields string
+
+//go:embed tpl/delete-multi-cache-by-fields.tpl
+var DeleteMultiCacheByFields string
+
+//go:embed tpl/interface-delete-multi-by-fields-tx.tpl
+var InterfaceDeleteMultiByFieldsTx string
+
+//go:embed tpl/delete-multi-by-fields-tx.tpl
+var DeleteMultiByFieldsTx string
+
+//go:embed tpl/interface-delete-multi-cache-by-fields-tx.tpl
+var InterfaceDeleteMultiCacheByFieldsTx string
+
+//go:embed tpl/delete-multi-cache-by-fields-tx.tpl
+var DeleteMultiCacheByFieldsTx string
 
 //go:embed tpl/interface-find-multi-by-field.tpl
 var InterfaceFindMultiByField string
@@ -136,11 +169,23 @@ var InterfaceFindOneCacheByFields string
 //go:embed tpl/find-one-cache-by-fields.tpl
 var FindOneCacheByFields string
 
+//go:embed tpl/interface-find-multi-by-paginator.tpl
+var InterfaceFindMultiByPaginator string
+
+//go:embed tpl/find-multi-by-paginator.tpl
+var FindMultiByPaginator string
+
 //go:embed tpl/interface-find-multi-by-custom.tpl
 var InterfaceFindMultiByCustom string
 
 //go:embed tpl/find-multi-by-custom.tpl
 var FindMultiByCustom string
+
+//go:embed tpl/interface-find-multi-by-condition.tpl
+var InterfaceFindMultiByCondition string
+
+//go:embed tpl/find-multi-by-condition.tpl
+var FindMultiByCondition string
 
 //go:embed tpl/interface-update-one.tpl
 var InterfaceUpdateOne string
@@ -225,3 +270,21 @@ var InterfaceDeleteOneCacheByFieldsTx string
 
 //go:embed tpl/delete-one-cache-by-fields-tx.tpl
 var DeleteOneCacheByFieldsTx string
+
+//go:embed tpl/interface-find-all.tpl
+var InterfaceFindAll string
+
+//go:embed tpl/find-all.tpl
+var FindAll string
+
+//go:embed tpl/interface-find-all-cache.tpl
+var InterfaceFindAllCache string
+
+//go:embed tpl/find-all-cache.tpl
+var FindAllCache string
+
+//go:embed tpl/delete-all-cache.tpl
+var DeleteAllCache string
+
+//go:embed tpl/interface-delete-all-cache.tpl
+var InterfaceDeleteAllCache string
