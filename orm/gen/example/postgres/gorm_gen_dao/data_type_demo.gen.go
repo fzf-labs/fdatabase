@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/example/postgres/gorm_gen_model"
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_model"
 )
 
 func newDataTypeDemo(db *gorm.DB, opts ...gen.DOOption) dataTypeDemo {
@@ -40,16 +40,16 @@ func newDataTypeDemo(db *gorm.DB, opts ...gen.DOOption) dataTypeDemo {
 	_dataTypeDemo.DataTypeTimeNull = field.NewField(tableName, "data_type_time_null")
 	_dataTypeDemo.DataTypeTime = field.NewTime(tableName, "data_type_time")
 	_dataTypeDemo.DataTypeJsonb = field.NewField(tableName, "data_type_jsonb")
-	_dataTypeDemo.DataTypeByte = field.NewField(tableName, "data_type_byte")
 	_dataTypeDemo.DataTypeDate = field.NewTime(tableName, "data_type_date")
 	_dataTypeDemo.DataTypeFloat4 = field.NewFloat32(tableName, "data_type_float4")
 	_dataTypeDemo.DataTypeFloat8 = field.NewFloat64(tableName, "data_type_float8")
 	_dataTypeDemo.ULid = field.NewString(tableName, "_id")
 	_dataTypeDemo.CacheKey = field.NewString(tableName, "cacheKey")
-	_dataTypeDemo.ArrayVarchar = field.NewField(tableName, "array_varchar")
-	_dataTypeDemo.ArrayInt2 = field.NewField(tableName, "array_int2")
-	_dataTypeDemo.ArrayInt4 = field.NewField(tableName, "array_int4")
-	_dataTypeDemo.ArrayInt8 = field.NewField(tableName, "array_int8")
+	_dataTypeDemo.DataTypeTimestamp = field.NewTime(tableName, "data_type_timestamp")
+	_dataTypeDemo.DataTypeBytea = field.NewField(tableName, "data_type_bytea")
+	_dataTypeDemo.DataTypeNumeric = field.NewFloat64(tableName, "data_type_numeric")
+	_dataTypeDemo.DataTypeInterval = field.NewString(tableName, "data_type_interval")
+	_dataTypeDemo.BatchAPI = field.NewString(tableName, "batch_api")
 
 	_dataTypeDemo.fillFieldMap()
 
@@ -59,30 +59,30 @@ func newDataTypeDemo(db *gorm.DB, opts ...gen.DOOption) dataTypeDemo {
 type dataTypeDemo struct {
 	dataTypeDemoDo dataTypeDemoDo
 
-	ALL              field.Asterisk
-	ID               field.String  // ID
-	DataTypeBool     field.Bool    // 数据类型 bool
-	DataTypeInt2     field.Int16   // 数据类型 int2
-	DataTypeInt8     field.Int64   // 数据类型 int8
-	DataTypeVarchar  field.String  // 数据类型 varchar
-	DataTypeText     field.String  // 数据类型 text
-	DataTypeJSON     field.Field   // 数据类型 json
-	CreatedAt        field.Time    // 创建时间
-	UpdatedAt        field.Time    // 更新时间
-	DeletedAt        field.Field   // 删除时间
-	DataTypeTimeNull field.Field   // 数据类型 time null
-	DataTypeTime     field.Time    // 数据类型 time not null
-	DataTypeJsonb    field.Field   // 数据类型 jsonb
-	DataTypeByte     field.Field   // 数据类型 byte
-	DataTypeDate     field.Time    // 数据类型 date
-	DataTypeFloat4   field.Float32 // 数据类型 float4
-	DataTypeFloat8   field.Float64 // 数据类型 float8
-	ULid             field.String  // 验证下划线
-	CacheKey         field.String  // 特殊保留字段名称
-	ArrayVarchar     field.Field   // 数据类型 数组varchar
-	ArrayInt2        field.Field   // 数据类型 数组int2
-	ArrayInt4        field.Field   // 数据类型 数组int4
-	ArrayInt8        field.Field   // 数据类型 数组int8
+	ALL               field.Asterisk
+	ID                field.String // ID
+	DataTypeBool      field.Bool   // 数据类型 bool
+	DataTypeInt2      field.Int16  // 数据类型 int2
+	DataTypeInt8      field.Int64  // 数据类型 int8
+	DataTypeVarchar   field.String // 数据类型 varchar
+	DataTypeText      field.String // 数据类型 text
+	DataTypeJSON      field.Field  // 数据类型 json
+	CreatedAt         field.Time   // 创建时间
+	UpdatedAt         field.Time   // 更新时间
+	DeletedAt         field.Field  // 删除时间
+	DataTypeTimeNull  field.Field  // 数据类型 time null
+	DataTypeTime      field.Time   // 数据类型 time not null
+	DataTypeJsonb     field.Field  // 数据类型 jsonb
+	DataTypeDate      field.Time
+	DataTypeFloat4    field.Float32
+	DataTypeFloat8    field.Float64
+	ULid              field.String // 验证下划线
+	CacheKey          field.String // 特殊保留字段名称
+	DataTypeTimestamp field.Time
+	DataTypeBytea     field.Field
+	DataTypeNumeric   field.Float64
+	DataTypeInterval  field.String
+	BatchAPI          field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -112,16 +112,16 @@ func (d *dataTypeDemo) updateTableName(table string) *dataTypeDemo {
 	d.DataTypeTimeNull = field.NewField(table, "data_type_time_null")
 	d.DataTypeTime = field.NewTime(table, "data_type_time")
 	d.DataTypeJsonb = field.NewField(table, "data_type_jsonb")
-	d.DataTypeByte = field.NewField(table, "data_type_byte")
 	d.DataTypeDate = field.NewTime(table, "data_type_date")
 	d.DataTypeFloat4 = field.NewFloat32(table, "data_type_float4")
 	d.DataTypeFloat8 = field.NewFloat64(table, "data_type_float8")
 	d.ULid = field.NewString(table, "_id")
 	d.CacheKey = field.NewString(table, "cacheKey")
-	d.ArrayVarchar = field.NewField(table, "array_varchar")
-	d.ArrayInt2 = field.NewField(table, "array_int2")
-	d.ArrayInt4 = field.NewField(table, "array_int4")
-	d.ArrayInt8 = field.NewField(table, "array_int8")
+	d.DataTypeTimestamp = field.NewTime(table, "data_type_timestamp")
+	d.DataTypeBytea = field.NewField(table, "data_type_bytea")
+	d.DataTypeNumeric = field.NewFloat64(table, "data_type_numeric")
+	d.DataTypeInterval = field.NewString(table, "data_type_interval")
+	d.BatchAPI = field.NewString(table, "batch_api")
 
 	d.fillFieldMap()
 
@@ -164,16 +164,16 @@ func (d *dataTypeDemo) fillFieldMap() {
 	d.fieldMap["data_type_time_null"] = d.DataTypeTimeNull
 	d.fieldMap["data_type_time"] = d.DataTypeTime
 	d.fieldMap["data_type_jsonb"] = d.DataTypeJsonb
-	d.fieldMap["data_type_byte"] = d.DataTypeByte
 	d.fieldMap["data_type_date"] = d.DataTypeDate
 	d.fieldMap["data_type_float4"] = d.DataTypeFloat4
 	d.fieldMap["data_type_float8"] = d.DataTypeFloat8
 	d.fieldMap["_id"] = d.ULid
 	d.fieldMap["cacheKey"] = d.CacheKey
-	d.fieldMap["array_varchar"] = d.ArrayVarchar
-	d.fieldMap["array_int2"] = d.ArrayInt2
-	d.fieldMap["array_int4"] = d.ArrayInt4
-	d.fieldMap["array_int8"] = d.ArrayInt8
+	d.fieldMap["data_type_timestamp"] = d.DataTypeTimestamp
+	d.fieldMap["data_type_bytea"] = d.DataTypeBytea
+	d.fieldMap["data_type_numeric"] = d.DataTypeNumeric
+	d.fieldMap["data_type_interval"] = d.DataTypeInterval
+	d.fieldMap["batch_api"] = d.BatchAPI
 }
 
 func (d dataTypeDemo) clone(db *gorm.DB) dataTypeDemo {

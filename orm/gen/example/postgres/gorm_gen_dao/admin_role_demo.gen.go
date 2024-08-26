@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/example/postgres/gorm_gen_model"
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_model"
 )
 
 func newAdminRoleDemo(db *gorm.DB, opts ...gen.DOOption) adminRoleDemo {

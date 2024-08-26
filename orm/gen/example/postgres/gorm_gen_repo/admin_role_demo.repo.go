@@ -8,14 +8,12 @@ import (
 	"context"
 	"errors"
 
-	"gitlab.yc345.tv/backend/utils/v2/orm"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/cache"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/condition"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/config"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/custom"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/encoding"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/example/postgres/gorm_gen_dao"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/example/postgres/gorm_gen_model"
+	"github.com/fzf-labs/fdatabase/orm/condition"
+	"github.com/fzf-labs/fdatabase/orm/dbcache"
+	"github.com/fzf-labs/fdatabase/orm/encoding"
+	"github.com/fzf-labs/fdatabase/orm/gen/config"
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_dao"
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_model"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -61,20 +59,10 @@ type (
 		FindMultiCacheByIDS(ctx context.Context, IDS []string) ([]*gorm_gen_model.AdminRoleDemo, error)
 		// FindMultiByIDS 根据IDS查询多条数据
 		FindMultiByIDS(ctx context.Context, IDS []string) ([]*gorm_gen_model.AdminRoleDemo, error)
-		// FindMultiByPid 根据pid查询多条数据
-		FindMultiByPid(ctx context.Context, pid string) ([]*gorm_gen_model.AdminRoleDemo, error)
-		// FindMultiByPids 根据pids查询多条数据
-		FindMultiByPids(ctx context.Context, pids []string) ([]*gorm_gen_model.AdminRoleDemo, error)
 		// FindAll 查询所有数据
 		FindAll(ctx context.Context) ([]*gorm_gen_model.AdminRoleDemo, error)
 		// FindAllCache 查询所有数据并设置缓存
 		FindAllCache(ctx context.Context) ([]*gorm_gen_model.AdminRoleDemo, error)
-		// Deprecated
-		// 请使用FindMultiByCondition替代
-		FindMultiByPaginator(ctx context.Context, paginatorReq *orm.PaginatorReq) ([]*gorm_gen_model.AdminRoleDemo, *orm.PaginatorReply, error)
-		// Deprecated
-		// 请使用FindMultiByCondition替代
-		FindMultiByCustom(ctx context.Context, customReq *custom.Req) ([]*gorm_gen_model.AdminRoleDemo, *custom.Reply, error)
 		// FindMultiByCondition 根据自定义条件查询数据
 		FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.AdminRoleDemo, *condition.Reply, error)
 		// DeleteOneCacheByID 根据ID删除一条数据并清理缓存
@@ -93,14 +81,6 @@ type (
 		DeleteMultiByIDS(ctx context.Context, IDS []string) error
 		// DeleteMultiByIDSTx 根据IDS删除多条数据(事务)
 		DeleteMultiByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error
-		// DeleteMultiCacheByPid 根据pid删除多条数据并清理缓存
-		DeleteMultiCacheByPid(ctx context.Context, pid string) error
-		// DeleteMultiCacheByPidTx 根据pid删除多条数据并清理缓存(事务)
-		DeleteMultiCacheByPidTx(ctx context.Context, tx *gorm_gen_dao.Query, pid string) error
-		// DeleteMultiByPid 根据pid删除多条数据
-		DeleteMultiByPid(ctx context.Context, pid string) error
-		// DeleteMultiByPidTx 根据pid删除多条数据(事务)
-		DeleteMultiByPidTx(ctx context.Context, tx *gorm_gen_dao.Query, pid string) error
 		// DeleteAllCache 删除所有数据缓存
 		DeleteAllCache(ctx context.Context) error
 		// DeleteUniqueIndexCache 删除唯一索引存在的缓存
@@ -108,7 +88,7 @@ type (
 	}
 	AdminRoleDemoRepo struct {
 		db       *gorm.DB
-		cache    cache.IDBCache
+		cache    dbcache.IDBCache
 		encoding encoding.API
 	}
 )
@@ -128,6 +108,10 @@ func (a *AdminRoleDemoRepo) CreateOne(ctx context.Context, data *gorm_gen_model.
 	if err != nil {
 		return err
 	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -135,6 +119,10 @@ func (a *AdminRoleDemoRepo) CreateOne(ctx context.Context, data *gorm_gen_model.
 func (a *AdminRoleDemoRepo) CreateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error {
 	dao := tx.AdminRoleDemo
 	err := dao.WithContext(ctx).Create(data)
+	if err != nil {
+		return err
+	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
 	if err != nil {
 		return err
 	}
@@ -148,6 +136,10 @@ func (a *AdminRoleDemoRepo) CreateBatch(ctx context.Context, data []*gorm_gen_mo
 	if err != nil {
 		return err
 	}
+	err = a.DeleteUniqueIndexCache(ctx, data)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -155,6 +147,10 @@ func (a *AdminRoleDemoRepo) CreateBatch(ctx context.Context, data []*gorm_gen_mo
 func (a *AdminRoleDemoRepo) CreateBatchByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.AdminRoleDemo, batchSize int) error {
 	dao := tx.AdminRoleDemo
 	err := dao.WithContext(ctx).CreateInBatches(data, batchSize)
+	if err != nil {
+		return err
+	}
+	err = a.DeleteUniqueIndexCache(ctx, data)
 	if err != nil {
 		return err
 	}
@@ -168,6 +164,10 @@ func (a *AdminRoleDemoRepo) UpsertOne(ctx context.Context, data *gorm_gen_model.
 	if err != nil {
 		return err
 	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -175,6 +175,10 @@ func (a *AdminRoleDemoRepo) UpsertOne(ctx context.Context, data *gorm_gen_model.
 func (a *AdminRoleDemoRepo) UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error {
 	dao := tx.AdminRoleDemo
 	err := dao.WithContext(ctx).Save(data)
+	if err != nil {
+		return err
+	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
 	if err != nil {
 		return err
 	}
@@ -198,6 +202,10 @@ func (a *AdminRoleDemoRepo) UpsertOneByFields(ctx context.Context, data *gorm_ge
 	if err != nil {
 		return err
 	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -215,6 +223,10 @@ func (a *AdminRoleDemoRepo) UpsertOneByFieldsTx(ctx context.Context, tx *gorm_ge
 		Columns:   columns,
 		UpdateAll: true,
 	}).Create(data)
+	if err != nil {
+		return err
+	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
 	if err != nil {
 		return err
 	}
@@ -401,68 +413,6 @@ func (a *AdminRoleDemoRepo) DeleteMultiByIDSTx(ctx context.Context, tx *gorm_gen
 	return nil
 }
 
-// DeleteMultiCacheByPid 根据pid删除多条数据并清理缓存
-func (a *AdminRoleDemoRepo) DeleteMultiCacheByPid(ctx context.Context, pid string) error {
-	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.Pid.Eq(pid)).Find()
-	if err != nil {
-		return err
-	}
-	if len(result) == 0 {
-		return nil
-	}
-	_, err = dao.WithContext(ctx).Where(dao.Pid.Eq(pid)).Delete()
-	if err != nil {
-		return err
-	}
-	err = a.DeleteUniqueIndexCache(ctx, result)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteMultiCacheByPidTx 根据pid删除多条数据并清理缓存
-func (a *AdminRoleDemoRepo) DeleteMultiCacheByPidTx(ctx context.Context, tx *gorm_gen_dao.Query, pid string) error {
-	dao := tx.AdminRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.Pid.Eq(pid)).Find()
-	if err != nil {
-		return err
-	}
-	if len(result) == 0 {
-		return nil
-	}
-	_, err = dao.WithContext(ctx).Where(dao.Pid.Eq(pid)).Delete()
-	if err != nil {
-		return err
-	}
-	err = a.DeleteUniqueIndexCache(ctx, result)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteMultiByPid 根据pid删除多条数据
-func (a *AdminRoleDemoRepo) DeleteMultiByPid(ctx context.Context, pid string) error {
-	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	_, err := dao.WithContext(ctx).Where(dao.Pid.Eq(pid)).Delete()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteMultiByPidTx 根据pid删除多条数据
-func (a *AdminRoleDemoRepo) DeleteMultiByPidTx(ctx context.Context, tx *gorm_gen_dao.Query, pid string) error {
-	dao := tx.AdminRoleDemo
-	_, err := dao.WithContext(ctx).Where(dao.Pid.Eq(pid)).Delete()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // DeleteAllCache 删除所有数据缓存
 func (a *AdminRoleDemoRepo) DeleteAllCache(ctx context.Context) error {
 	cacheKey := a.cache.Key(CacheAdminRoleDemoAll)
@@ -585,26 +535,6 @@ func (a *AdminRoleDemoRepo) FindMultiByIDS(ctx context.Context, IDS []string) ([
 	return result, nil
 }
 
-// FindMultiByPid 根据pid查询多条数据
-func (a *AdminRoleDemoRepo) FindMultiByPid(ctx context.Context, pid string) ([]*gorm_gen_model.AdminRoleDemo, error) {
-	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.Pid.Eq(pid)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiByPids 根据pids查询多条数据
-func (a *AdminRoleDemoRepo) FindMultiByPids(ctx context.Context, pids []string) ([]*gorm_gen_model.AdminRoleDemo, error) {
-	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.Pid.In(pids...)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
 // FindAll 查询所有数据
 func (a *AdminRoleDemoRepo) FindAll(ctx context.Context) ([]*gorm_gen_model.AdminRoleDemo, error) {
 	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
@@ -641,64 +571,6 @@ func (a *AdminRoleDemoRepo) FindAllCache(ctx context.Context) ([]*gorm_gen_model
 		}
 	}
 	return resp, nil
-}
-
-// Deprecated
-// 请使用FindMultiByCondition替代
-func (a *AdminRoleDemoRepo) FindMultiByPaginator(ctx context.Context, paginatorReq *orm.PaginatorReq) ([]*gorm_gen_model.AdminRoleDemo, *orm.PaginatorReply, error) {
-	result := make([]*gorm_gen_model.AdminRoleDemo, 0)
-	var total int64
-	whereExpressions, orderExpressions, err := paginatorReq.ConvertToGormExpression(gorm_gen_model.AdminRoleDemo{})
-	if err != nil {
-		return result, nil, err
-	}
-	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminRoleDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
-	if err != nil {
-		return result, nil, err
-	}
-	if total == 0 {
-		return result, nil, nil
-	}
-	paginatorReply := paginatorReq.ConvertToPage(int(total))
-	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminRoleDemo{}).Limit(paginatorReply.Limit).Offset(paginatorReply.Offset).Clauses(whereExpressions...).Clauses(orderExpressions...).Find(&result).Error
-	if err != nil {
-		return result, nil, err
-	}
-	return result, paginatorReply, err
-}
-
-// Deprecated
-// 请使用FindMultiByCondition替代
-func (a *AdminRoleDemoRepo) FindMultiByCustom(ctx context.Context, customReq *custom.Req) ([]*gorm_gen_model.AdminRoleDemo, *custom.Reply, error) {
-	result := make([]*gorm_gen_model.AdminRoleDemo, 0)
-	var total int64
-	whereExpressions, orderExpressions, err := customReq.ConvertToGormExpression(gorm_gen_model.AdminRoleDemo{})
-	if err != nil {
-		return result, nil, err
-	}
-	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminRoleDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
-	if err != nil {
-		return result, nil, err
-	}
-	if total == 0 {
-		return result, nil, nil
-	}
-	customReply, err := customReq.ConvertToPage(int(total))
-	if err != nil {
-		return result, nil, err
-	}
-	query := a.db.WithContext(ctx).Model(&gorm_gen_model.AdminRoleDemo{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
-	if customReply.Offset != 0 {
-		query = query.Offset(customReply.Offset)
-	}
-	if customReply.Limit != 0 {
-		query = query.Limit(customReply.Limit)
-	}
-	err = query.Find(&result).Error
-	if err != nil {
-		return result, nil, err
-	}
-	return result, customReply, err
 }
 
 // FindMultiByCondition 自定义查询数据(通用)

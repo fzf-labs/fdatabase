@@ -3,12 +3,12 @@ package goredisdbcache
 import (
 	"context"
 	"errors"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/cache"
+	"github.com/fzf-labs/fdatabase/orm/dbcache"
+	"github.com/redis/go-redis/v9"
 	"math/rand"
 	"strings"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -51,7 +51,7 @@ func (r *Cache) Key(keys ...interface{}) string {
 	keyStr := make([]string, 0)
 	keyStr = append(keyStr, r.name)
 	for _, v := range keys {
-		keyStr = append(keyStr, cache.KeyFormat(v))
+		keyStr = append(keyStr, dbcache.KeyFormat(v))
 	}
 	return strings.Join(keyStr, ":")
 }

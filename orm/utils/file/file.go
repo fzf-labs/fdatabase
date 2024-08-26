@@ -16,7 +16,7 @@ func MkdirPath(relativePath string) error {
 	return os.MkdirAll(relativePath, os.ModePerm)
 }
 
-// WriteContentCover 写入文件
+// WriteContentCover 数据写入，不存在则创建
 func WriteContentCover(filePath, content string) error {
 	fileDir := filepath.Dir(filePath)
 	if err := os.MkdirAll(fileDir, 0775); err != nil {

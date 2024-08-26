@@ -3,17 +3,15 @@ package goredisdbcache
 import (
 	"context"
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	"testing"
 	"time"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/stretchr/testify/assert"
 )
 
 var client = redis.NewClient(&redis.Options{
-	Addr:     "10.8.8.117:6379",
-	Password: "",
-	DB:       7,
+	Addr: "0.0.0.0:6379",
 })
 
 func TestGoRedisCache_Fetch(t *testing.T) {

@@ -2,7 +2,7 @@ package rocksdbcache
 
 import (
 	"context"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/cache"
+	"github.com/fzf-labs/fdatabase/orm/dbcache"
 	"strings"
 	"time"
 
@@ -59,7 +59,7 @@ func (r *Cache) Key(keys ...any) string {
 	keyStr := make([]string, 0)
 	keyStr = append(keyStr, r.name)
 	for _, v := range keys {
-		keyStr = append(keyStr, cache.KeyFormat(v))
+		keyStr = append(keyStr, dbcache.KeyFormat(v))
 	}
 	return strings.Join(keyStr, ":")
 }

@@ -2,17 +2,17 @@ package gen
 
 import (
 	"fmt"
+	"github.com/fzf-labs/fdatabase/orm/gen/proto"
+	"github.com/fzf-labs/fdatabase/orm/gen/repo"
+	"github.com/fzf-labs/fdatabase/orm/utils"
+	"github.com/fzf-labs/fdatabase/orm/utils/dbfunc"
+	"github.com/fzf-labs/fdatabase/orm/utils/file"
 	"log"
 	"regexp"
 	"strings"
 	"sync"
 
 	"github.com/iancoleman/strcase"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/proto"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/repo"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/dbfunc"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/file"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/util"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 	"gorm.io/gorm"
@@ -158,7 +158,7 @@ func (g *GenerationDB) Do() {
 		partitionChildTables = append(partitionChildTables, v...)
 	}
 	// 去掉tables中的partitionChildTables
-	tables = util.SliRemove(tables, partitionChildTables)
+	tables = utils.SliRemove(tables, partitionChildTables)
 	models := make(map[string]any, len(tables))
 	for _, tableName := range tables {
 		generateModel := generator.GenerateModel(tableName)
@@ -292,7 +292,7 @@ func DataTypeMap() map[string]func(columnType gorm.ColumnType) (dataType string)
 		"json":  func(columnType gorm.ColumnType) string { return "datatypes.JSON" },
 		"jsonb": func(columnType gorm.ColumnType) string { return "datatypes.JSON" },
 		"timestamptz": func(columnType gorm.ColumnType) string {
-			if util.StrSliFind([]string{"deleted_at", "deletedAt", "deleted_time", "deletedTime"}, columnType.Name()) {
+			if utils.StrSliFind([]string{"deleted_at", "deletedAt", "deleted_time", "deletedTime"}, columnType.Name()) {
 				return "gorm.DeletedAt"
 			}
 			nullable, _ := columnType.Nullable()
@@ -385,7 +385,7 @@ func (g *GenerationPb) Do() {
 		return
 	}
 	// 去掉tables中的partitionChildTables
-	tables = util.SliRemove(tables, partitionChildTables)
+	tables = utils.SliRemove(tables, partitionChildTables)
 	var wg sync.WaitGroup
 	wg.Add(len(tables))
 	for _, v := range tables {

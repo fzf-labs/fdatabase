@@ -1,26 +1,27 @@
 package repo
 
 import (
+	"github.com/fzf-labs/fdatabase/orm"
 	"testing"
 
-	"gitlab.yc345.tv/backend/utils/v2/orm"
 	"gorm.io/gorm"
 )
 
 var db *gorm.DB
 
 func init() {
-	newDBWithStruct, err := orm.NewDBWithStruct(&orm.ORMConfig{
-		User:     "postgres",
-		Password: "7to12pg12",
-		Host:     "10.8.8.110",
-		Port:     5433,
-		DBname:   "gorm_gen",
+	newPg, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
+		MaxIdleConn:     0,
+		MaxOpenConn:     0,
+		ConnMaxLifeTime: 0,
+		ShowLog:         false,
+		Tracing:         false,
 	})
 	if err != nil {
 		return
 	}
-	db = newDBWithStruct.Client
+	db = newPg
 }
 
 func TestGenerationTable(t *testing.T) {

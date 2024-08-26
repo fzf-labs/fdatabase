@@ -1,12 +1,12 @@
 package config
 
 import (
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/cache"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/encoding"
+	"github.com/fzf-labs/fdatabase/orm/dbcache"
+	"github.com/fzf-labs/fdatabase/orm/encoding"
 	"gorm.io/gorm"
 )
 
-func NewRepoConfig(db *gorm.DB, cache cache.IDBCache, encode encoding.API) *Repo {
+func NewRepoConfig(db *gorm.DB, cache dbcache.IDBCache, encode encoding.API) *Repo {
 	return &Repo{
 		DB:       db,
 		Cache:    cache,
@@ -16,6 +16,6 @@ func NewRepoConfig(db *gorm.DB, cache cache.IDBCache, encode encoding.API) *Repo
 
 type Repo struct {
 	DB       *gorm.DB
-	Cache    cache.IDBCache
+	Cache    dbcache.IDBCache
 	Encoding encoding.API
 }

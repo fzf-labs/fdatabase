@@ -23,7 +23,6 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		AdminRoleDemo:   newAdminRoleDemo(db, opts...),
 		AdminToRoleDemo: newAdminToRoleDemo(db, opts...),
 		DataTypeDemo:    newDataTypeDemo(db, opts...),
-		PartitionTable:  newPartitionTable(db, opts...),
 		UserDemo:        newUserDemo(db, opts...),
 	}
 }
@@ -36,7 +35,6 @@ type Query struct {
 	AdminRoleDemo   adminRoleDemo
 	AdminToRoleDemo adminToRoleDemo
 	DataTypeDemo    dataTypeDemo
-	PartitionTable  partitionTable
 	UserDemo        userDemo
 }
 
@@ -50,7 +48,6 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		AdminRoleDemo:   q.AdminRoleDemo.clone(db),
 		AdminToRoleDemo: q.AdminToRoleDemo.clone(db),
 		DataTypeDemo:    q.DataTypeDemo.clone(db),
-		PartitionTable:  q.PartitionTable.clone(db),
 		UserDemo:        q.UserDemo.clone(db),
 	}
 }
@@ -71,7 +68,6 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		AdminRoleDemo:   q.AdminRoleDemo.replaceDB(db),
 		AdminToRoleDemo: q.AdminToRoleDemo.replaceDB(db),
 		DataTypeDemo:    q.DataTypeDemo.replaceDB(db),
-		PartitionTable:  q.PartitionTable.replaceDB(db),
 		UserDemo:        q.UserDemo.replaceDB(db),
 	}
 }
@@ -82,7 +78,6 @@ type queryCtx struct {
 	AdminRoleDemo   *adminRoleDemoDo
 	AdminToRoleDemo *adminToRoleDemoDo
 	DataTypeDemo    *dataTypeDemoDo
-	PartitionTable  *partitionTableDo
 	UserDemo        *userDemoDo
 }
 
@@ -93,7 +88,6 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		AdminRoleDemo:   q.AdminRoleDemo.WithContext(ctx),
 		AdminToRoleDemo: q.AdminToRoleDemo.WithContext(ctx),
 		DataTypeDemo:    q.DataTypeDemo.WithContext(ctx),
-		PartitionTable:  q.PartitionTable.WithContext(ctx),
 		UserDemo:        q.UserDemo.WithContext(ctx),
 	}
 }

@@ -1,10 +1,12 @@
 package encoding
 
 import (
+	"bytes"
+	"compress/zlib"
 	"encoding/json"
-
 	"github.com/bytedance/sonic"
 	"github.com/vmihailenco/msgpack/v5"
+	"io"
 )
 
 type API interface {
@@ -52,4 +54,52 @@ func (e *MsgPack) Marshal(v interface{}) ([]byte, error) {
 
 func (e *MsgPack) Unmarshal(data []byte, v interface{}) error {
 	return msgpack.Unmarshal(data, v)
+}
+
+func NewZlib() *Zlib {
+	return &Zlib{}
+}
+
+type Zlib struct{}
+
+func (z *Zlib) Marshal(v interface{}) ([]byte, error) {
+	marshal, err := msgpack.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return z.ZlibCompress(marshal)
+}
+
+func (z *Zlib) Unmarshal(data []byte, v interface{}) error {
+	compress, err := z.ZlibUnCompress(data)
+	if err != nil {
+		return err
+	}
+	return msgpack.Unmarshal(compress, v)
+}
+
+func (z *Zlib) ZlibCompress(data []byte) ([]byte, error) {
+	var b bytes.Buffer
+	w := zlib.NewWriter(&b)
+	_, err := w.Write(data)
+	if err != nil {
+		return nil, err
+	}
+	_ = w.Close()
+	return b.Bytes(), nil
+}
+
+func (z *Zlib) ZlibUnCompress(data []byte) ([]byte, error) {
+	var b bytes.Buffer
+	w := bytes.NewReader(data)
+	r, err := zlib.NewReader(w)
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(&b, r)
+	if err != nil {
+		return nil, err
+	}
+	_ = r.Close()
+	return b.Bytes(), nil
 }

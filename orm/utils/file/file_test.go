@@ -1,6 +1,8 @@
 package file
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestFileExists(t *testing.T) {
 	type args struct {

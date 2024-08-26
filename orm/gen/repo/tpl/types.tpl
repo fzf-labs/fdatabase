@@ -4,7 +4,7 @@ type (
 	}
 	{{.upperTableName}}Repo struct {
 		db       *gorm.DB
-		cache    cache.IDBCache
+		cache    dbcache.IDBCache
 		encoding encoding.API
 	}
 )

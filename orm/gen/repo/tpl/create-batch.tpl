@@ -5,5 +5,9 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) CreateBatch(ctx context.Cont
 	if err != nil {
 		return err
 	}
+	err = {{.firstTableChar}}.DeleteUniqueIndexCache(ctx, data)
+    if err != nil {
+    	return err
+    }
 	return nil
 }

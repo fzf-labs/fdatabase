@@ -8,14 +8,12 @@ import (
 	"context"
 	"errors"
 
-	"gitlab.yc345.tv/backend/utils/v2/orm"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/cache"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/condition"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/config"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/custom"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/encoding"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/example/postgres/gorm_gen_dao"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/example/postgres/gorm_gen_model"
+	"github.com/fzf-labs/fdatabase/orm/condition"
+	"github.com/fzf-labs/fdatabase/orm/dbcache"
+	"github.com/fzf-labs/fdatabase/orm/encoding"
+	"github.com/fzf-labs/fdatabase/orm/gen/config"
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_dao"
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_model"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -74,12 +72,6 @@ type (
 		FindAll(ctx context.Context) ([]*gorm_gen_model.AdminDemo, error)
 		// FindAllCache 查询所有数据并设置缓存
 		FindAllCache(ctx context.Context) ([]*gorm_gen_model.AdminDemo, error)
-		// Deprecated
-		// 请使用FindMultiByCondition替代
-		FindMultiByPaginator(ctx context.Context, paginatorReq *orm.PaginatorReq) ([]*gorm_gen_model.AdminDemo, *orm.PaginatorReply, error)
-		// Deprecated
-		// 请使用FindMultiByCondition替代
-		FindMultiByCustom(ctx context.Context, customReq *custom.Req) ([]*gorm_gen_model.AdminDemo, *custom.Reply, error)
 		// FindMultiByCondition 根据自定义条件查询数据
 		FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.AdminDemo, *condition.Reply, error)
 		// DeleteOneCacheByID 根据ID删除一条数据并清理缓存
@@ -121,7 +113,7 @@ type (
 	}
 	AdminDemoRepo struct {
 		db       *gorm.DB
-		cache    cache.IDBCache
+		cache    dbcache.IDBCache
 		encoding encoding.API
 	}
 )
@@ -141,6 +133,10 @@ func (a *AdminDemoRepo) CreateOne(ctx context.Context, data *gorm_gen_model.Admi
 	if err != nil {
 		return err
 	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminDemo{data})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -148,6 +144,10 @@ func (a *AdminDemoRepo) CreateOne(ctx context.Context, data *gorm_gen_model.Admi
 func (a *AdminDemoRepo) CreateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminDemo) error {
 	dao := tx.AdminDemo
 	err := dao.WithContext(ctx).Create(data)
+	if err != nil {
+		return err
+	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminDemo{data})
 	if err != nil {
 		return err
 	}
@@ -161,6 +161,10 @@ func (a *AdminDemoRepo) CreateBatch(ctx context.Context, data []*gorm_gen_model.
 	if err != nil {
 		return err
 	}
+	err = a.DeleteUniqueIndexCache(ctx, data)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -168,6 +172,10 @@ func (a *AdminDemoRepo) CreateBatch(ctx context.Context, data []*gorm_gen_model.
 func (a *AdminDemoRepo) CreateBatchByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.AdminDemo, batchSize int) error {
 	dao := tx.AdminDemo
 	err := dao.WithContext(ctx).CreateInBatches(data, batchSize)
+	if err != nil {
+		return err
+	}
+	err = a.DeleteUniqueIndexCache(ctx, data)
 	if err != nil {
 		return err
 	}
@@ -181,6 +189,10 @@ func (a *AdminDemoRepo) UpsertOne(ctx context.Context, data *gorm_gen_model.Admi
 	if err != nil {
 		return err
 	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminDemo{data})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -188,6 +200,10 @@ func (a *AdminDemoRepo) UpsertOne(ctx context.Context, data *gorm_gen_model.Admi
 func (a *AdminDemoRepo) UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminDemo) error {
 	dao := tx.AdminDemo
 	err := dao.WithContext(ctx).Save(data)
+	if err != nil {
+		return err
+	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminDemo{data})
 	if err != nil {
 		return err
 	}
@@ -211,6 +227,10 @@ func (a *AdminDemoRepo) UpsertOneByFields(ctx context.Context, data *gorm_gen_mo
 	if err != nil {
 		return err
 	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminDemo{data})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -228,6 +248,10 @@ func (a *AdminDemoRepo) UpsertOneByFieldsTx(ctx context.Context, tx *gorm_gen_da
 		Columns:   columns,
 		UpdateAll: true,
 	}).Create(data)
+	if err != nil {
+		return err
+	}
+	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminDemo{data})
 	if err != nil {
 		return err
 	}
@@ -795,64 +819,6 @@ func (a *AdminDemoRepo) FindAllCache(ctx context.Context) ([]*gorm_gen_model.Adm
 		}
 	}
 	return resp, nil
-}
-
-// Deprecated
-// 请使用FindMultiByCondition替代
-func (a *AdminDemoRepo) FindMultiByPaginator(ctx context.Context, paginatorReq *orm.PaginatorReq) ([]*gorm_gen_model.AdminDemo, *orm.PaginatorReply, error) {
-	result := make([]*gorm_gen_model.AdminDemo, 0)
-	var total int64
-	whereExpressions, orderExpressions, err := paginatorReq.ConvertToGormExpression(gorm_gen_model.AdminDemo{})
-	if err != nil {
-		return result, nil, err
-	}
-	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
-	if err != nil {
-		return result, nil, err
-	}
-	if total == 0 {
-		return result, nil, nil
-	}
-	paginatorReply := paginatorReq.ConvertToPage(int(total))
-	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminDemo{}).Limit(paginatorReply.Limit).Offset(paginatorReply.Offset).Clauses(whereExpressions...).Clauses(orderExpressions...).Find(&result).Error
-	if err != nil {
-		return result, nil, err
-	}
-	return result, paginatorReply, err
-}
-
-// Deprecated
-// 请使用FindMultiByCondition替代
-func (a *AdminDemoRepo) FindMultiByCustom(ctx context.Context, customReq *custom.Req) ([]*gorm_gen_model.AdminDemo, *custom.Reply, error) {
-	result := make([]*gorm_gen_model.AdminDemo, 0)
-	var total int64
-	whereExpressions, orderExpressions, err := customReq.ConvertToGormExpression(gorm_gen_model.AdminDemo{})
-	if err != nil {
-		return result, nil, err
-	}
-	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
-	if err != nil {
-		return result, nil, err
-	}
-	if total == 0 {
-		return result, nil, nil
-	}
-	customReply, err := customReq.ConvertToPage(int(total))
-	if err != nil {
-		return result, nil, err
-	}
-	query := a.db.WithContext(ctx).Model(&gorm_gen_model.AdminDemo{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
-	if customReply.Offset != 0 {
-		query = query.Offset(customReply.Offset)
-	}
-	if customReply.Limit != 0 {
-		query = query.Limit(customReply.Limit)
-	}
-	err = query.Find(&result).Error
-	if err != nil {
-		return result, nil, err
-	}
-	return result, customReply, err
 }
 
 // FindMultiByCondition 自定义查询数据(通用)

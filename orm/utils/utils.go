@@ -3,11 +3,10 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"golang.org/x/tools/go/packages"
 	"reflect"
 	"strconv"
 	"time"
-
-	"golang.org/x/tools/go/packages"
 )
 
 // FillModelPkgPath 返回模型文件的包路径

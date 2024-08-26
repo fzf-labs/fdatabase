@@ -3,6 +3,9 @@ package repo
 
 import (
 	"fmt"
+	"github.com/fzf-labs/fdatabase/orm/utils"
+	"github.com/fzf-labs/fdatabase/orm/utils/dbfunc"
+	"github.com/fzf-labs/fdatabase/orm/utils/template"
 	"go/token"
 	"os"
 	"sort"
@@ -10,9 +13,7 @@ import (
 	"unicode"
 
 	"github.com/jinzhu/inflection"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/dbfunc"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/template"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/util"
+
 	"golang.org/x/tools/imports"
 	"gorm.io/gorm"
 )
@@ -44,8 +45,8 @@ func GenerationTable(db *gorm.DB, dbname, daoPath, modelPath, repoPath, table st
 		dbName:                dbname,
 		lowerTableName:        "",
 		upperTableName:        "",
-		daoPkgPath:            util.FillModelPkgPath(daoPath),
-		modelPkgPath:          util.FillModelPkgPath(modelPath),
+		daoPkgPath:            utils.FillModelPkgPath(daoPath),
+		modelPkgPath:          utils.FillModelPkgPath(modelPath),
 		index:                 make([]DBIndex, 0),
 	}
 	// 查询当前db的索引
@@ -313,6 +314,15 @@ func (r *Repo) generateVar() (string, error) {
 
 // generateCreateMethods
 func (r *Repo) generateCreateMethods() (string, error) {
+	var haveUnique bool
+	for _, v := range r.index {
+		if v.Unique {
+			haveUnique = true
+		}
+	}
+	if !haveUnique {
+		return "", nil
+	}
 	var createMethods string
 	interfaceCreateOne, err := template.NewTemplate("InterfaceCreateOne").Parse(InterfaceCreateOne).Execute(map[string]any{
 		"dbName":         r.dbName,
@@ -390,13 +400,21 @@ func (r *Repo) generateCreateMethods() (string, error) {
 func (r *Repo) generateUpdateMethods() (string, error) {
 	var updateMethods string
 	var primaryKey string
+	var haveUnique bool
 	for _, v := range r.index {
 		if v.PrimaryKey {
-			primaryKey = v.Columns[0]
-			break
+			if primaryKey == "" {
+				primaryKey = v.Columns[0]
+			}
+		}
+		if v.Unique {
+			haveUnique = true
 		}
 	}
 	if primaryKey == "" {
+		return "", nil
+	}
+	if !haveUnique {
 		return "", nil
 	}
 	interfaceUpdateOne, err := template.NewTemplate("InterfaceUpdateOne").Parse(InterfaceUpdateOne).Execute(map[string]any{
@@ -602,27 +620,6 @@ func (r *Repo) generateReadMethods() (string, error) {
 		return "", err
 	}
 	readMethods += fmt.Sprintln(interfaceFindAllCache.String())
-	// 兼容旧方法,不在维护
-	interfaceFindMultiByPaginator, err := template.NewTemplate("InterfaceFindMultiByPaginator").Parse(InterfaceFindMultiByPaginator).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-	})
-	if err != nil {
-		return "", err
-	}
-	readMethods += fmt.Sprintln(interfaceFindMultiByPaginator.String())
-	// 兼容旧方法,不在维护
-	interfaceFindMultiByCustom, err := template.NewTemplate("InterfaceFindMultiByCustom").Parse(InterfaceFindMultiByCustom).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-	})
-	if err != nil {
-		return "", err
-	}
-	readMethods += fmt.Sprintln(interfaceFindMultiByCustom.String())
-
 	interfaceFindMultiByCondition, err := template.NewTemplate("InterfaceFindMultiByCondition").Parse(InterfaceFindMultiByCondition).Execute(map[string]any{
 		"dbName":         r.dbName,
 		"upperTableName": r.upperTableName,
@@ -961,6 +958,15 @@ func (r *Repo) generateNew() (string, error) {
 
 // generateCreateFunc
 func (r *Repo) generateCreateFunc() (string, error) {
+	var haveUnique bool
+	for _, v := range r.index {
+		if v.Unique {
+			haveUnique = true
+		}
+	}
+	if !haveUnique {
+		return "", nil
+	}
 	var createFunc string
 	createOne, err := template.NewTemplate("CreateOne").Parse(CreateOne).Execute(map[string]any{
 		"firstTableChar": r.firstTableChar,
@@ -1269,30 +1275,6 @@ func (r *Repo) generateReadFunc() (string, error) {
 		return "", err
 	}
 	readFunc += fmt.Sprintln(findAllCache.String())
-
-	// 兼容旧方法,不在维护
-	findMultiByPaginator, err := template.NewTemplate("FindMultiByPaginator").Parse(FindMultiByPaginator).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-	})
-	if err != nil {
-		return "", err
-	}
-	readFunc += fmt.Sprintln(findMultiByPaginator.String())
-	// 兼容旧方法,不在维护
-	findMultiByCustom, err := template.NewTemplate("FindMultiByCustom").Parse(FindMultiByCustom).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-	})
-	if err != nil {
-		return "", err
-	}
-	readFunc += fmt.Sprintln(findMultiByCustom.String())
-
 	findMultiByCondition, err := template.NewTemplate("FindMultiByCondition").Parse(FindMultiByCondition).Execute(map[string]any{
 		"firstTableChar": r.firstTableChar,
 		"dbName":         r.dbName,
@@ -1310,13 +1292,21 @@ func (r *Repo) generateReadFunc() (string, error) {
 func (r *Repo) generateUpdateFunc() (string, error) {
 	var updateFunc string
 	var primaryKey string
+	var haveUnique bool
 	for _, v := range r.index {
 		if v.PrimaryKey {
-			primaryKey = v.Columns[0]
-			break
+			if primaryKey == "" {
+				primaryKey = v.Columns[0]
+			}
+		}
+		if v.Unique {
+			haveUnique = true
 		}
 	}
 	if primaryKey == "" {
+		return "", nil
+	}
+	if !haveUnique {
 		return "", nil
 	}
 	updateOneTpl, err := template.NewTemplate("UpdateOne").Parse(UpdateOne).Execute(map[string]any{
@@ -1719,7 +1709,7 @@ func (r *Repo) lowerFieldName(s string) string {
 	if 'A' <= f && f <= 'Z' {
 		str = string(unicode.ToLower(f)) + string(rs[1:])
 	}
-	if token.Lookup(str).IsKeyword() || util.StrSliFind(KeyWords, str) {
+	if token.Lookup(str).IsKeyword() || utils.StrSliFind(KeyWords, str) {
 		str = "_" + str
 	}
 	return str

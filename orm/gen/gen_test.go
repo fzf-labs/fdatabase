@@ -1,29 +1,30 @@
 package gen
 
 import (
+	"github.com/fzf-labs/fdatabase/orm"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.yc345.tv/backend/utils/v2/orm"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 )
 
 func TestGenerationPostgresWithOutRepo(t *testing.T) {
 	// 初始化数据库
-	db, err := orm.NewDBWithStruct(&orm.ORMConfig{
-		User:     "postgres",
-		Password: "7to12pg12",
-		Host:     "10.8.8.110",
-		Port:     5433,
-		DBname:   "gorm_gen",
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
+		MaxIdleConn:     0,
+		MaxOpenConn:     0,
+		ConnMaxLifeTime: 0,
+		ShowLog:         false,
+		Tracing:         false,
 	})
 	if err != nil {
 		return
 	}
 	// 生成代码
 	NewGenerationDB(
-		db.Client,
+		db,
 		"./example/postgres/",
 		WithOutRepo(),
 		WithDBNameOpts(DBNameOpts()),
@@ -37,19 +38,20 @@ func TestGenerationPostgresWithOutRepo(t *testing.T) {
 
 func TestGenerationPostgres(t *testing.T) {
 	// 初始化数据库
-	db, err := orm.NewDBWithStruct(&orm.ORMConfig{
-		User:     "postgres",
-		Password: "7to12pg12",
-		Host:     "10.8.8.110",
-		Port:     5433,
-		DBname:   "gorm_gen",
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
+		MaxIdleConn:     0,
+		MaxOpenConn:     0,
+		ConnMaxLifeTime: 0,
+		ShowLog:         false,
+		Tracing:         false,
 	})
 	if err != nil {
 		return
 	}
 	// 生成代码
 	NewGenerationDB(
-		db.Client,
+		db,
 		"./example/postgres/",
 		WithGenerateModel(func(g *gen.Generator) map[string]any { // 设置表关联关系(1对多,多对多...)
 			adminLogDemo := g.GenerateModel("admin_log_demo")
@@ -92,19 +94,20 @@ func TestGenerationPostgres(t *testing.T) {
 
 func TestGenerationPostgresFieldNullable(t *testing.T) {
 	// 初始化数据库
-	db, err := orm.NewDBWithStruct(&orm.ORMConfig{
-		User:     "postgres",
-		Password: "7to12pg12",
-		Host:     "10.8.8.110",
-		Port:     5433,
-		DBname:   "gorm_gen",
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
+		MaxIdleConn:     0,
+		MaxOpenConn:     0,
+		ConnMaxLifeTime: 0,
+		ShowLog:         false,
+		Tracing:         false,
 	})
 	if err != nil {
 		return
 	}
 	// 生成代码
 	NewGenerationDB(
-		db.Client,
+		db,
 		"./example/postgres/",
 		WithGenerateModel(func(g *gen.Generator) map[string]any { // 设置表关联关系(1对多,多对多...)
 			adminLogDemo := g.GenerateModel("admin_log_demo")
@@ -147,18 +150,19 @@ func TestGenerationPostgresFieldNullable(t *testing.T) {
 }
 
 func TestNewGenerationPb(t *testing.T) {
-	db, err := orm.NewDBWithStruct(&orm.ORMConfig{
-		User:     "postgres",
-		Password: "7to12pg12",
-		Host:     "10.8.8.110",
-		Port:     5433,
-		DBname:   "gorm_gen",
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
+		MaxIdleConn:     0,
+		MaxOpenConn:     0,
+		ConnMaxLifeTime: 0,
+		ShowLog:         false,
+		Tracing:         false,
 	})
 	if err != nil {
 		return
 	}
 	NewGenerationPB(
-		db.Client,
+		db,
 		"./example/postgres/pb",
 		"api.gorm_gen.v1",
 		"api/gorm_gen/v1;v1",

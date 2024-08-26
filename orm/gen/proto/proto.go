@@ -2,6 +2,9 @@ package proto
 
 import (
 	"fmt"
+	"github.com/fzf-labs/fdatabase/orm/utils"
+	"github.com/fzf-labs/fdatabase/orm/utils/file"
+	"github.com/fzf-labs/fdatabase/orm/utils/template"
 	"go/token"
 	"os"
 	"path/filepath"
@@ -11,9 +14,6 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 	"github.com/pkg/errors"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/file"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/template"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/util"
 	"gorm.io/gorm"
 )
 
@@ -154,11 +154,11 @@ func (p *Proto) genMessage() string {
 		pbType := columnTypeToPbType(v.DatabaseTypeName())
 		pbName := lowerFieldName(p.columnNameToName[v.Name()])
 		comment, _ := v.Comment()
-		if util.StrSliFind([]string{"deletedAt", "deleted_at", "deletedTime", "deleted_time"}, v.Name()) {
+		if utils.StrSliFind([]string{"deletedAt", "deleted_at", "deletedTime", "deleted_time"}, v.Name()) {
 			continue
 		}
 		info += fmt.Sprintf("	%s %s = %d; // %s\n", pbType, pbName, num, comment)
-		if util.StrSliFind([]string{"createdAt", "created_at", "createdTime", "created_time", "updatedAt", "updated_at", "updatedTime", "updated_time"}, v.Name()) {
+		if utils.StrSliFind([]string{"createdAt", "created_at", "createdTime", "created_time", "updatedAt", "updated_at", "updatedTime", "updated_time"}, v.Name()) {
 			continue
 		}
 		if v.Name() != primaryKeyColumn {

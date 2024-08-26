@@ -3,44 +3,38 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/config"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/encoding"
-	"testing"
-	"time"
-
-	"github.com/go-redis/redismock/v8"
+	"github.com/fzf-labs/fdatabase/orm"
+	"github.com/fzf-labs/fdatabase/orm/condition"
+	"github.com/fzf-labs/fdatabase/orm/dbcache/goredisdbcache"
+	"github.com/fzf-labs/fdatabase/orm/encoding"
+	"github.com/fzf-labs/fdatabase/orm/gen/config"
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_dao"
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_model"
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_repo"
+	"github.com/go-redis/redismock/v9"
 	"github.com/stretchr/testify/assert"
-	"gitlab.yc345.tv/backend/utils/v2/orm"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/cache/goredisdbcache"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/condition"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/example/postgres/gorm_gen_dao"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/example/postgres/gorm_gen_model"
-	"gitlab.yc345.tv/backend/utils/v2/orm/gen/example/postgres/gorm_gen_repo"
+	"testing"
 )
 
 // Test_FindOneCacheByID 根据ID查询单条数据
 func Test_FindOneCacheByID(t *testing.T) {
-	db, err := orm.NewDBWithStruct(&orm.ORMConfig{
-		User:            "postgres",
-		Password:        "7to12pg12",
-		Host:            "10.8.8.110",
-		Port:            5433,
-		DBname:          "gorm_gen",
-		MaxIdleConns:    10,
-		MaxOpenConns:    10,
-		ConnMaxLifeTime: 3600 * time.Second,
-		LogMode:         orm.LogModeInfo,
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
+		MaxIdleConn:     0,
+		MaxOpenConn:     0,
+		ConnMaxLifeTime: 0,
+		ShowLog:         false,
+		Tracing:         false,
 	})
 	if err != nil {
-		t.Error("createDBClientError")
 		return
 	}
 	client, _ := redismock.NewClientMock()
 	dbCache := goredisdbcache.NewGoRedisDBCache(client)
 	ctx := context.Background()
-	cfg := config.NewRepoConfig(db.Client, dbCache, encoding.NewMsgPack())
+	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
 	repo := gorm_gen_repo.NewUserDemoRepo(cfg)
-	result, err := repo.FindOneByID(ctx, "0822971b-cbf1-4a44-a2bc-e62cb5a1dd5e")
+	result, err := repo.FindOneByID(ctx, 1)
 	if err != nil {
 		return
 	}
@@ -50,25 +44,21 @@ func Test_FindOneCacheByID(t *testing.T) {
 
 // Test_FindMultiByCustom 自定义查询
 func Test_FindMultiByCustom(t *testing.T) {
-	db, err := orm.NewDBWithStruct(&orm.ORMConfig{
-		User:            "postgres",
-		Password:        "7to12pg12",
-		Host:            "10.8.8.110",
-		Port:            5433,
-		DBname:          "gorm_gen",
-		MaxIdleConns:    10,
-		MaxOpenConns:    10,
-		ConnMaxLifeTime: 3600 * time.Second,
-		LogMode:         orm.LogModeInfo,
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
+		MaxIdleConn:     0,
+		MaxOpenConn:     0,
+		ConnMaxLifeTime: 0,
+		ShowLog:         false,
+		Tracing:         false,
 	})
 	if err != nil {
-		t.Error("createDBClientError")
 		return
 	}
 	client, _ := redismock.NewClientMock()
 	dbCache := goredisdbcache.NewGoRedisDBCache(client)
 	ctx := context.Background()
-	cfg := config.NewRepoConfig(db.Client, dbCache, encoding.NewMsgPack())
+	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
 	repo := gorm_gen_repo.NewAdminDemoRepo(cfg)
 	result, p, err := repo.FindMultiByCondition(ctx, &condition.Req{
 		Page:     1,
@@ -111,28 +101,24 @@ func Test_FindMultiByCustom(t *testing.T) {
 
 // Test_Tx 使用事务
 func Test_Tx(t *testing.T) {
-	db, err := orm.NewDBWithStruct(&orm.ORMConfig{
-		User:            "postgres",
-		Password:        "7to12pg12",
-		Host:            "10.8.8.110",
-		Port:            5433,
-		DBname:          "gorm_gen",
-		MaxIdleConns:    10,
-		MaxOpenConns:    10,
-		ConnMaxLifeTime: 3600 * time.Second,
-		LogMode:         orm.LogModeInfo,
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
+		MaxIdleConn:     0,
+		MaxOpenConn:     0,
+		ConnMaxLifeTime: 0,
+		ShowLog:         false,
+		Tracing:         false,
 	})
 	if err != nil {
-		t.Error("createDBClientError")
 		return
 	}
 	client, _ := redismock.NewClientMock()
 	dbCache := goredisdbcache.NewGoRedisDBCache(client)
 	ctx := context.Background()
-	cfg := config.NewRepoConfig(db.Client, dbCache, encoding.NewMsgPack())
+	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
 	adminDemoRepo := gorm_gen_repo.NewAdminDemoRepo(cfg)
 	adminLogDemoRepo := gorm_gen_repo.NewAdminLogDemoRepo(cfg)
-	err = gorm_gen_dao.Use(db.Client).Transaction(func(tx *gorm_gen_dao.Query) error {
+	err = gorm_gen_dao.Use(db).Transaction(func(tx *gorm_gen_dao.Query) error {
 		err2 := adminDemoRepo.UpsertOneByTx(ctx, tx, &gorm_gen_model.AdminDemo{
 			ID:       "c8ddd930-339a-408b-8acb-fac22f5b43aa",
 			Username: "admin",

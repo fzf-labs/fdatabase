@@ -14,7 +14,7 @@ const TableNameUserDemo = "user_demo"
 
 // UserDemo mapped from table <user_demo>
 type UserDemo struct {
-	ID        string         `gorm:"column:id;type:uuid;primaryKey;default:gen_random_uuid();comment:ID" json:"id"`          // ID
+	ID        int64          `gorm:"column:id;type:bigint;primaryKey;comment:ID" json:"id"`                                  // ID
 	UID       string         `gorm:"column:uid;type:character varying(64);not null;comment:uid" json:"uid"`                  // uid
 	Username  string         `gorm:"column:username;type:character varying(30);not null;comment:用户账号" json:"username"`       // 用户账号
 	Password  string         `gorm:"column:password;type:character varying(100);not null;comment:密码" json:"password"`        // 密码

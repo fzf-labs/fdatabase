@@ -18,14 +18,14 @@ func TestNewRistretto(t *testing.T) {
 	// wait for value to pass through buffers
 	cache.Wait()
 
-	// get value from cache
+	// get value from dbcache
 	value, found := cache.Get("key")
 	if !found {
 		panic("missing value")
 	}
 	fmt.Println(value)
 
-	// del value from cache
+	// del value from dbcache
 	cache.Del("key")
 	assert.Equal(t, nil, err)
 }

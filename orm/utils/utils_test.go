@@ -1,4 +1,4 @@
-package util
+package utils
 
 import (
 	"reflect"
@@ -19,7 +19,7 @@ func TestFillModelPkgPath(t *testing.T) {
 			args: args{
 				filePath: "./",
 			},
-			want: "gitlab.yc345.tv/backend/utils/v2/orm/gen/utils/util",
+			want: "github.com/fzf-labs/fdatabase/orm/gen/utils/util",
 		},
 		{
 			name: "test",

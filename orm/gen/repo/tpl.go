@@ -175,12 +175,6 @@ var InterfaceFindMultiByPaginator string
 //go:embed tpl/find-multi-by-paginator.tpl
 var FindMultiByPaginator string
 
-//go:embed tpl/interface-find-multi-by-custom.tpl
-var InterfaceFindMultiByCustom string
-
-//go:embed tpl/find-multi-by-custom.tpl
-var FindMultiByCustom string
-
 //go:embed tpl/interface-find-multi-by-condition.tpl
 var InterfaceFindMultiByCondition string
 
