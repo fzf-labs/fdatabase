@@ -11,6 +11,7 @@ require (
 	github.com/golang-module/carbon/v2 v2.3.12
 	github.com/iancoleman/strcase v0.3.0
 	github.com/jinzhu/inflection v1.0.0
+	github.com/klauspost/compress v1.17.9
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/extra/redisotel/v9 v9.5.3
 	github.com/redis/go-redis/v9 v9.6.1
@@ -22,10 +23,12 @@ require (
 	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948
 	golang.org/x/sync v0.8.0
 	golang.org/x/tools v0.24.0
+	gorm.io/datatypes v1.2.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gen v0.3.26
 	gorm.io/gorm v1.25.11
+	gorm.io/plugin/dbresolver v1.5.1
 	gorm.io/plugin/opentelemetry v0.1.4
 	gorm.io/sharding v0.6.1
 )
@@ -66,7 +69,5 @@ require (
 	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/datatypes v1.2.0 // indirect
 	gorm.io/hints v1.1.2 // indirect
-	gorm.io/plugin/dbresolver v1.5.1 // indirect
 )

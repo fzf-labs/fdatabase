@@ -2,9 +2,9 @@ package encoding
 
 import (
 	"bytes"
-	"compress/zlib"
 	"encoding/json"
 	"github.com/bytedance/sonic"
+	"github.com/klauspost/compress/zlib"
 	"github.com/vmihailenco/msgpack/v5"
 	"io"
 )
