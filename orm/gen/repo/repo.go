@@ -314,85 +314,106 @@ func (r *Repo) generateVar() (string, error) {
 
 // generateCreateMethods
 func (r *Repo) generateCreateMethods() (string, error) {
-	var haveUnique bool
-	for _, v := range r.index {
-		if v.Unique {
-			haveUnique = true
-		}
-	}
-	if !haveUnique {
-		return "", nil
-	}
 	var createMethods string
-	interfaceCreateOne, err := template.NewTemplate("InterfaceCreateOne").Parse(InterfaceCreateOne).Execute(map[string]any{
+	tplParams := map[string]any{
 		"dbName":         r.dbName,
 		"upperTableName": r.upperTableName,
-	})
+	}
+	interfaceCreateOne, err := template.NewTemplate("InterfaceCreateOne").Parse(InterfaceCreateOne).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createMethods += fmt.Sprintln(interfaceCreateOne.String())
 
-	interfaceCreateOneByTx, err := template.NewTemplate("InterfaceCreateOneByTx").Parse(InterfaceCreateOneByTx).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+	interfaceCreateOneCache, err := template.NewTemplate("InterfaceCreateOneCache").Parse(InterfaceCreateOneCache).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createMethods += fmt.Sprintln(interfaceCreateOneCache.String())
+
+	interfaceCreateOneByTx, err := template.NewTemplate("InterfaceCreateOneByTx").Parse(InterfaceCreateOneByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createMethods += fmt.Sprintln(interfaceCreateOneByTx.String())
 
-	interfaceCreateBatch, err := template.NewTemplate("InterfaceCreateBatch").Parse(InterfaceCreateBatch).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+	interfaceCreateOneCacheByTx, err := template.NewTemplate("InterfaceCreateOneCacheByTx").Parse(InterfaceCreateOneCacheByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createMethods += fmt.Sprintln(interfaceCreateOneCacheByTx.String())
+
+	interfaceCreateBatch, err := template.NewTemplate("InterfaceCreateBatch").Parse(InterfaceCreateBatch).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createMethods += fmt.Sprintln(interfaceCreateBatch.String())
 
-	interfaceCreateBatchByTx, err := template.NewTemplate("InterfaceCreateBatchByTx").Parse(InterfaceCreateBatchByTx).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+	interfaceCreateBatchCache, err := template.NewTemplate("InterfaceCreateBatchCache").Parse(InterfaceCreateBatchCache).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createMethods += fmt.Sprintln(interfaceCreateBatchCache.String())
+
+	interfaceCreateBatchByTx, err := template.NewTemplate("InterfaceCreateBatchByTx").Parse(InterfaceCreateBatchByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createMethods += fmt.Sprintln(interfaceCreateBatchByTx.String())
 
-	interfaceUpsertOne, err := template.NewTemplate("InterfaceUpsertOne").Parse(InterfaceUpsertOne).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+	interfaceCreateBatchCacheByTx, err := template.NewTemplate("InterfaceCreateBatchCacheByTx").Parse(InterfaceCreateBatchCacheByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createMethods += fmt.Sprintln(interfaceCreateBatchCacheByTx.String())
+
+	interfaceUpsertOne, err := template.NewTemplate("InterfaceUpsertOne").Parse(InterfaceUpsertOne).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createMethods += fmt.Sprintln(interfaceUpsertOne.String())
 
-	interfaceUpsertOneByTx, err := template.NewTemplate("InterfaceUpsertOneByTx").Parse(InterfaceUpsertOneByTx).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+	interfaceUpsertOneCache, err := template.NewTemplate("InterfaceUpsertOneCache").Parse(InterfaceUpsertOneCache).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createMethods += fmt.Sprintln(interfaceUpsertOneCache.String())
+
+	interfaceUpsertOneByTx, err := template.NewTemplate("InterfaceUpsertOneByTx").Parse(InterfaceUpsertOneByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createMethods += fmt.Sprintln(interfaceUpsertOneByTx.String())
-	interfaceUpsertOneByFields, err := template.NewTemplate("InterfaceUpsertOneByFields").Parse(InterfaceUpsertOneByFields).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+
+	interfaceUpsertOneCacheByTx, err := template.NewTemplate("InterfaceUpsertOneCacheByTx").Parse(InterfaceUpsertOneCacheByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createMethods += fmt.Sprintln(interfaceUpsertOneCacheByTx.String())
+
+	interfaceUpsertOneByFields, err := template.NewTemplate("InterfaceUpsertOneByFields").Parse(InterfaceUpsertOneByFields).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createMethods += fmt.Sprintln(interfaceUpsertOneByFields.String())
-	interfaceUpsertOneByFieldsTx, err := template.NewTemplate("InterfaceUpsertOneByFieldsTx").Parse(InterfaceUpsertOneByFieldsTx).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+
+	interfaceUpsertOneCacheByFields, err := template.NewTemplate("InterfaceUpsertOneCacheByFields").Parse(InterfaceUpsertOneCacheByFields).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createMethods += fmt.Sprintln(interfaceUpsertOneCacheByFields.String())
+
+	interfaceUpsertOneByFieldsTx, err := template.NewTemplate("InterfaceUpsertOneByFieldsTx").Parse(InterfaceUpsertOneByFieldsTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createMethods += fmt.Sprintln(interfaceUpsertOneByFieldsTx.String())
+
+	interfaceUpsertOneCacheByFieldsTx, err := template.NewTemplate("InterfaceUpsertOneCacheByFieldsTx").Parse(InterfaceUpsertOneCacheByFieldsTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createMethods += fmt.Sprintln(interfaceUpsertOneCacheByFieldsTx.String())
 	return createMethods, nil
 }
 
@@ -400,55 +421,67 @@ func (r *Repo) generateCreateMethods() (string, error) {
 func (r *Repo) generateUpdateMethods() (string, error) {
 	var updateMethods string
 	var primaryKey string
-	var haveUnique bool
 	for _, v := range r.index {
 		if v.PrimaryKey {
-			if primaryKey == "" {
-				primaryKey = v.Columns[0]
-			}
-		}
-		if v.Unique {
-			haveUnique = true
+			primaryKey = v.Columns[0]
+			break
 		}
 	}
 	if primaryKey == "" {
 		return "", nil
 	}
-	if !haveUnique {
-		return "", nil
-	}
-	interfaceUpdateOne, err := template.NewTemplate("InterfaceUpdateOne").Parse(InterfaceUpdateOne).Execute(map[string]any{
+	tplParams := map[string]any{
 		"dbName":         r.dbName,
 		"upperTableName": r.upperTableName,
-	})
+	}
+	interfaceUpdateOne, err := template.NewTemplate("InterfaceUpdateOne").Parse(InterfaceUpdateOne).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	updateMethods += fmt.Sprintln(interfaceUpdateOne.String())
-	interfaceUpdateOneByTx, err := template.NewTemplate("InterfaceUpdateOneByTx").Parse(InterfaceUpdateOneByTx).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+
+	interfaceUpdateOneCache, err := template.NewTemplate("InterfaceUpdateOneCache").Parse(InterfaceUpdateOneCache).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateMethods += fmt.Sprintln(interfaceUpdateOneCache.String())
+
+	interfaceUpdateOneByTx, err := template.NewTemplate("InterfaceUpdateOneByTx").Parse(InterfaceUpdateOneByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	updateMethods += fmt.Sprintln(interfaceUpdateOneByTx.String())
-	interfaceUpdateOneWithZero, err := template.NewTemplate("InterfaceUpdateOneWithZero").Parse(InterfaceUpdateOneWithZero).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+
+	interfaceUpdateOneCacheByTx, err := template.NewTemplate("InterfaceUpdateOneCacheByTx").Parse(InterfaceUpdateOneCacheByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateMethods += fmt.Sprintln(interfaceUpdateOneCacheByTx.String())
+
+	interfaceUpdateOneWithZero, err := template.NewTemplate("InterfaceUpdateOneWithZero").Parse(InterfaceUpdateOneWithZero).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	updateMethods += fmt.Sprintln(interfaceUpdateOneWithZero.String())
-	interfaceUpdateOneWithZeroByTx, err := template.NewTemplate("InterfaceUpdateOneWithZeroByTx").Parse(InterfaceUpdateOneWithZeroByTx).Execute(map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+
+	interfaceUpdateOneCacheWithZero, err := template.NewTemplate("InterfaceUpdateOneCacheWithZero").Parse(InterfaceUpdateOneCacheWithZero).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateMethods += fmt.Sprintln(interfaceUpdateOneCacheWithZero.String())
+
+	interfaceUpdateOneWithZeroByTx, err := template.NewTemplate("InterfaceUpdateOneWithZeroByTx").Parse(InterfaceUpdateOneWithZeroByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	updateMethods += fmt.Sprintln(interfaceUpdateOneWithZeroByTx.String())
+
+	interfaceUpdateOneCacheWithZeroByTx, err := template.NewTemplate("InterfaceUpdateOneCacheWithZeroByTx").Parse(InterfaceUpdateOneCacheWithZeroByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateMethods += fmt.Sprintln(interfaceUpdateOneCacheWithZeroByTx.String())
+
 	return updateMethods, nil
 }
 
@@ -958,97 +991,108 @@ func (r *Repo) generateNew() (string, error) {
 
 // generateCreateFunc
 func (r *Repo) generateCreateFunc() (string, error) {
-	var haveUnique bool
-	for _, v := range r.index {
-		if v.Unique {
-			haveUnique = true
-		}
-	}
-	if !haveUnique {
-		return "", nil
-	}
 	var createFunc string
-	createOne, err := template.NewTemplate("CreateOne").Parse(CreateOne).Execute(map[string]any{
+	tplParams := map[string]any{
 		"firstTableChar": r.firstTableChar,
 		"dbName":         r.dbName,
 		"upperTableName": r.upperTableName,
 		"lowerTableName": r.lowerTableName,
-	})
+	}
+	createOne, err := template.NewTemplate("CreateOne").Parse(CreateOne).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createFunc += fmt.Sprintln(createOne.String())
-	createOneByTx, err := template.NewTemplate("CreateOneByTx").Parse(CreateOneByTx).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-	})
+
+	createOneCache, err := template.NewTemplate("CreateOneCache").Parse(CreateOneCache).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createFunc += fmt.Sprintln(createOneCache.String())
+
+	createOneByTx, err := template.NewTemplate("CreateOneByTx").Parse(CreateOneByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createFunc += fmt.Sprintln(createOneByTx.String())
 
-	createBatch, err := template.NewTemplate("CreateBatch").Parse(CreateBatch).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+	createOneCacheByTx, err := template.NewTemplate("CreateOneCacheByTx").Parse(CreateOneCacheByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createFunc += fmt.Sprintln(createOneCacheByTx.String())
+
+	createBatch, err := template.NewTemplate("CreateBatch").Parse(CreateBatch).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createFunc += fmt.Sprintln(createBatch.String())
 
-	createBatchByTx, err := template.NewTemplate("CreateBatchByTx").Parse(CreateBatchByTx).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-	})
+	createBatchCache, err := template.NewTemplate("CreateBatchCache").Parse(CreateBatchCache).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createFunc += fmt.Sprintln(createBatchCache.String())
+
+	createBatchByTx, err := template.NewTemplate("CreateBatchByTx").Parse(CreateBatchByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createFunc += fmt.Sprintln(createBatchByTx.String())
 
-	upsertOne, err := template.NewTemplate("UpsertOne").Parse(UpsertOne).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-	})
+	createBatchCacheByTx, err := template.NewTemplate("CreateBatchCacheByTx").Parse(CreateBatchCacheByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createFunc += fmt.Sprintln(createBatchCacheByTx.String())
+
+	upsertOne, err := template.NewTemplate("UpsertOne").Parse(UpsertOne).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createFunc += fmt.Sprintln(upsertOne.String())
-	upsertOneByTx, err := template.NewTemplate("UpsertOneByTx").Parse(UpsertOneByTx).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-	})
+
+	upsertOneCache, err := template.NewTemplate("UpsertOneCache").Parse(UpsertOneCache).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createFunc += fmt.Sprintln(upsertOneCache.String())
+
+	upsertOneByTx, err := template.NewTemplate("UpsertOneByTx").Parse(UpsertOneByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createFunc += fmt.Sprintln(upsertOneByTx.String())
-	upsertOneByFields, err := template.NewTemplate("UpsertOneByFields").Parse(UpsertOneByFields).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-	})
+
+	upsertOneCacheByTx, err := template.NewTemplate("UpsertOneCacheByTx").Parse(UpsertOneCacheByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createFunc += fmt.Sprintln(upsertOneCacheByTx.String())
+
+	upsertOneByFields, err := template.NewTemplate("UpsertOneByFields").Parse(UpsertOneByFields).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createFunc += fmt.Sprintln(upsertOneByFields.String())
-	upsertOneByFieldsTx, err := template.NewTemplate("UpsertOneByFieldsTx").Parse(UpsertOneByFieldsTx).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-	})
+
+	upsertOneCacheByFields, err := template.NewTemplate("UpsertOneCacheByFields").Parse(UpsertOneCacheByFields).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createFunc += fmt.Sprintln(upsertOneCacheByFields.String())
+
+	upsertOneByFieldsTx, err := template.NewTemplate("UpsertOneByFieldsTx").Parse(UpsertOneByFieldsTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	createFunc += fmt.Sprintln(upsertOneByFieldsTx.String())
+
+	upsertOneCacheByFieldsTx, err := template.NewTemplate("UpsertOneCacheByFieldsTx").Parse(UpsertOneCacheByFieldsTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	createFunc += fmt.Sprintln(upsertOneCacheByFieldsTx.String())
 	return createFunc, nil
 }
 
@@ -1292,68 +1336,71 @@ func (r *Repo) generateReadFunc() (string, error) {
 func (r *Repo) generateUpdateFunc() (string, error) {
 	var updateFunc string
 	var primaryKey string
-	var haveUnique bool
 	for _, v := range r.index {
 		if v.PrimaryKey {
-			if primaryKey == "" {
-				primaryKey = v.Columns[0]
-			}
-		}
-		if v.Unique {
-			haveUnique = true
+			primaryKey = v.Columns[0]
+			break
 		}
 	}
 	if primaryKey == "" {
 		return "", nil
 	}
-	if !haveUnique {
-		return "", nil
-	}
-	updateOneTpl, err := template.NewTemplate("UpdateOne").Parse(UpdateOne).Execute(map[string]any{
+	//参数
+	tplParams := map[string]any{
 		"firstTableChar": r.firstTableChar,
 		"dbName":         r.dbName,
 		"upperTableName": r.upperTableName,
 		"lowerTableName": r.lowerTableName,
 		"upperField":     r.upperFieldName(primaryKey),
-	})
+	}
+
+	updateOneTpl, err := template.NewTemplate("UpdateOne").Parse(UpdateOne).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	updateFunc += fmt.Sprintln(updateOneTpl.String())
-	updateOneByTx, err := template.NewTemplate("UpdateOneByTx").Parse(UpdateOneByTx).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-		"upperField":     r.upperFieldName(primaryKey),
-	})
+
+	updateOneCacheTpl, err := template.NewTemplate("UpdateOneCache").Parse(UpdateOneCache).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateFunc += fmt.Sprintln(updateOneCacheTpl.String())
+
+	updateOneByTx, err := template.NewTemplate("UpdateOneByTx").Parse(UpdateOneByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	updateFunc += fmt.Sprintln(updateOneByTx.String())
+	updateOneCacheByTxTpl, err := template.NewTemplate("UpdateOneCacheByTx").Parse(UpdateOneCacheByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateFunc += fmt.Sprintln(updateOneCacheByTxTpl.String())
 
-	updateOneWithZero, err := template.NewTemplate("UpdateOneWithZero").Parse(UpdateOneWithZero).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-		"upperField":     r.upperFieldName(primaryKey),
-	})
+	updateOneWithZero, err := template.NewTemplate("UpdateOneWithZero").Parse(UpdateOneWithZero).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	updateFunc += fmt.Sprintln(updateOneWithZero.String())
-	updateOneWithZeroByTx, err := template.NewTemplate("UpdateOneWithZeroByTx").Parse(UpdateOneWithZeroByTx).Execute(map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
-		"upperField":     r.upperFieldName(primaryKey),
-	})
+
+	updateOneCacheWithZero, err := template.NewTemplate("UpdateOneCacheWithZero").Parse(UpdateOneCacheWithZero).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateFunc += fmt.Sprintln(updateOneCacheWithZero.String())
+
+	updateOneWithZeroByTx, err := template.NewTemplate("UpdateOneWithZeroByTx").Parse(UpdateOneWithZeroByTx).Execute(tplParams)
 	if err != nil {
 		return "", err
 	}
 	updateFunc += fmt.Sprintln(updateOneWithZeroByTx.String())
+
+	updateOneCacheWithZeroByTx, err := template.NewTemplate("UpdateOneCacheWithZeroByTx").Parse(UpdateOneCacheWithZeroByTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateFunc += fmt.Sprintln(updateOneCacheWithZeroByTx.String())
+
 	return updateFunc, nil
 }
 

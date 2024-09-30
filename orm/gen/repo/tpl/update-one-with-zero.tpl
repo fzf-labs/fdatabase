@@ -5,9 +5,5 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) UpdateOneWithZero(ctx contex
 	if err != nil {
 		return err
 	}
-	err = {{.firstTableChar}}.DeleteUniqueIndexCache(ctx, []*{{.dbName}}_model.{{.upperTableName}}{data})
-    if err != nil {
-    	return err
-    }
 	return nil
 }

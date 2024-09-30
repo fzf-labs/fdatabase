@@ -31,23 +31,31 @@ var Types string
 //go:embed tpl/new.tpl
 var New string
 
+// 创建
+
 //go:embed tpl/interface-create-one.tpl
 var InterfaceCreateOne string
 
 //go:embed tpl/create-one.tpl
 var CreateOne string
 
-//go:embed tpl/interface-upsert-one.tpl
-var InterfaceUpsertOne string
+//go:embed tpl/interface-create-one-cache.tpl
+var InterfaceCreateOneCache string
 
-//go:embed tpl/upsert-one.tpl
-var UpsertOne string
+//go:embed tpl/create-one-cache.tpl
+var CreateOneCache string
 
-//go:embed tpl/interface-upsert-one-by-fields.tpl
-var InterfaceUpsertOneByFields string
+//go:embed tpl/interface-create-one-by-tx.tpl
+var InterfaceCreateOneByTx string
 
-//go:embed tpl/upsert-one-by-fields.tpl
-var UpsertOneByFields string
+//go:embed tpl/create-one-by-tx.tpl
+var CreateOneByTx string
+
+//go:embed tpl/interface-create-one-cache-by-tx.tpl
+var InterfaceCreateOneCacheByTx string
+
+//go:embed tpl/create-one-cache-by-tx.tpl
+var CreateOneCacheByTx string
 
 //go:embed tpl/interface-create-batch.tpl
 var InterfaceCreateBatch string
@@ -55,11 +63,123 @@ var InterfaceCreateBatch string
 //go:embed tpl/create-batch.tpl
 var CreateBatch string
 
+//go:embed tpl/interface-create-batch-cache.tpl
+var InterfaceCreateBatchCache string
+
+//go:embed tpl/create-batch-cache.tpl
+var CreateBatchCache string
+
 //go:embed tpl/interface-create-batch-by-tx.tpl
 var InterfaceCreateBatchByTx string
 
 //go:embed tpl/create-batch-by-tx.tpl
 var CreateBatchByTx string
+
+//go:embed tpl/interface-create-batch-cache-by-tx.tpl
+var InterfaceCreateBatchCacheByTx string
+
+//go:embed tpl/create-batch-cache-by-tx.tpl
+var CreateBatchCacheByTx string
+
+//go:embed tpl/interface-upsert-one.tpl
+var InterfaceUpsertOne string
+
+//go:embed tpl/upsert-one.tpl
+var UpsertOne string
+
+//go:embed tpl/interface-upsert-one-cache.tpl
+var InterfaceUpsertOneCache string
+
+//go:embed tpl/upsert-one-cache.tpl
+var UpsertOneCache string
+
+//go:embed tpl/interface-upsert-one-by-tx.tpl
+var InterfaceUpsertOneByTx string
+
+//go:embed tpl/upsert-one-by-tx.tpl
+var UpsertOneByTx string
+
+//go:embed tpl/interface-upsert-one-cache-by-tx.tpl
+var InterfaceUpsertOneCacheByTx string
+
+//go:embed tpl/upsert-one-cache-by-tx.tpl
+var UpsertOneCacheByTx string
+
+//go:embed tpl/interface-upsert-one-by-fields.tpl
+var InterfaceUpsertOneByFields string
+
+//go:embed tpl/upsert-one-by-fields.tpl
+var UpsertOneByFields string
+
+//go:embed tpl/interface-upsert-one-cache-by-fields.tpl
+var InterfaceUpsertOneCacheByFields string
+
+//go:embed tpl/upsert-one-cache-by-fields.tpl
+var UpsertOneCacheByFields string
+
+//go:embed tpl/interface-upsert-one-by-fields-tx.tpl
+var InterfaceUpsertOneByFieldsTx string
+
+//go:embed tpl/upsert-one-by-fields-tx.tpl
+var UpsertOneByFieldsTx string
+
+//go:embed tpl/interface-upsert-one-cache-by-fields-tx.tpl
+var InterfaceUpsertOneCacheByFieldsTx string
+
+//go:embed tpl/upsert-one-cache-by-fields-tx.tpl
+var UpsertOneCacheByFieldsTx string
+
+// 更新
+
+//go:embed tpl/interface-update-one.tpl
+var InterfaceUpdateOne string
+
+//go:embed tpl/update-one.tpl
+var UpdateOne string
+
+//go:embed tpl/interface-update-one-cache.tpl
+var InterfaceUpdateOneCache string
+
+//go:embed tpl/update-one-cache.tpl
+var UpdateOneCache string
+
+//go:embed tpl/interface-update-one-by-tx.tpl
+var InterfaceUpdateOneByTx string
+
+//go:embed tpl/update-one-by-tx.tpl
+var UpdateOneByTx string
+
+//go:embed tpl/interface-update-one-cache-by-tx.tpl
+var InterfaceUpdateOneCacheByTx string
+
+//go:embed tpl/update-one-cache-by-tx.tpl
+var UpdateOneCacheByTx string
+
+//go:embed tpl/interface-update-one-with-zero.tpl
+var InterfaceUpdateOneWithZero string
+
+//go:embed tpl/update-one-with-zero.tpl
+var UpdateOneWithZero string
+
+//go:embed tpl/interface-update-one-cache-with-zero.tpl
+var InterfaceUpdateOneCacheWithZero string
+
+//go:embed tpl/update-one-cache-with-zero.tpl
+var UpdateOneCacheWithZero string
+
+//go:embed tpl/interface-update-one-with-zero-by-tx.tpl
+var InterfaceUpdateOneWithZeroByTx string
+
+//go:embed tpl/update-one-with-zero-by-tx.tpl
+var UpdateOneWithZeroByTx string
+
+//go:embed tpl/interface-update-one-cache-with-zero-by-tx.tpl
+var InterfaceUpdateOneCacheWithZeroByTx string
+
+//go:embed tpl/update-one-cache-with-zero-by-tx.tpl
+var UpdateOneCacheWithZeroByTx string
+
+// 删除
 
 //go:embed tpl/interface-delete-multi-by-field-plural.tpl
 var InterfaceDeleteMultiByFieldPlural string
@@ -121,6 +241,56 @@ var InterfaceDeleteMultiCacheByFieldsTx string
 //go:embed tpl/delete-multi-cache-by-fields-tx.tpl
 var DeleteMultiCacheByFieldsTx string
 
+//go:embed tpl/interface-delete-unique-index-cache.tpl
+var InterfaceDeleteUniqueIndexCache string
+
+//go:embed tpl/delete-unique-index-cache.tpl
+var DeleteUniqueIndexCache string
+
+//go:embed tpl/interface-delete-multi-by-field-plural-tx.tpl
+var InterfaceDeleteMultiByFieldPluralTx string
+
+//go:embed tpl/delete-multi-by-field-plural-tx.tpl
+var DeleteMultiByFieldPluralTx string
+
+//go:embed tpl/interface-delete-multi-cache-by-field-plural-tx.tpl
+var InterfaceDeleteMultiCacheByFieldPluralTx string
+
+//go:embed tpl/delete-multi-cache-by-field-plural-tx.tpl
+var DeleteMultiCacheByFieldPluralTx string
+
+//go:embed tpl/interface-delete-one-by-field-tx.tpl
+var InterfaceDeleteOneByFieldTx string
+
+//go:embed tpl/delete-one-by-field-tx.tpl
+var DeleteOneByFieldTx string
+
+//go:embed tpl/interface-delete-one-cache-by-field-tx.tpl
+var InterfaceDeleteOneCacheByFieldTx string
+
+//go:embed tpl/delete-one-cache-by-field-tx.tpl
+var DeleteOneCacheByFieldTx string
+
+//go:embed tpl/interface-delete-one-by-fields-tx.tpl
+var InterfaceDeleteOneByFieldsTx string
+
+//go:embed tpl/delete-one-by-fields-tx.tpl
+var DeleteOneByFieldsTx string
+
+//go:embed tpl/interface-delete-one-cache-by-fields-tx.tpl
+var InterfaceDeleteOneCacheByFieldsTx string
+
+//go:embed tpl/delete-one-cache-by-fields-tx.tpl
+var DeleteOneCacheByFieldsTx string
+
+//go:embed tpl/delete-all-cache.tpl
+var DeleteAllCache string
+
+//go:embed tpl/interface-delete-all-cache.tpl
+var InterfaceDeleteAllCache string
+
+// 查询
+
 //go:embed tpl/interface-find-multi-by-field.tpl
 var InterfaceFindMultiByField string
 
@@ -169,101 +339,11 @@ var InterfaceFindOneCacheByFields string
 //go:embed tpl/find-one-cache-by-fields.tpl
 var FindOneCacheByFields string
 
-//go:embed tpl/interface-find-multi-by-paginator.tpl
-var InterfaceFindMultiByPaginator string
-
-//go:embed tpl/find-multi-by-paginator.tpl
-var FindMultiByPaginator string
-
 //go:embed tpl/interface-find-multi-by-condition.tpl
 var InterfaceFindMultiByCondition string
 
 //go:embed tpl/find-multi-by-condition.tpl
 var FindMultiByCondition string
-
-//go:embed tpl/interface-update-one.tpl
-var InterfaceUpdateOne string
-
-//go:embed tpl/update-one.tpl
-var UpdateOne string
-
-//go:embed tpl/interface-update-one-with-zero.tpl
-var InterfaceUpdateOneWithZero string
-
-//go:embed tpl/update-one-with-zero.tpl
-var UpdateOneWithZero string
-
-//go:embed tpl/interface-delete-unique-index-cache.tpl
-var InterfaceDeleteUniqueIndexCache string
-
-//go:embed tpl/delete-unique-index-cache.tpl
-var DeleteUniqueIndexCache string
-
-//go:embed tpl/interface-create-one-by-tx.tpl
-var InterfaceCreateOneByTx string
-
-//go:embed tpl/create-one-by-tx.tpl
-var CreateOneByTx string
-
-//go:embed tpl/interface-upsert-one-by-tx.tpl
-var InterfaceUpsertOneByTx string
-
-//go:embed tpl/upsert-one-by-tx.tpl
-var UpsertOneByTx string
-
-//go:embed tpl/interface-upsert-one-by-fields-tx.tpl
-var InterfaceUpsertOneByFieldsTx string
-
-//go:embed tpl/upsert-one-by-fields-tx.tpl
-var UpsertOneByFieldsTx string
-
-//go:embed tpl/interface-update-one-by-tx.tpl
-var InterfaceUpdateOneByTx string
-
-//go:embed tpl/update-one-by-tx.tpl
-var UpdateOneByTx string
-
-//go:embed tpl/interface-update-one-with-zero-by-tx.tpl
-var InterfaceUpdateOneWithZeroByTx string
-
-//go:embed tpl/update-one-with-zero-by-tx.tpl
-var UpdateOneWithZeroByTx string
-
-//go:embed tpl/interface-delete-multi-by-field-plural-tx.tpl
-var InterfaceDeleteMultiByFieldPluralTx string
-
-//go:embed tpl/delete-multi-by-field-plural-tx.tpl
-var DeleteMultiByFieldPluralTx string
-
-//go:embed tpl/interface-delete-multi-cache-by-field-plural-tx.tpl
-var InterfaceDeleteMultiCacheByFieldPluralTx string
-
-//go:embed tpl/delete-multi-cache-by-field-plural-tx.tpl
-var DeleteMultiCacheByFieldPluralTx string
-
-//go:embed tpl/interface-delete-one-by-field-tx.tpl
-var InterfaceDeleteOneByFieldTx string
-
-//go:embed tpl/delete-one-by-field-tx.tpl
-var DeleteOneByFieldTx string
-
-//go:embed tpl/interface-delete-one-cache-by-field-tx.tpl
-var InterfaceDeleteOneCacheByFieldTx string
-
-//go:embed tpl/delete-one-cache-by-field-tx.tpl
-var DeleteOneCacheByFieldTx string
-
-//go:embed tpl/interface-delete-one-by-fields-tx.tpl
-var InterfaceDeleteOneByFieldsTx string
-
-//go:embed tpl/delete-one-by-fields-tx.tpl
-var DeleteOneByFieldsTx string
-
-//go:embed tpl/interface-delete-one-cache-by-fields-tx.tpl
-var InterfaceDeleteOneCacheByFieldsTx string
-
-//go:embed tpl/delete-one-cache-by-fields-tx.tpl
-var DeleteOneCacheByFieldsTx string
 
 //go:embed tpl/interface-find-all.tpl
 var InterfaceFindAll string
@@ -276,9 +356,3 @@ var InterfaceFindAllCache string
 
 //go:embed tpl/find-all-cache.tpl
 var FindAllCache string
-
-//go:embed tpl/delete-all-cache.tpl
-var DeleteAllCache string
-
-//go:embed tpl/interface-delete-all-cache.tpl
-var InterfaceDeleteAllCache string

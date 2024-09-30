@@ -5,9 +5,5 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) UpdateOneByTx(ctx context.Co
 	if err != nil {
 		return err
 	}
-    err = {{.firstTableChar}}.DeleteUniqueIndexCache(ctx, []*{{.dbName}}_model.{{.upperTableName}}{data})
-    if err != nil {
-        return err
-    }
 	return err
 }
