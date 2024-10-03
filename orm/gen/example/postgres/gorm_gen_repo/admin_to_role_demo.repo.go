@@ -6,6 +6,7 @@ package gorm_gen_repo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/fzf-labs/fdatabase/orm/condition"
 	"github.com/fzf-labs/fdatabase/orm/dbcache"
@@ -14,6 +15,7 @@ import (
 	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_dao"
 	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_model"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var _ IAdminToRoleDemoRepo = (*AdminToRoleDemoRepo)(nil)
@@ -24,12 +26,58 @@ var (
 
 type (
 	IAdminToRoleDemoRepo interface {
+		// CreateOne 创建一条数据
+		CreateOne(ctx context.Context, data *gorm_gen_model.AdminToRoleDemo) error
+		// CreateOneByTx 创建一条数据(事务)
+		CreateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminToRoleDemo) error
+		// CreateBatch 批量创建数据
+		CreateBatch(ctx context.Context, data []*gorm_gen_model.AdminToRoleDemo, batchSize int) error
+		// CreateBatchByTx 批量创建数据(事务)
+		CreateBatchByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.AdminToRoleDemo, batchSize int) error
+		// UpsertOne Upsert一条数据
+		UpsertOne(ctx context.Context, data *gorm_gen_model.AdminToRoleDemo) error
+		// UpsertOneByTx Upsert一条数据(事务)
+		UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminToRoleDemo) error
+		// UpsertOneByFields Upsert一条数据，根据fields字段
+		UpsertOneByFields(ctx context.Context, data *gorm_gen_model.AdminToRoleDemo, fields []string) error
+		// UpsertOneByFieldsTx Upsert一条数据，根据fields字段(事务)
+		UpsertOneByFieldsTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminToRoleDemo, fields []string) error
+		// FindMultiByAdminIDRoleID 根据AdminIDRoleID查询多条数据
+		FindMultiByAdminIDRoleID(ctx context.Context, adminID string, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error)
+		// FindMultiByRoleIDAdminID 根据RoleIDAdminID查询多条数据
+		FindMultiByRoleIDAdminID(ctx context.Context, roleID string, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error)
+		// FindMultiByAdminID 根据adminID查询多条数据
+		FindMultiByAdminID(ctx context.Context, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error)
+		// FindMultiByAdminIDS 根据adminIDS查询多条数据
+		FindMultiByAdminIDS(ctx context.Context, adminIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error)
+		// FindMultiByRoleID 根据roleID查询多条数据
+		FindMultiByRoleID(ctx context.Context, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error)
+		// FindMultiByRoleIDS 根据roleIDS查询多条数据
+		FindMultiByRoleIDS(ctx context.Context, roleIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error)
 		// FindAll 查询所有数据
 		FindAll(ctx context.Context) ([]*gorm_gen_model.AdminToRoleDemo, error)
 		// FindAllCache 查询所有数据并设置缓存
 		FindAllCache(ctx context.Context) ([]*gorm_gen_model.AdminToRoleDemo, error)
 		// FindMultiByCondition 根据自定义条件查询数据
 		FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.AdminToRoleDemo, *condition.Reply, error)
+		// DeleteMultiByAdminIDRoleID 根据adminID删除多条数据
+		DeleteMultiByAdminIDRoleID(ctx context.Context, adminID string, roleID string) error
+		// DeleteMultiByAdminIDRoleIDTx 根据adminID删除多条数据(事务)
+		DeleteMultiByAdminIDRoleIDTx(ctx context.Context, tx *gorm_gen_dao.Query, adminID string, roleID string) error
+		// DeleteMultiByRoleIDAdminID 根据roleID删除多条数据
+		DeleteMultiByRoleIDAdminID(ctx context.Context, roleID string, adminID string) error
+		// DeleteMultiByRoleIDAdminIDTx 根据roleID删除多条数据(事务)
+		DeleteMultiByRoleIDAdminIDTx(ctx context.Context, tx *gorm_gen_dao.Query, roleID string, adminID string) error
+		// DeleteMultiByAdminID 根据adminID删除多条数据
+		DeleteMultiByAdminID(ctx context.Context, adminID string) error
+		// DeleteMultiByAdminIDTx 根据adminID删除多条数据(事务)
+		DeleteMultiByAdminIDTx(ctx context.Context, tx *gorm_gen_dao.Query, adminID string) error
+		// DeleteMultiByRoleID 根据roleID删除多条数据
+		DeleteMultiByRoleID(ctx context.Context, roleID string) error
+		// DeleteMultiByRoleIDTx 根据roleID删除多条数据(事务)
+		DeleteMultiByRoleIDTx(ctx context.Context, tx *gorm_gen_dao.Query, roleID string) error
+		// DeleteAllCache 删除所有数据缓存
+		DeleteAllCache(ctx context.Context) error
 	}
 	AdminToRoleDemoRepo struct {
 		db       *gorm.DB
@@ -44,6 +92,256 @@ func NewAdminToRoleDemoRepo(cfg *config.Repo) *AdminToRoleDemoRepo {
 		cache:    cfg.Cache,
 		encoding: cfg.Encoding,
 	}
+}
+
+// CreateOne 创建一条数据
+func (a *AdminToRoleDemoRepo) CreateOne(ctx context.Context, data *gorm_gen_model.AdminToRoleDemo) error {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	err := dao.WithContext(ctx).Create(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CreateOneByTx 创建一条数据(事务)
+func (a *AdminToRoleDemoRepo) CreateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminToRoleDemo) error {
+	dao := tx.AdminToRoleDemo
+	err := dao.WithContext(ctx).Create(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CreateBatch 批量创建数据
+func (a *AdminToRoleDemoRepo) CreateBatch(ctx context.Context, data []*gorm_gen_model.AdminToRoleDemo, batchSize int) error {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	err := dao.WithContext(ctx).CreateInBatches(data, batchSize)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CreateBatchByTx 批量创建数据(事务)
+func (a *AdminToRoleDemoRepo) CreateBatchByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.AdminToRoleDemo, batchSize int) error {
+	dao := tx.AdminToRoleDemo
+	err := dao.WithContext(ctx).CreateInBatches(data, batchSize)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpsertOne Upsert一条数据
+func (a *AdminToRoleDemoRepo) UpsertOne(ctx context.Context, data *gorm_gen_model.AdminToRoleDemo) error {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	err := dao.WithContext(ctx).Save(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpsertOneByTx Upsert一条数据(事务)
+func (a *AdminToRoleDemoRepo) UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminToRoleDemo) error {
+	dao := tx.AdminToRoleDemo
+	err := dao.WithContext(ctx).Save(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpsertOneByFields Upsert一条数据，根据fields字段
+func (a *AdminToRoleDemoRepo) UpsertOneByFields(ctx context.Context, data *gorm_gen_model.AdminToRoleDemo, fields []string) error {
+	if len(fields) == 0 {
+		return errors.New("UpsertOneByFields fields is empty")
+	}
+	columns := make([]clause.Column, 0)
+	for _, v := range fields {
+		columns = append(columns, clause.Column{Name: v})
+	}
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   columns,
+		UpdateAll: true,
+	}).Create(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpsertOneByFieldsTx Upsert一条数据，根据fields字段(事务)
+func (a *AdminToRoleDemoRepo) UpsertOneByFieldsTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminToRoleDemo, fields []string) error {
+	if len(fields) == 0 {
+		return errors.New("UpsertOneByFieldsTx fields is empty")
+	}
+	columns := make([]clause.Column, 0)
+	for _, v := range fields {
+		columns = append(columns, clause.Column{Name: v})
+	}
+	dao := tx.AdminToRoleDemo
+	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   columns,
+		UpdateAll: true,
+	}).Create(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByAdminIDRoleID 根据adminID删除多条数据
+func (a *AdminToRoleDemoRepo) DeleteMultiByAdminIDRoleID(ctx context.Context, adminID string, roleID string) error {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID), dao.RoleID.Eq(roleID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByAdminIDRoleIDTx 根据adminID删除多条数据
+func (a *AdminToRoleDemoRepo) DeleteMultiByAdminIDRoleIDTx(ctx context.Context, tx *gorm_gen_dao.Query, adminID string, roleID string) error {
+	dao := tx.AdminToRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID), dao.RoleID.Eq(roleID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByRoleIDAdminID 根据roleID删除多条数据
+func (a *AdminToRoleDemoRepo) DeleteMultiByRoleIDAdminID(ctx context.Context, roleID string, adminID string) error {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID), dao.AdminID.Eq(adminID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByRoleIDAdminIDTx 根据roleID删除多条数据
+func (a *AdminToRoleDemoRepo) DeleteMultiByRoleIDAdminIDTx(ctx context.Context, tx *gorm_gen_dao.Query, roleID string, adminID string) error {
+	dao := tx.AdminToRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID), dao.AdminID.Eq(adminID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByAdminID 根据adminID删除多条数据
+func (a *AdminToRoleDemoRepo) DeleteMultiByAdminID(ctx context.Context, adminID string) error {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByAdminIDTx 根据adminID删除多条数据
+func (a *AdminToRoleDemoRepo) DeleteMultiByAdminIDTx(ctx context.Context, tx *gorm_gen_dao.Query, adminID string) error {
+	dao := tx.AdminToRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByRoleID 根据roleID删除多条数据
+func (a *AdminToRoleDemoRepo) DeleteMultiByRoleID(ctx context.Context, roleID string) error {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByRoleIDTx 根据roleID删除多条数据
+func (a *AdminToRoleDemoRepo) DeleteMultiByRoleIDTx(ctx context.Context, tx *gorm_gen_dao.Query, roleID string) error {
+	dao := tx.AdminToRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteAllCache 删除所有数据缓存
+func (a *AdminToRoleDemoRepo) DeleteAllCache(ctx context.Context) error {
+	cacheKey := a.cache.Key(CacheAdminToRoleDemoAll)
+	err := a.cache.Del(ctx, cacheKey)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// FindMultiByAdminIDRoleID 根据AdminIDRoleID查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByAdminIDRoleID(ctx context.Context, adminID string, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID), dao.RoleID.Eq(roleID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiByRoleIDAdminID 根据RoleIDAdminID查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByRoleIDAdminID(ctx context.Context, roleID string, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID), dao.AdminID.Eq(adminID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiByAdminID 根据adminID查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByAdminID(ctx context.Context, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiByAdminIDS 根据adminIDS查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByAdminIDS(ctx context.Context, adminIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.AdminID.In(adminIDS...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiByRoleID 根据roleID查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByRoleID(ctx context.Context, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiByRoleIDS 根据roleIDS查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByRoleIDS(ctx context.Context, roleIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.RoleID.In(roleIDS...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // FindAll 查询所有数据

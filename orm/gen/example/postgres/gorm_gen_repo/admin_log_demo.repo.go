@@ -29,28 +29,52 @@ type (
 	IAdminLogDemoRepo interface {
 		// CreateOne 创建一条数据
 		CreateOne(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
+		// CreateOneCache 创建一条数据
+		CreateOneCache(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
 		// CreateOneByTx 创建一条数据(事务)
 		CreateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
+		// CreateOneCacheByTx 创建一条数据(事务)
+		CreateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
 		// CreateBatch 批量创建数据
 		CreateBatch(ctx context.Context, data []*gorm_gen_model.AdminLogDemo, batchSize int) error
+		// CreateBatchCache 批量创建数据
+		CreateBatchCache(ctx context.Context, data []*gorm_gen_model.AdminLogDemo, batchSize int) error
 		// CreateBatchByTx 批量创建数据(事务)
 		CreateBatchByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.AdminLogDemo, batchSize int) error
+		// CreateBatchCacheByTx 批量创建数据(事务)
+		CreateBatchCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.AdminLogDemo, batchSize int) error
 		// UpsertOne Upsert一条数据
 		UpsertOne(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
+		// UpsertOneCache Upsert一条数据
+		UpsertOneCache(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
 		// UpsertOneByTx Upsert一条数据(事务)
 		UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
+		// UpsertOneCacheByTx Upsert一条数据(事务)
+		UpsertOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
 		// UpsertOneByFields Upsert一条数据，根据fields字段
 		UpsertOneByFields(ctx context.Context, data *gorm_gen_model.AdminLogDemo, fields []string) error
+		// UpsertOneCacheByFields Upsert一条数据，根据fields字段
+		UpsertOneCacheByFields(ctx context.Context, data *gorm_gen_model.AdminLogDemo, fields []string) error
 		// UpsertOneByFieldsTx Upsert一条数据，根据fields字段(事务)
 		UpsertOneByFieldsTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo, fields []string) error
+		// UpsertOneCacheByFieldsTx Upsert一条数据，根据fields字段(事务)
+		UpsertOneCacheByFieldsTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo, fields []string) error
 		// UpdateOne 更新一条数据
 		UpdateOne(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
+		// UpdateOneCache 更新一条数据
+		UpdateOneCache(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
 		// UpdateOneByTx 更新一条数据(事务)
 		UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
+		// UpdateOneCacheByTx 更新一条数据(事务)
+		UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
 		// UpdateOneWithZero 更新一条数据,包含零值
 		UpdateOneWithZero(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
+		// UpdateOneCacheWithZero 更新一条数据,包含零值
+		UpdateOneCacheWithZero(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
 		// UpdateOneWithZeroByTx 更新一条数据,包含零值(事务)
 		UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
+		// UpdateOneCacheWithZeroByTx 更新一条数据,包含零值(事务)
+		UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
 		// FindOneCacheByID 根据ID查询一条数据并设置缓存
 		FindOneCacheByID(ctx context.Context, ID string) (*gorm_gen_model.AdminLogDemo, error)
 		// FindOneByID 根据ID查询一条数据
@@ -65,22 +89,22 @@ type (
 		FindAllCache(ctx context.Context) ([]*gorm_gen_model.AdminLogDemo, error)
 		// FindMultiByCondition 根据自定义条件查询数据
 		FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.AdminLogDemo, *condition.Reply, error)
-		// DeleteOneCacheByID 根据ID删除一条数据并清理缓存
-		DeleteOneCacheByID(ctx context.Context, ID string) error
-		// DeleteOneCacheByIDTx 根据ID删除一条数据并清理缓存(事务)
-		DeleteOneCacheByIDTx(ctx context.Context, tx *gorm_gen_dao.Query, ID string) error
 		// DeleteOneByID 根据ID删除一条数据
 		DeleteOneByID(ctx context.Context, ID string) error
+		// DeleteOneCacheByID 根据ID删除一条数据并清理缓存
+		DeleteOneCacheByID(ctx context.Context, ID string) error
 		// DeleteOneByIDTx 根据ID删除一条数据(事务)
 		DeleteOneByIDTx(ctx context.Context, tx *gorm_gen_dao.Query, ID string) error
-		// DeleteMultiCacheByIDS 根据IDS删除多条数据并清理缓存
-		DeleteMultiCacheByIDS(ctx context.Context, IDS []string) error
-		// DeleteMultiCacheByIDSTx 根据IDS删除多条数据并清理缓存(事务)
-		DeleteMultiCacheByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error
+		// DeleteOneCacheByIDTx 根据ID删除一条数据并清理缓存(事务)
+		DeleteOneCacheByIDTx(ctx context.Context, tx *gorm_gen_dao.Query, ID string) error
 		// DeleteMultiByIDS 根据IDS删除多条数据
 		DeleteMultiByIDS(ctx context.Context, IDS []string) error
+		// DeleteMultiCacheByIDS 根据IDS删除多条数据并清理缓存
+		DeleteMultiCacheByIDS(ctx context.Context, IDS []string) error
 		// DeleteMultiByIDSTx 根据IDS删除多条数据(事务)
 		DeleteMultiByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error
+		// DeleteMultiCacheByIDSTx 根据IDS删除多条数据并清理缓存(事务)
+		DeleteMultiCacheByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error
 		// DeleteAllCache 删除所有数据缓存
 		DeleteAllCache(ctx context.Context) error
 		// DeleteUniqueIndexCache 删除唯一索引存在的缓存
@@ -108,6 +132,16 @@ func (a *AdminLogDemoRepo) CreateOne(ctx context.Context, data *gorm_gen_model.A
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// CreateOneCache 创建一条数据
+func (a *AdminLogDemoRepo) CreateOneCache(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error {
+	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
+	err := dao.WithContext(ctx).Create(data)
+	if err != nil {
+		return err
+	}
 	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminLogDemo{data})
 	if err != nil {
 		return err
@@ -117,6 +151,16 @@ func (a *AdminLogDemoRepo) CreateOne(ctx context.Context, data *gorm_gen_model.A
 
 // CreateOneByTx 创建一条数据(事务)
 func (a *AdminLogDemoRepo) CreateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error {
+	dao := tx.AdminLogDemo
+	err := dao.WithContext(ctx).Create(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CreateOneCacheByTx 创建一条数据(事务)
+func (a *AdminLogDemoRepo) CreateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error {
 	dao := tx.AdminLogDemo
 	err := dao.WithContext(ctx).Create(data)
 	if err != nil {
@@ -136,6 +180,16 @@ func (a *AdminLogDemoRepo) CreateBatch(ctx context.Context, data []*gorm_gen_mod
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// CreateBatchCache 批量创建数据
+func (a *AdminLogDemoRepo) CreateBatchCache(ctx context.Context, data []*gorm_gen_model.AdminLogDemo, batchSize int) error {
+	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
+	err := dao.WithContext(ctx).CreateInBatches(data, batchSize)
+	if err != nil {
+		return err
+	}
 	err = a.DeleteUniqueIndexCache(ctx, data)
 	if err != nil {
 		return err
@@ -145,6 +199,16 @@ func (a *AdminLogDemoRepo) CreateBatch(ctx context.Context, data []*gorm_gen_mod
 
 // CreateBatchByTx 批量创建数据(事务)
 func (a *AdminLogDemoRepo) CreateBatchByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.AdminLogDemo, batchSize int) error {
+	dao := tx.AdminLogDemo
+	err := dao.WithContext(ctx).CreateInBatches(data, batchSize)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CreateBatchCacheByTx 批量创建数据(事务)
+func (a *AdminLogDemoRepo) CreateBatchCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.AdminLogDemo, batchSize int) error {
 	dao := tx.AdminLogDemo
 	err := dao.WithContext(ctx).CreateInBatches(data, batchSize)
 	if err != nil {
@@ -164,6 +228,16 @@ func (a *AdminLogDemoRepo) UpsertOne(ctx context.Context, data *gorm_gen_model.A
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// UpsertOneCache Upsert一条数据
+func (a *AdminLogDemoRepo) UpsertOneCache(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error {
+	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
+	err := dao.WithContext(ctx).Save(data)
+	if err != nil {
+		return err
+	}
 	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminLogDemo{data})
 	if err != nil {
 		return err
@@ -178,6 +252,16 @@ func (a *AdminLogDemoRepo) UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Q
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// UpsertOneCacheByTx Upsert一条数据(事务)
+func (a *AdminLogDemoRepo) UpsertOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error {
+	dao := tx.AdminLogDemo
+	err := dao.WithContext(ctx).Save(data)
+	if err != nil {
+		return err
+	}
 	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminLogDemo{data})
 	if err != nil {
 		return err
@@ -187,6 +271,26 @@ func (a *AdminLogDemoRepo) UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Q
 
 // UpsertOneByFields Upsert一条数据，根据fields字段
 func (a *AdminLogDemoRepo) UpsertOneByFields(ctx context.Context, data *gorm_gen_model.AdminLogDemo, fields []string) error {
+	if len(fields) == 0 {
+		return errors.New("UpsertOneByFields fields is empty")
+	}
+	columns := make([]clause.Column, 0)
+	for _, v := range fields {
+		columns = append(columns, clause.Column{Name: v})
+	}
+	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
+	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   columns,
+		UpdateAll: true,
+	}).Create(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpsertOneCacheByFields Upsert一条数据，根据fields字段
+func (a *AdminLogDemoRepo) UpsertOneCacheByFields(ctx context.Context, data *gorm_gen_model.AdminLogDemo, fields []string) error {
 	if len(fields) == 0 {
 		return errors.New("UpsertOneByFields fields is empty")
 	}
@@ -226,6 +330,26 @@ func (a *AdminLogDemoRepo) UpsertOneByFieldsTx(ctx context.Context, tx *gorm_gen
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// UpsertOneCacheByFieldsTx Upsert一条数据，根据fields字段(事务)
+func (a *AdminLogDemoRepo) UpsertOneCacheByFieldsTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo, fields []string) error {
+	if len(fields) == 0 {
+		return errors.New("UpsertOneByFieldsTx fields is empty")
+	}
+	columns := make([]clause.Column, 0)
+	for _, v := range fields {
+		columns = append(columns, clause.Column{Name: v})
+	}
+	dao := tx.AdminLogDemo
+	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   columns,
+		UpdateAll: true,
+	}).Create(data)
+	if err != nil {
+		return err
+	}
 	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminLogDemo{data})
 	if err != nil {
 		return err
@@ -235,6 +359,16 @@ func (a *AdminLogDemoRepo) UpsertOneByFieldsTx(ctx context.Context, tx *gorm_gen
 
 // UpdateOne 更新一条数据
 func (a *AdminLogDemoRepo) UpdateOne(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error {
+	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).Updates(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateOneCache 更新一条数据
+func (a *AdminLogDemoRepo) UpdateOneCache(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error {
 	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
 	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).Updates(data)
 	if err != nil {
@@ -254,6 +388,16 @@ func (a *AdminLogDemoRepo) UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Q
 	if err != nil {
 		return err
 	}
+	return err
+}
+
+// UpdateOneCacheByTx 更新一条数据(事务)
+func (a *AdminLogDemoRepo) UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error {
+	dao := tx.AdminLogDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).Updates(data)
+	if err != nil {
+		return err
+	}
 	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminLogDemo{data})
 	if err != nil {
 		return err
@@ -263,6 +407,16 @@ func (a *AdminLogDemoRepo) UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Q
 
 // UpdateOneWithZero 更新一条数据,包含零值
 func (a *AdminLogDemoRepo) UpdateOneWithZero(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error {
+	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).Select(dao.ALL.WithTable("")).Updates(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateOneCacheWithZero 更新一条数据,包含零值
+func (a *AdminLogDemoRepo) UpdateOneCacheWithZero(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error {
 	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
 	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).Select(dao.ALL.WithTable("")).Updates(data)
 	if err != nil {
@@ -282,11 +436,31 @@ func (a *AdminLogDemoRepo) UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_g
 	if err != nil {
 		return err
 	}
+	return err
+}
+
+// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值
+func (a *AdminLogDemoRepo) UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error {
+	dao := tx.AdminLogDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).Select(dao.ALL.WithTable("")).Updates(data)
+	if err != nil {
+		return err
+	}
 	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminLogDemo{data})
 	if err != nil {
 		return err
 	}
 	return err
+}
+
+// DeleteOneByID 根据ID删除一条数据
+func (a *AdminLogDemoRepo) DeleteOneByID(ctx context.Context, ID string) error {
+	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // DeleteOneCacheByID 根据ID删除一条数据并清理缓存
@@ -304,6 +478,16 @@ func (a *AdminLogDemoRepo) DeleteOneCacheByID(ctx context.Context, ID string) er
 		return err
 	}
 	err = a.DeleteUniqueIndexCache(ctx, []*gorm_gen_model.AdminLogDemo{result})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteOneByID 根据ID删除一条数据
+func (a *AdminLogDemoRepo) DeleteOneByIDTx(ctx context.Context, tx *gorm_gen_dao.Query, ID string) error {
+	dao := tx.AdminLogDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
 	if err != nil {
 		return err
 	}
@@ -331,20 +515,10 @@ func (a *AdminLogDemoRepo) DeleteOneCacheByIDTx(ctx context.Context, tx *gorm_ge
 	return nil
 }
 
-// DeleteOneByID 根据ID删除一条数据
-func (a *AdminLogDemoRepo) DeleteOneByID(ctx context.Context, ID string) error {
+// DeleteMultiByIDS 根据IDS删除多条数据
+func (a *AdminLogDemoRepo) DeleteMultiByIDS(ctx context.Context, IDS []string) error {
 	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
-	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteOneByID 根据ID删除一条数据
-func (a *AdminLogDemoRepo) DeleteOneByIDTx(ctx context.Context, tx *gorm_gen_dao.Query, ID string) error {
-	dao := tx.AdminLogDemo
-	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
+	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
 	if err != nil {
 		return err
 	}
@@ -372,6 +546,16 @@ func (a *AdminLogDemoRepo) DeleteMultiCacheByIDS(ctx context.Context, IDS []stri
 	return nil
 }
 
+// DeleteMultiByIDSTx 根据IDS删除多条数据
+func (a *AdminLogDemoRepo) DeleteMultiByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error {
+	dao := tx.AdminLogDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // DeleteMultiCacheByIDSTx 根据IDS删除多条数据并清理缓存
 func (a *AdminLogDemoRepo) DeleteMultiCacheByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error {
 	dao := tx.AdminLogDemo
@@ -387,26 +571,6 @@ func (a *AdminLogDemoRepo) DeleteMultiCacheByIDSTx(ctx context.Context, tx *gorm
 		return err
 	}
 	err = a.DeleteUniqueIndexCache(ctx, result)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteMultiByIDS 根据IDS删除多条数据
-func (a *AdminLogDemoRepo) DeleteMultiByIDS(ctx context.Context, IDS []string) error {
-	dao := gorm_gen_dao.Use(a.db).AdminLogDemo
-	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteMultiByIDSTx 根据IDS删除多条数据
-func (a *AdminLogDemoRepo) DeleteMultiByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error {
-	dao := tx.AdminLogDemo
-	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
 	if err != nil {
 		return err
 	}
