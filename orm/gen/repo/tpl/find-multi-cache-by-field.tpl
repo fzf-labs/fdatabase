@@ -1,11 +1,11 @@
-// FindAllCache 查询所有数据并设置缓存
-func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindAllCache(ctx context.Context) ([]*{{.dbName}}_model.{{.upperTableName}}, error) {
+// FindMultiCacheBy{{.upperField}} 根据{{.lowerField}}查询多条数据，并设置缓存
+func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiCacheBy{{.upperField}}(ctx context.Context, {{.lowerField}} {{.dataType}}) ([]*{{.dbName}}_model.{{.upperTableName}}, error) {
 	resp := make([]*{{.dbName}}_model.{{.upperTableName}}, 0)
-	cacheKey := {{.firstTableChar}}.cache.Key(Cache{{.upperTableName}}All)
+	cacheKey := {{.firstTableChar}}.cache.Key(Cache{{.upperTableName}}By{{.cacheFields}}Prefix, {{.cacheFieldsJoin}})
 	cacheValue, err := {{.firstTableChar}}.cache.Fetch(ctx, cacheKey, func() (string, error) {
 		dao := {{.dbName}}_dao.Use({{.firstTableChar}}.db).{{.upperTableName}}
-		result, err := dao.WithContext(ctx).Find()
-		if err != nil {
+	    result, err := dao.WithContext(ctx).Where({{.whereFields}}).Find()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", err
 		}
         marshal, err := {{.firstTableChar}}.encoding.Marshal(result)

@@ -1,4 +1,4 @@
-// DeleteOneCacheBy{{.upperField}} 根据{{.lowerField}}删除一条数据并清理缓存
+// DeleteOneCacheBy{{.upperField}} 根据{{.lowerField}}删除一条数据，并删除缓存
 func ({{.firstTableChar}} *{{.upperTableName}}Repo) DeleteOneCacheBy{{.upperField}}(ctx context.Context, {{.lowerField}} {{.dataType}}) error {
 	dao := {{.dbName}}_dao.Use({{.firstTableChar}}.db).{{.upperTableName}}
 	result, err := dao.WithContext(ctx).Where(dao.{{.upperField}}.Eq({{.lowerField}})).First()
@@ -12,7 +12,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) DeleteOneCacheBy{{.upperFiel
 	if err != nil {
 		return err
 	}
-	err = {{.firstTableChar}}.DeleteUniqueIndexCache(ctx, []*{{.dbName}}_model.{{.upperTableName}}{result})
+	err = {{.firstTableChar}}.DeleteIndexCache(ctx, []*{{.dbName}}_model.{{.upperTableName}}{result})
     if err != nil {
     	return err
     }

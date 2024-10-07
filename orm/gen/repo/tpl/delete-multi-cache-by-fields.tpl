@@ -1,4 +1,4 @@
-// DeleteMultiCacheBy{{.upperFields}} 根据{{.lowerField}}删除多条数据并清理缓存
+// DeleteMultiCacheBy{{.upperFields}} 根据{{.lowerField}}删除多条数据，并删除缓存
 func ({{.firstTableChar}} *{{.upperTableName}}Repo) DeleteMultiCacheBy{{.upperFields}}(ctx context.Context, {{.fieldAndDataTypes}}) error {
 	dao := {{.dbName}}_dao.Use({{.firstTableChar}}.db).{{.upperTableName}}
 	result, err := dao.WithContext(ctx).Where({{.whereFields}}).Find()
@@ -12,7 +12,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) DeleteMultiCacheBy{{.upperFi
 	if err != nil {
 		return err
 	}
-	err = {{.firstTableChar}}.DeleteUniqueIndexCache(ctx, result)
+	err = {{.firstTableChar}}.DeleteIndexCache(ctx, result)
 	if err != nil {
 		return err
 	}

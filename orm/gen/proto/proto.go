@@ -90,31 +90,31 @@ func (p *Proto) getTableComment(table string) string {
 }
 
 func (p *Proto) genSyntax() string {
-	str, _ := template.NewTemplate("Syntax").Parse(Syntax).Execute(map[string]any{})
+	str, _ := template.NewTemplate().Parse(Syntax).Execute(map[string]any{})
 	return fmt.Sprintln(str.String())
 }
 
 func (p *Proto) genPackage() string {
-	str, _ := template.NewTemplate("Package").Parse(Package).Execute(map[string]any{
+	str, _ := template.NewTemplate().Parse(Package).Execute(map[string]any{
 		"packageStr": p.packageStr,
 	})
 	return fmt.Sprintln(str.String())
 }
 
 func (p *Proto) genImport() string {
-	str, _ := template.NewTemplate("Import").Parse(Import).Execute(map[string]any{})
+	str, _ := template.NewTemplate().Parse(Import).Execute(map[string]any{})
 	return fmt.Sprintln(str.String())
 }
 
 func (p *Proto) genOption() string {
-	str, _ := template.NewTemplate("Option").Parse(Option).Execute(map[string]any{
+	str, _ := template.NewTemplate().Parse(Option).Execute(map[string]any{
 		"goPackageStr": p.goPackageStr,
 	})
 	return fmt.Sprintln(str.String())
 }
 
 func (p *Proto) genService() string {
-	str, _ := template.NewTemplate("Service").Parse(Service).Execute(map[string]any{
+	str, _ := template.NewTemplate().Parse(Service).Execute(map[string]any{
 		"upperTableName":      p.upperTableName,
 		"tableNameComment":    p.tableNameComment,
 		"tableNameUnderScore": p.tableNameUnderScore,
@@ -181,7 +181,7 @@ func (p *Proto) genMessage() string {
 	updateReq = strings.TrimSpace(strings.TrimRight(updateReq, "\n"))
 	deleteReq = strings.TrimSpace(strings.TrimRight(deleteReq, "\n"))
 	getReq = strings.TrimSpace(strings.TrimRight(getReq, "\n"))
-	str, _ := template.NewTemplate("Message").Parse(Message).Execute(map[string]any{
+	str, _ := template.NewTemplate().Parse(Message).Execute(map[string]any{
 		"tableNameComment": p.tableNameComment,
 		"upperTableName":   p.upperTableName,
 		"info":             info,

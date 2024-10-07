@@ -1,10 +1,10 @@
-// FindOneCacheBy{{.upperField}} 根据{{.lowerField}}查询一条数据并设置缓存
+// FindOneCacheBy{{.upperField}} 根据{{.lowerField}}查询一条数据，并设置缓存
 func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindOneCacheBy{{.upperField}}(ctx context.Context, {{.lowerField}} {{.dataType}}) (*{{.dbName}}_model.{{.upperTableName}}, error) {
 	resp := new({{.dbName}}_model.{{.upperTableName}})
-	cacheKey := {{.firstTableChar}}.cache.Key( Cache{{.upperTableName}}By{{.upperField}}Prefix, {{.lowerField}})
+	cacheKey := {{.firstTableChar}}.cache.Key(Cache{{.upperTableName}}By{{.cacheFields}}Prefix,{{.cacheFieldsJoin}})
 	cacheValue, err := {{.firstTableChar}}.cache.Fetch(ctx, cacheKey, func() (string, error) {
 		dao := {{.dbName}}_dao.Use({{.firstTableChar}}.db).{{.upperTableName}}
-		result, err := dao.WithContext(ctx).Where({{.whereField}}).First()
+		result, err := dao.WithContext(ctx).Where({{.whereFields}}).First()
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", err
 		}

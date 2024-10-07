@@ -1,4 +1,4 @@
-// UpsertOneCacheByFields Upsert一条数据，根据fields字段
+// UpsertOneCacheByFields 根据fields字段Upsert一条数据, 并删除缓存
 func ({{.firstTableChar}} *{{.upperTableName}}Repo) UpsertOneCacheByFields(ctx context.Context, data *{{.dbName}}_model.{{.upperTableName}},fields []string) error {
 	if len(fields) == 0 {
         return errors.New("UpsertOneByFields fields is empty")
@@ -15,7 +15,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) UpsertOneCacheByFields(ctx c
 	if err != nil {
 		return err
 	}
-	err = {{.firstTableChar}}.DeleteUniqueIndexCache(ctx, []*{{.dbName}}_model.{{.upperTableName}}{data})
+	err = {{.firstTableChar}}.DeleteIndexCache(ctx, []*{{.dbName}}_model.{{.upperTableName}}{data})
 	if err != nil {
 		return err
 	}

@@ -16,9 +16,6 @@ var Var string
 //go:embed tpl/var-cache.tpl
 var VarCache string
 
-//go:embed tpl/var-cache-all.tpl
-var VarCacheAll string
-
 //go:embed tpl/var-cache-keys.tpl
 var VarCacheKeys string
 
@@ -181,18 +178,6 @@ var UpdateOneCacheWithZeroByTx string
 
 // 删除
 
-//go:embed tpl/interface-delete-multi-by-field-plural.tpl
-var InterfaceDeleteMultiByFieldPlural string
-
-//go:embed tpl/delete-multi-by-field-plural.tpl
-var DeleteMultiByFieldPlural string
-
-//go:embed tpl/interface-delete-multi-cache-by-field-plural.tpl
-var InterfaceDeleteMultiCacheByFieldPlural string
-
-//go:embed tpl/delete-multi-cache-by-field-plural.tpl
-var DeleteMultiCacheByFieldPlural string
-
 //go:embed tpl/interface-delete-one-by-field.tpl
 var InterfaceDeleteOneByField string
 
@@ -216,48 +201,6 @@ var InterfaceDeleteOneCacheByFields string
 
 //go:embed tpl/delete-one-cache-by-fields.tpl
 var DeleteOneCacheByFields string
-
-//go:embed tpl/interface-delete-multi-by-fields.tpl
-var InterfaceDeleteMultiByFields string
-
-//go:embed tpl/delete-multi-by-fields.tpl
-var DeleteMultiByFields string
-
-//go:embed tpl/interface-delete-multi-cache-by-fields.tpl
-var InterfaceDeleteMultiCacheByFields string
-
-//go:embed tpl/delete-multi-cache-by-fields.tpl
-var DeleteMultiCacheByFields string
-
-//go:embed tpl/interface-delete-multi-by-fields-tx.tpl
-var InterfaceDeleteMultiByFieldsTx string
-
-//go:embed tpl/delete-multi-by-fields-tx.tpl
-var DeleteMultiByFieldsTx string
-
-//go:embed tpl/interface-delete-multi-cache-by-fields-tx.tpl
-var InterfaceDeleteMultiCacheByFieldsTx string
-
-//go:embed tpl/delete-multi-cache-by-fields-tx.tpl
-var DeleteMultiCacheByFieldsTx string
-
-//go:embed tpl/interface-delete-unique-index-cache.tpl
-var InterfaceDeleteUniqueIndexCache string
-
-//go:embed tpl/delete-unique-index-cache.tpl
-var DeleteUniqueIndexCache string
-
-//go:embed tpl/interface-delete-multi-by-field-plural-tx.tpl
-var InterfaceDeleteMultiByFieldPluralTx string
-
-//go:embed tpl/delete-multi-by-field-plural-tx.tpl
-var DeleteMultiByFieldPluralTx string
-
-//go:embed tpl/interface-delete-multi-cache-by-field-plural-tx.tpl
-var InterfaceDeleteMultiCacheByFieldPluralTx string
-
-//go:embed tpl/delete-multi-cache-by-field-plural-tx.tpl
-var DeleteMultiCacheByFieldPluralTx string
 
 //go:embed tpl/interface-delete-one-by-field-tx.tpl
 var InterfaceDeleteOneByFieldTx string
@@ -283,37 +226,85 @@ var InterfaceDeleteOneCacheByFieldsTx string
 //go:embed tpl/delete-one-cache-by-fields-tx.tpl
 var DeleteOneCacheByFieldsTx string
 
-//go:embed tpl/delete-all-cache.tpl
-var DeleteAllCache string
+//go:embed tpl/interface-delete-multi-by-field.tpl
+var InterfaceDeleteMultiByField string
 
-//go:embed tpl/interface-delete-all-cache.tpl
-var InterfaceDeleteAllCache string
+//go:embed tpl/delete-multi-by-field.tpl
+var DeleteMultiByField string
+
+//go:embed tpl/interface-delete-multi-cache-by-field.tpl
+var InterfaceDeleteMultiCacheByField string
+
+//go:embed tpl/delete-multi-cache-by-field.tpl
+var DeleteMultiCacheByField string
+
+//go:embed tpl/interface-delete-multi-by-field-tx.tpl
+var InterfaceDeleteMultiByFieldTx string
+
+//go:embed tpl/delete-multi-by-field-tx.tpl
+var DeleteMultiByFieldTx string
+
+//go:embed tpl/interface-delete-multi-cache-by-field-tx.tpl
+var InterfaceDeleteMultiCacheByFieldTx string
+
+//go:embed tpl/delete-multi-cache-by-field-tx.tpl
+var DeleteMultiCacheByFieldTx string
+
+//go:embed tpl/interface-delete-multi-by-field-plural.tpl
+var InterfaceDeleteMultiByFieldPlural string
+
+//go:embed tpl/delete-multi-by-field-plural.tpl
+var DeleteMultiByFieldPlural string
+
+//go:embed tpl/interface-delete-multi-cache-by-field-plural.tpl
+var InterfaceDeleteMultiCacheByFieldPlural string
+
+//go:embed tpl/delete-multi-cache-by-field-plural.tpl
+var DeleteMultiCacheByFieldPlural string
+
+//go:embed tpl/interface-delete-multi-by-field-plural-tx.tpl
+var InterfaceDeleteMultiByFieldPluralTx string
+
+//go:embed tpl/delete-multi-by-field-plural-tx.tpl
+var DeleteMultiByFieldPluralTx string
+
+//go:embed tpl/interface-delete-multi-cache-by-field-plural-tx.tpl
+var InterfaceDeleteMultiCacheByFieldPluralTx string
+
+//go:embed tpl/delete-multi-cache-by-field-plural-tx.tpl
+var DeleteMultiCacheByFieldPluralTx string
+
+//go:embed tpl/interface-delete-multi-by-fields.tpl
+var InterfaceDeleteMultiByFields string
+
+//go:embed tpl/delete-multi-by-fields.tpl
+var DeleteMultiByFields string
+
+//go:embed tpl/interface-delete-multi-cache-by-fields.tpl
+var InterfaceDeleteMultiCacheByFields string
+
+//go:embed tpl/delete-multi-cache-by-fields.tpl
+var DeleteMultiCacheByFields string
+
+//go:embed tpl/interface-delete-multi-by-fields-tx.tpl
+var InterfaceDeleteMultiByFieldsTx string
+
+//go:embed tpl/delete-multi-by-fields-tx.tpl
+var DeleteMultiByFieldsTx string
+
+//go:embed tpl/interface-delete-multi-cache-by-fields-tx.tpl
+var InterfaceDeleteMultiCacheByFieldsTx string
+
+//go:embed tpl/delete-multi-cache-by-fields-tx.tpl
+var DeleteMultiCacheByFieldsTx string
+
+//go:embed tpl/interface-delete-index-cache.tpl
+var InterfaceDeleteIndexCache string
+
+//go:embed tpl/delete-index-cache.tpl
+var DeleteIndexCache string
 
 // 查询
-
-//go:embed tpl/interface-find-multi-by-field.tpl
-var InterfaceFindMultiByField string
-
-//go:embed tpl/find-multi-by-field.tpl
-var FindMultiByField string
-
-//go:embed tpl/interface-find-multi-by-fields.tpl
-var InterfaceFindMultiByFields string
-
-//go:embed tpl/find-multi-by-fields.tpl
-var FindMultiByFields string
-
-//go:embed tpl/interface-find-multi-by-field-plural.tpl
-var InterfaceFindMultiByFieldPlural string
-
-//go:embed tpl/find-multi-by-field-plural.tpl
-var FindMultiByFieldPlural string
-
-//go:embed tpl/interface-find-multi-cache-by-field-plural.tpl
-var InterfaceFindMultiCacheByFieldPlural string
-
-//go:embed tpl/find-multi-cache-by-field-plural.tpl
-var FindMultiCacheByFieldPlural string
 
 //go:embed tpl/interface-find-one-by-field.tpl
 var InterfaceFindOneByField string
@@ -327,6 +318,21 @@ var InterfaceFindOneCacheByField string
 //go:embed tpl/find-one-cache-by-field.tpl
 var FindOneCacheByField string
 
+//go:embed tpl/interface-find-multi-by-field-plural.tpl
+var InterfaceFindMultiByFieldPlural string
+
+//go:embed tpl/find-multi-by-field-plural.tpl
+var FindMultiByFieldPlural string
+
+//go:embed tpl/interface-find-multi-cache-by-field-plural.tpl
+var InterfaceFindMultiCacheByFieldPlural string
+
+//go:embed tpl/find-multi-cache-by-field-plural.tpl
+var FindMultiCacheByFieldPlural string
+
+//go:embed tpl/interface-find-multi-by-condition.tpl
+var InterfaceFindMultiByCondition string
+
 //go:embed tpl/interface-find-one-by-fields.tpl
 var InterfaceFindOneByFields string
 
@@ -339,20 +345,30 @@ var InterfaceFindOneCacheByFields string
 //go:embed tpl/find-one-cache-by-fields.tpl
 var FindOneCacheByFields string
 
-//go:embed tpl/interface-find-multi-by-condition.tpl
-var InterfaceFindMultiByCondition string
+//go:embed tpl/interface-find-multi-by-field.tpl
+var InterfaceFindMultiByField string
+
+//go:embed tpl/find-multi-by-field.tpl
+var FindMultiByField string
+
+//go:embed tpl/interface-find-multi-cache-by-field.tpl
+var InterfaceFindMultiCacheByField string
+
+//go:embed tpl/find-multi-cache-by-field.tpl
+var FindMultiCacheByField string
+
+//go:embed tpl/interface-find-multi-by-fields.tpl
+var InterfaceFindMultiByFields string
+
+//go:embed tpl/find-multi-by-fields.tpl
+var FindMultiByFields string
+
+//go:embed tpl/interface-find-multi-cache-by-fields.tpl
+var InterfaceFindMultiCacheByFields string
+
+//go:embed tpl/find-multi-cache-by-fields.tpl
+
+var FindMultiCacheByFields string
 
 //go:embed tpl/find-multi-by-condition.tpl
 var FindMultiByCondition string
-
-//go:embed tpl/interface-find-all.tpl
-var InterfaceFindAll string
-
-//go:embed tpl/find-all.tpl
-var FindAll string
-
-//go:embed tpl/interface-find-all-cache.tpl
-var InterfaceFindAllCache string
-
-//go:embed tpl/find-all-cache.tpl
-var FindAllCache string

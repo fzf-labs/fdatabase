@@ -10,16 +10,13 @@ import (
 
 // DefaultTemplate is a tool to provides the text/template operations
 type DefaultTemplate struct {
-	name  string
 	text  string
 	goFmt bool
 }
 
 // NewTemplate returns an instance of defaultTemplate
-func NewTemplate(name string) *DefaultTemplate {
-	return &DefaultTemplate{
-		name: name,
-	}
+func NewTemplate() *DefaultTemplate {
+	return &DefaultTemplate{}
 }
 
 // Parse accepts a source template and returns defaultTemplate
@@ -36,7 +33,7 @@ func (t *DefaultTemplate) GoFmt(fmt bool) *DefaultTemplate {
 
 // Execute returns the codes after the template executed
 func (t *DefaultTemplate) Execute(data any) (*bytes.Buffer, error) {
-	tem, err := template.New(t.name).Parse(t.text)
+	tem, err := template.New("").Parse(t.text)
 	if err != nil {
 		return nil, errors.Wrapf(err, "template parse error:%s", t.text)
 	}
