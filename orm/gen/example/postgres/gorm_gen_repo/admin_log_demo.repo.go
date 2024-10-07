@@ -598,8 +598,10 @@ func (a *AdminLogDemoRepo) DeleteMultiCacheByIDSTx(ctx context.Context, tx *gorm
 func (a *AdminLogDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminLogDemo) error {
 	keys := make([]string, 0)
 	for _, v := range data {
-		keys = append(keys, a.cache.Key(CacheAdminLogDemoByIDPrefix, v.ID))
-
+		keys = append(
+			keys,
+			a.cache.Key(CacheAdminLogDemoByIDPrefix, v.ID),
+		)
 	}
 	err := a.cache.DelBatch(ctx, keys)
 	if err != nil {

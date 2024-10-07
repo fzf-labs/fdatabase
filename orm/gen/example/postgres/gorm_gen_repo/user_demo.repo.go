@@ -1179,13 +1179,15 @@ func (u *UserDemoRepo) DeleteMultiCacheByTenantIDSTx(ctx context.Context, tx *go
 func (u *UserDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.UserDemo) error {
 	keys := make([]string, 0)
 	for _, v := range data {
-		keys = append(keys, u.cache.Key(CacheUserDemoByIDPrefix, v.ID))
-		keys = append(keys, u.cache.Key(CacheUserDemoByUIDPrefix, v.UID))
-		keys = append(keys, u.cache.Key(CacheUserDemoByUIDStatusPrefix, v.UID, v.Status))
-		keys = append(keys, u.cache.Key(CacheUserDemoByTenantIDDeptIDPrefix, v.TenantID, v.DeptID))
-		keys = append(keys, u.cache.Key(CacheUserDemoByUsernamePrefix, v.Username))
-		keys = append(keys, u.cache.Key(CacheUserDemoByTenantIDPrefix, v.TenantID))
-
+		keys = append(
+			keys,
+			u.cache.Key(CacheUserDemoByIDPrefix, v.ID),
+			u.cache.Key(CacheUserDemoByUIDPrefix, v.UID),
+			u.cache.Key(CacheUserDemoByUIDStatusPrefix, v.UID, v.Status),
+			u.cache.Key(CacheUserDemoByTenantIDDeptIDPrefix, v.TenantID, v.DeptID),
+			u.cache.Key(CacheUserDemoByUsernamePrefix, v.Username),
+			u.cache.Key(CacheUserDemoByTenantIDPrefix, v.TenantID),
+		)
 	}
 	err := u.cache.DelBatch(ctx, keys)
 	if err != nil {

@@ -689,11 +689,13 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByRoleIDSTx(ctx context.Context, t
 func (a *AdminToRoleDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminToRoleDemo) error {
 	keys := make([]string, 0)
 	for _, v := range data {
-		keys = append(keys, a.cache.Key(CacheAdminToRoleDemoByAdminIDRoleIDPrefix, v.AdminID, v.RoleID))
-		keys = append(keys, a.cache.Key(CacheAdminToRoleDemoByRoleIDAdminIDPrefix, v.RoleID, v.AdminID))
-		keys = append(keys, a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v.AdminID))
-		keys = append(keys, a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v.RoleID))
-
+		keys = append(
+			keys,
+			a.cache.Key(CacheAdminToRoleDemoByAdminIDRoleIDPrefix, v.AdminID, v.RoleID),
+			a.cache.Key(CacheAdminToRoleDemoByRoleIDAdminIDPrefix, v.RoleID, v.AdminID),
+			a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v.AdminID),
+			a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v.RoleID),
+		)
 	}
 	err := a.cache.DelBatch(ctx, keys)
 	if err != nil {

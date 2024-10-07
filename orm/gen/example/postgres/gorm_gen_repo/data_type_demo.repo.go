@@ -1171,12 +1171,14 @@ func (d *DataTypeDemoRepo) DeleteMultiCacheByDataTypeTimesTx(ctx context.Context
 func (d *DataTypeDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.DataTypeDemo) error {
 	keys := make([]string, 0)
 	for _, v := range data {
-		keys = append(keys, d.cache.Key(CacheDataTypeDemoByIDPrefix, v.ID))
-		keys = append(keys, d.cache.Key(CacheDataTypeDemoByULidPrefix, v.ULid))
-		keys = append(keys, d.cache.Key(CacheDataTypeDemoByBatchAPIPrefix, v.BatchAPI))
-		keys = append(keys, d.cache.Key(CacheDataTypeDemoByCacheKeyPrefix, v.CacheKey))
-		keys = append(keys, d.cache.Key(CacheDataTypeDemoByDataTypeTimePrefix, v.DataTypeTime))
-
+		keys = append(
+			keys,
+			d.cache.Key(CacheDataTypeDemoByIDPrefix, v.ID),
+			d.cache.Key(CacheDataTypeDemoByULidPrefix, v.ULid),
+			d.cache.Key(CacheDataTypeDemoByBatchAPIPrefix, v.BatchAPI),
+			d.cache.Key(CacheDataTypeDemoByCacheKeyPrefix, v.CacheKey),
+			d.cache.Key(CacheDataTypeDemoByDataTypeTimePrefix, v.DataTypeTime),
+		)
 	}
 	err := d.cache.DelBatch(ctx, keys)
 	if err != nil {

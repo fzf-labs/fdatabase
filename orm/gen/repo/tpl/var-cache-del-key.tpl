@@ -1,1 +1,1 @@
-		keys = append(keys, {{.firstTableChar}}.cache.Key(Cache{{.upperTableName}}By{{.cacheFields}}Prefix, {{.delCacheFieldsParam}}))
+    {{.firstTableChar}}.cache.Key(Cache{{.upperTableName}}By{{.cacheFields}}Prefix, {{.delCacheFieldsParam}}),

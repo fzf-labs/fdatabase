@@ -2,7 +2,10 @@
 func ({{.firstTableChar}} *{{.upperTableName}}Repo) DeleteIndexCache(ctx context.Context, data []*{{.dbName}}_model.{{.upperTableName}}) error {
 	keys := make([]string, 0)
 	for _, v := range data {
-	  {{.cacheDelKeys}}
+		keys = append(
+		    keys,
+	    	{{.cacheDelKeys}}
+		)
 	}
 	err := {{.firstTableChar}}.cache.DelBatch(ctx, keys)
 	if err != nil {

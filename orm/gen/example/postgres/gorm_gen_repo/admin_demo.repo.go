@@ -747,9 +747,11 @@ func (a *AdminDemoRepo) DeleteMultiCacheByUsernamesTx(ctx context.Context, tx *g
 func (a *AdminDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminDemo) error {
 	keys := make([]string, 0)
 	for _, v := range data {
-		keys = append(keys, a.cache.Key(CacheAdminDemoByIDPrefix, v.ID))
-		keys = append(keys, a.cache.Key(CacheAdminDemoByUsernamePrefix, v.Username))
-
+		keys = append(
+			keys,
+			a.cache.Key(CacheAdminDemoByIDPrefix, v.ID),
+			a.cache.Key(CacheAdminDemoByUsernamePrefix, v.Username),
+		)
 	}
 	err := a.cache.DelBatch(ctx, keys)
 	if err != nil {
