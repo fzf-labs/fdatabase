@@ -26,6 +26,7 @@ var (
 	CacheDataTypeDemoByULidPrefix         = "DBCache:gorm_gen:DataTypeDemoByULid"
 	CacheDataTypeDemoByBatchAPIPrefix     = "DBCache:gorm_gen:DataTypeDemoByBatchAPI"
 	CacheDataTypeDemoByCacheKeyPrefix     = "DBCache:gorm_gen:DataTypeDemoByCacheKey"
+	CacheDataTypeDemoByDataTypeBoolPrefix = "DBCache:gorm_gen:DataTypeDemoByDataTypeBool"
 	CacheDataTypeDemoByDataTypeTimePrefix = "DBCache:gorm_gen:DataTypeDemoByDataTypeTime"
 )
 
@@ -111,6 +112,10 @@ type (
 		FindMultiByCacheKeys(ctx context.Context, _cacheKeys []string) ([]*gorm_gen_model.DataTypeDemo, error)
 		// FindMultiCacheByCacheKeys 根据_cacheKeys查询多条数据，并设置缓存
 		FindMultiCacheByCacheKeys(ctx context.Context, _cacheKeys []string) ([]*gorm_gen_model.DataTypeDemo, error)
+		// FindMultiByDataTypeBool 根据dataTypeBool查询多条数据
+		FindMultiByDataTypeBool(ctx context.Context, dataTypeBool bool) ([]*gorm_gen_model.DataTypeDemo, error)
+		// FindMultiCacheByDataTypeBool 根据dataTypeBool查询多条数据并设置缓存
+		FindMultiCacheByDataTypeBool(ctx context.Context, dataTypeBool bool) ([]*gorm_gen_model.DataTypeDemo, error)
 		// FindMultiByDataTypeTime 根据dataTypeTime查询多条数据
 		FindMultiByDataTypeTime(ctx context.Context, dataTypeTime time.Time) ([]*gorm_gen_model.DataTypeDemo, error)
 		// FindMultiCacheByDataTypeTime 根据dataTypeTime查询多条数据并设置缓存
@@ -161,6 +166,14 @@ type (
 		DeleteMultiByBatchAPITx(ctx context.Context, tx *gorm_gen_dao.Query, batchAPI string) error
 		// DeleteMultiCacheByBatchAPITx 根据batchAPI删除多条数据，并删除缓存
 		DeleteMultiCacheByBatchAPITx(ctx context.Context, tx *gorm_gen_dao.Query, batchAPI string) error
+		// DeleteMultiByBatchAPIS 根据BatchAPIS删除多条数据
+		DeleteMultiByBatchAPIS(ctx context.Context, batchAPIS []string) error
+		// DeleteMultiCacheByBatchAPIS 根据BatchAPIS删除多条数据，并删除缓存
+		DeleteMultiCacheByBatchAPIS(ctx context.Context, batchAPIS []string) error
+		// DeleteMultiByBatchAPISTx 根据BatchAPIS删除多条数据(事务)
+		DeleteMultiByBatchAPISTx(ctx context.Context, tx *gorm_gen_dao.Query, batchAPIS []string) error
+		// DeleteMultiCacheByBatchAPISTx 根据BatchAPIS删除多条数据，并删除缓存(事务)
+		DeleteMultiCacheByBatchAPISTx(ctx context.Context, tx *gorm_gen_dao.Query, batchAPIS []string) error
 		// DeleteMultiByCacheKey 根据CacheKey删除多条数据
 		DeleteMultiByCacheKey(ctx context.Context, _cacheKey string) error
 		// DeleteMultiCacheByCacheKey 根据_cacheKey删除多条数据，并删除缓存
@@ -169,6 +182,14 @@ type (
 		DeleteMultiByCacheKeyTx(ctx context.Context, tx *gorm_gen_dao.Query, _cacheKey string) error
 		// DeleteMultiCacheByCacheKeyTx 根据_cacheKey删除多条数据，并删除缓存
 		DeleteMultiCacheByCacheKeyTx(ctx context.Context, tx *gorm_gen_dao.Query, _cacheKey string) error
+		// DeleteMultiByCacheKeys 根据CacheKeys删除多条数据
+		DeleteMultiByCacheKeys(ctx context.Context, _cacheKeys []string) error
+		// DeleteMultiCacheByCacheKeys 根据CacheKeys删除多条数据，并删除缓存
+		DeleteMultiCacheByCacheKeys(ctx context.Context, _cacheKeys []string) error
+		// DeleteMultiByCacheKeysTx 根据CacheKeys删除多条数据(事务)
+		DeleteMultiByCacheKeysTx(ctx context.Context, tx *gorm_gen_dao.Query, _cacheKeys []string) error
+		// DeleteMultiCacheByCacheKeysTx 根据CacheKeys删除多条数据，并删除缓存(事务)
+		DeleteMultiCacheByCacheKeysTx(ctx context.Context, tx *gorm_gen_dao.Query, _cacheKeys []string) error
 		// DeleteMultiByDataTypeTime 根据DataTypeTime删除多条数据
 		DeleteMultiByDataTypeTime(ctx context.Context, dataTypeTime time.Time) error
 		// DeleteMultiCacheByDataTypeTime 根据dataTypeTime删除多条数据，并删除缓存
@@ -177,6 +198,14 @@ type (
 		DeleteMultiByDataTypeTimeTx(ctx context.Context, tx *gorm_gen_dao.Query, dataTypeTime time.Time) error
 		// DeleteMultiCacheByDataTypeTimeTx 根据dataTypeTime删除多条数据，并删除缓存
 		DeleteMultiCacheByDataTypeTimeTx(ctx context.Context, tx *gorm_gen_dao.Query, dataTypeTime time.Time) error
+		// DeleteMultiByDataTypeTimes 根据DataTypeTimes删除多条数据
+		DeleteMultiByDataTypeTimes(ctx context.Context, dataTypeTimes []time.Time) error
+		// DeleteMultiCacheByDataTypeTimes 根据DataTypeTimes删除多条数据，并删除缓存
+		DeleteMultiCacheByDataTypeTimes(ctx context.Context, dataTypeTimes []time.Time) error
+		// DeleteMultiByDataTypeTimesTx 根据DataTypeTimes删除多条数据(事务)
+		DeleteMultiByDataTypeTimesTx(ctx context.Context, tx *gorm_gen_dao.Query, dataTypeTimes []time.Time) error
+		// DeleteMultiCacheByDataTypeTimesTx 根据DataTypeTimes删除多条数据，并删除缓存(事务)
+		DeleteMultiCacheByDataTypeTimesTx(ctx context.Context, tx *gorm_gen_dao.Query, dataTypeTimes []time.Time) error
 		// DeleteIndexCache 删除索引存在的缓存
 		DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.DataTypeDemo) error
 	}
@@ -1165,6 +1194,7 @@ func (d *DataTypeDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_ge
 			d.cache.Key(CacheDataTypeDemoByULidPrefix, v.ULid),
 			d.cache.Key(CacheDataTypeDemoByBatchAPIPrefix, v.BatchAPI),
 			d.cache.Key(CacheDataTypeDemoByCacheKeyPrefix, v.CacheKey),
+			d.cache.Key(CacheDataTypeDemoByDataTypeBoolPrefix, v.DataTypeBool),
 			d.cache.Key(CacheDataTypeDemoByDataTypeTimePrefix, v.DataTypeTime),
 		)
 	}
@@ -1594,6 +1624,44 @@ func (d *DataTypeDemoRepo) FindMultiCacheByCacheKeys(ctx context.Context, _cache
 				return nil, err
 			}
 			resp = append(resp, tmp...)
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByDataTypeBool 根据dataTypeBool查询多条数据
+func (d *DataTypeDemoRepo) FindMultiByDataTypeBool(ctx context.Context, dataTypeBool bool) ([]*gorm_gen_model.DataTypeDemo, error) {
+	dao := gorm_gen_dao.Use(d.db).DataTypeDemo
+	result, err := dao.WithContext(ctx).Where(dao.DataTypeBool.Is(dataTypeBool)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByDataTypeBool 根据dataTypeBool查询多条数据，并设置缓存
+func (d *DataTypeDemoRepo) FindMultiCacheByDataTypeBool(ctx context.Context, dataTypeBool bool) ([]*gorm_gen_model.DataTypeDemo, error) {
+	resp := make([]*gorm_gen_model.DataTypeDemo, 0)
+	cacheKey := d.cache.Key(CacheDataTypeDemoByDataTypeBoolPrefix, dataTypeBool)
+	cacheValue, err := d.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(d.db).DataTypeDemo
+		result, err := dao.WithContext(ctx).Where(dao.DataTypeBool.Is(dataTypeBool)).Find()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := d.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = d.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
 		}
 	}
 	return resp, nil

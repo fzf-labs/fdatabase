@@ -103,6 +103,14 @@ type (
 		DeleteMultiByAdminIDTx(ctx context.Context, tx *gorm_gen_dao.Query, adminID string) error
 		// DeleteMultiCacheByAdminIDTx 根据adminID删除多条数据，并删除缓存
 		DeleteMultiCacheByAdminIDTx(ctx context.Context, tx *gorm_gen_dao.Query, adminID string) error
+		// DeleteMultiByAdminIDS 根据AdminIDS删除多条数据
+		DeleteMultiByAdminIDS(ctx context.Context, adminIDS []string) error
+		// DeleteMultiCacheByAdminIDS 根据AdminIDS删除多条数据，并删除缓存
+		DeleteMultiCacheByAdminIDS(ctx context.Context, adminIDS []string) error
+		// DeleteMultiByAdminIDSTx 根据AdminIDS删除多条数据(事务)
+		DeleteMultiByAdminIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, adminIDS []string) error
+		// DeleteMultiCacheByAdminIDSTx 根据AdminIDS删除多条数据，并删除缓存(事务)
+		DeleteMultiCacheByAdminIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, adminIDS []string) error
 		// DeleteMultiByRoleID 根据RoleID删除多条数据
 		DeleteMultiByRoleID(ctx context.Context, roleID string) error
 		// DeleteMultiCacheByRoleID 根据roleID删除多条数据，并删除缓存
@@ -111,6 +119,14 @@ type (
 		DeleteMultiByRoleIDTx(ctx context.Context, tx *gorm_gen_dao.Query, roleID string) error
 		// DeleteMultiCacheByRoleIDTx 根据roleID删除多条数据，并删除缓存
 		DeleteMultiCacheByRoleIDTx(ctx context.Context, tx *gorm_gen_dao.Query, roleID string) error
+		// DeleteMultiByRoleIDS 根据RoleIDS删除多条数据
+		DeleteMultiByRoleIDS(ctx context.Context, roleIDS []string) error
+		// DeleteMultiCacheByRoleIDS 根据RoleIDS删除多条数据，并删除缓存
+		DeleteMultiCacheByRoleIDS(ctx context.Context, roleIDS []string) error
+		// DeleteMultiByRoleIDSTx 根据RoleIDS删除多条数据(事务)
+		DeleteMultiByRoleIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, roleIDS []string) error
+		// DeleteMultiCacheByRoleIDSTx 根据RoleIDS删除多条数据，并删除缓存(事务)
+		DeleteMultiCacheByRoleIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, roleIDS []string) error
 		// DeleteIndexCache 删除索引存在的缓存
 		DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminToRoleDemo) error
 	}

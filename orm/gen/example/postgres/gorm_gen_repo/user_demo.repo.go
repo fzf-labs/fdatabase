@@ -177,6 +177,14 @@ type (
 		DeleteMultiByUsernameTx(ctx context.Context, tx *gorm_gen_dao.Query, username string) error
 		// DeleteMultiCacheByUsernameTx 根据username删除多条数据，并删除缓存
 		DeleteMultiCacheByUsernameTx(ctx context.Context, tx *gorm_gen_dao.Query, username string) error
+		// DeleteMultiByUsernames 根据Usernames删除多条数据
+		DeleteMultiByUsernames(ctx context.Context, usernames []string) error
+		// DeleteMultiCacheByUsernames 根据Usernames删除多条数据，并删除缓存
+		DeleteMultiCacheByUsernames(ctx context.Context, usernames []string) error
+		// DeleteMultiByUsernamesTx 根据Usernames删除多条数据(事务)
+		DeleteMultiByUsernamesTx(ctx context.Context, tx *gorm_gen_dao.Query, usernames []string) error
+		// DeleteMultiCacheByUsernamesTx 根据Usernames删除多条数据，并删除缓存(事务)
+		DeleteMultiCacheByUsernamesTx(ctx context.Context, tx *gorm_gen_dao.Query, usernames []string) error
 		// DeleteMultiByTenantID 根据TenantID删除多条数据
 		DeleteMultiByTenantID(ctx context.Context, tenantID int64) error
 		// DeleteMultiCacheByTenantID 根据tenantID删除多条数据，并删除缓存
@@ -185,6 +193,14 @@ type (
 		DeleteMultiByTenantIDTx(ctx context.Context, tx *gorm_gen_dao.Query, tenantID int64) error
 		// DeleteMultiCacheByTenantIDTx 根据tenantID删除多条数据，并删除缓存
 		DeleteMultiCacheByTenantIDTx(ctx context.Context, tx *gorm_gen_dao.Query, tenantID int64) error
+		// DeleteMultiByTenantIDS 根据TenantIDS删除多条数据
+		DeleteMultiByTenantIDS(ctx context.Context, tenantIDS []int64) error
+		// DeleteMultiCacheByTenantIDS 根据TenantIDS删除多条数据，并删除缓存
+		DeleteMultiCacheByTenantIDS(ctx context.Context, tenantIDS []int64) error
+		// DeleteMultiByTenantIDSTx 根据TenantIDS删除多条数据(事务)
+		DeleteMultiByTenantIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, tenantIDS []int64) error
+		// DeleteMultiCacheByTenantIDSTx 根据TenantIDS删除多条数据，并删除缓存(事务)
+		DeleteMultiCacheByTenantIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, tenantIDS []int64) error
 		// DeleteIndexCache 删除索引存在的缓存
 		DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.UserDemo) error
 	}

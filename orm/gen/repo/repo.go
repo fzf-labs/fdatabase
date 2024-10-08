@@ -739,29 +739,56 @@ func (r *Repo) generateDelMethods() (string, error) {
 		}
 		// 不唯一 && 字段数等于1
 		if !v.Unique && len(v.Columns) == 1 {
-			interfaceDeleteMultiByField, err := template.NewTemplate().Parse(InterfaceDeleteMultiByField).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(interfaceDeleteMultiByField.String())
+			switch r.columnNameToDataType[v.Columns[0]] {
+			case "bool":
+			default:
+				interfaceDeleteMultiByField, err := template.NewTemplate().Parse(InterfaceDeleteMultiByField).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(interfaceDeleteMultiByField.String())
 
-			interfaceDeleteMultiCacheByField, err := template.NewTemplate().Parse(InterfaceDeleteMultiCacheByField).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(interfaceDeleteMultiCacheByField.String())
+				interfaceDeleteMultiCacheByField, err := template.NewTemplate().Parse(InterfaceDeleteMultiCacheByField).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(interfaceDeleteMultiCacheByField.String())
 
-			interfaceDeleteMultiByFieldTx, err := template.NewTemplate().Parse(InterfaceDeleteMultiByFieldTx).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(interfaceDeleteMultiByFieldTx.String())
+				interfaceDeleteMultiByFieldTx, err := template.NewTemplate().Parse(InterfaceDeleteMultiByFieldTx).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(interfaceDeleteMultiByFieldTx.String())
 
-			interfaceDeleteMultiCacheByFieldTx, err := template.NewTemplate().Parse(InterfaceDeleteMultiCacheByFieldTx).Execute(tplParams)
-			if err != nil {
-				return "", err
+				interfaceDeleteMultiCacheByFieldTx, err := template.NewTemplate().Parse(InterfaceDeleteMultiCacheByFieldTx).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(interfaceDeleteMultiCacheByFieldTx.String())
+
+				interfaceDeleteMultiByFieldPlural, err := template.NewTemplate().Parse(InterfaceDeleteMultiByFieldPlural).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(interfaceDeleteMultiByFieldPlural.String())
+
+				interfaceDeleteMultiCacheByFieldPlural, err := template.NewTemplate().Parse(InterfaceDeleteMultiCacheByFieldPlural).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(interfaceDeleteMultiCacheByFieldPlural.String())
+
+				interfaceDeleteMultiByFieldPluralTx, err := template.NewTemplate().Parse(InterfaceDeleteMultiByFieldPluralTx).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(interfaceDeleteMultiByFieldPluralTx.String())
+				interfaceDeleteMultiCacheByFieldPluralTx, err := template.NewTemplate().Parse(InterfaceDeleteMultiCacheByFieldPluralTx).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(interfaceDeleteMultiCacheByFieldPluralTx.String())
 			}
-			delMethods += fmt.Sprintln(interfaceDeleteMultiCacheByFieldTx.String())
 		}
 		// 不唯一 && 字段数大于1
 		if !v.Unique && len(v.Columns) > 1 {
@@ -1340,64 +1367,57 @@ func (r *Repo) generateDelFunc() (string, error) {
 		}
 		// 不唯一 && 字段数等于1
 		if !v.Unique && len(v.Columns) == 1 {
-			var whereFields string
-			for _, v := range v.Columns {
-				switch r.columnNameToDataType[v] {
-				case "bool":
-					whereFields += fmt.Sprintf("dao.%s.Is(%s),", r.upperFieldName(v), r.lowerFieldName(v))
-				default:
-					whereFields += fmt.Sprintf("dao.%s.Eq(%s),", r.upperFieldName(v), r.lowerFieldName(v))
+			switch r.columnNameToDataType[v.Columns[0]] {
+			case "bool":
+			default:
+				deleteMultiByField, err := template.NewTemplate().Parse(DeleteMultiByField).Execute(tplParams)
+				if err != nil {
+					return "", err
 				}
-			}
-			tplParams["whereFields"] = strings.TrimRight(whereFields, ",")
-			deleteMultiByField, err := template.NewTemplate().Parse(DeleteMultiByField).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(deleteMultiByField.String())
+				delMethods += fmt.Sprintln(deleteMultiByField.String())
 
-			deleteMultiCacheByField, err := template.NewTemplate().Parse(DeleteMultiCacheByField).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(deleteMultiCacheByField.String())
+				deleteMultiCacheByField, err := template.NewTemplate().Parse(DeleteMultiCacheByField).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(deleteMultiCacheByField.String())
 
-			deleteMultiByFieldTx, err := template.NewTemplate().Parse(DeleteMultiByFieldTx).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(deleteMultiByFieldTx.String())
+				deleteMultiByFieldTx, err := template.NewTemplate().Parse(DeleteMultiByFieldTx).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(deleteMultiByFieldTx.String())
 
-			deleteMultiCacheByFieldTx, err := template.NewTemplate().Parse(DeleteMultiCacheByFieldTx).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(deleteMultiCacheByFieldTx.String())
+				deleteMultiCacheByFieldTx, err := template.NewTemplate().Parse(DeleteMultiCacheByFieldTx).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(deleteMultiCacheByFieldTx.String())
 
-			deleteMultiByFieldPlural, err := template.NewTemplate().Parse(DeleteMultiByFieldPlural).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(deleteMultiByFieldPlural.String())
+				deleteMultiByFieldPlural, err := template.NewTemplate().Parse(DeleteMultiByFieldPlural).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(deleteMultiByFieldPlural.String())
 
-			deleteMultiCacheByFieldPlural, err := template.NewTemplate().Parse(DeleteMultiCacheByFieldPlural).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(deleteMultiCacheByFieldPlural.String())
+				deleteMultiCacheByFieldPlural, err := template.NewTemplate().Parse(DeleteMultiCacheByFieldPlural).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(deleteMultiCacheByFieldPlural.String())
 
-			deleteMultiByFieldPluralTx, err := template.NewTemplate().Parse(DeleteMultiByFieldPluralTx).Execute(tplParams)
-			if err != nil {
-				return "", err
-			}
-			delMethods += fmt.Sprintln(deleteMultiByFieldPluralTx.String())
+				deleteMultiByFieldPluralTx, err := template.NewTemplate().Parse(DeleteMultiByFieldPluralTx).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(deleteMultiByFieldPluralTx.String())
 
-			deleteMultiCacheByFieldPluralTx, err := template.NewTemplate().Parse(DeleteMultiCacheByFieldPluralTx).Execute(tplParams)
-			if err != nil {
-				return "", err
+				deleteMultiCacheByFieldPluralTx, err := template.NewTemplate().Parse(DeleteMultiCacheByFieldPluralTx).Execute(tplParams)
+				if err != nil {
+					return "", err
+				}
+				delMethods += fmt.Sprintln(deleteMultiCacheByFieldPluralTx.String())
 			}
-			delMethods += fmt.Sprintln(deleteMultiCacheByFieldPluralTx.String())
-
 		}
 		// 不唯一 && 字段数大于1
 		if !v.Unique && len(v.Columns) > 1 {
