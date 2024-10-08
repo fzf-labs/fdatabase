@@ -43,16 +43,12 @@ type (
 		// CreateBatchCacheByTx 批量创建数据(事务), 并删除缓存
 		CreateBatchCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.AdminLogDemo, batchSize int) error
 		// UpsertOne Upsert一条数据
-		// Update all columns, except primary keys, to new value on conflict
 		UpsertOne(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
 		// UpsertOneCache Upsert一条数据, 并删除缓存
-		// Update all columns, except primary keys, to new value on conflict
 		UpsertOneCache(ctx context.Context, data *gorm_gen_model.AdminLogDemo) error
 		// UpsertOneByTx Upsert一条数据(事务)
-		// Update all columns, except primary keys, to new value on conflict
 		UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
 		// UpsertOneCacheByTx Upsert一条数据(事务), 并删除缓存
-		// Update all columns, except primary keys, to new value on conflict
 		UpsertOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminLogDemo) error
 		// UpsertOneByFields 根据fields字段Upsert一条数据
 		UpsertOneByFields(ctx context.Context, data *gorm_gen_model.AdminLogDemo, fields []string) error
@@ -706,7 +702,7 @@ func (a *AdminLogDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []string
 		cacheKey := a.cache.Key(CacheAdminLogDemoByIDPrefix, v)
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.AdminLogDemo, 0)
-			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
+			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
 			if err != nil {
 				return nil, err
 			}

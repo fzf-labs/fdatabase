@@ -876,7 +876,7 @@ func (a *AdminToRoleDemoRepo) FindMultiCacheByAdminIDS(ctx context.Context, admi
 		cacheKey := a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v)
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
+			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
 			if err != nil {
 				return nil, err
 			}
@@ -982,7 +982,7 @@ func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleIDS(ctx context.Context, roleI
 		cacheKey := a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v)
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
+			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
 			if err != nil {
 				return nil, err
 			}

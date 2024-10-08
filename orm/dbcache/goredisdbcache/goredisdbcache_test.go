@@ -11,7 +11,8 @@ import (
 )
 
 var client = redis.NewClient(&redis.Options{
-	Addr: "0.0.0.0:6379",
+	Addr:     "0.0.0.0:6379",
+	Password: "123456",
 })
 
 func TestGoRedisCache_Fetch(t *testing.T) {

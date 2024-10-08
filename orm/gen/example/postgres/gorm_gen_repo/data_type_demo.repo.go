@@ -48,16 +48,12 @@ type (
 		// CreateBatchCacheByTx 批量创建数据(事务), 并删除缓存
 		CreateBatchCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data []*gorm_gen_model.DataTypeDemo, batchSize int) error
 		// UpsertOne Upsert一条数据
-		// Update all columns, except primary keys, to new value on conflict
 		UpsertOne(ctx context.Context, data *gorm_gen_model.DataTypeDemo) error
 		// UpsertOneCache Upsert一条数据, 并删除缓存
-		// Update all columns, except primary keys, to new value on conflict
 		UpsertOneCache(ctx context.Context, data *gorm_gen_model.DataTypeDemo) error
 		// UpsertOneByTx Upsert一条数据(事务)
-		// Update all columns, except primary keys, to new value on conflict
 		UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.DataTypeDemo) error
 		// UpsertOneCacheByTx Upsert一条数据(事务), 并删除缓存
-		// Update all columns, except primary keys, to new value on conflict
 		UpsertOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.DataTypeDemo) error
 		// UpsertOneByFields 根据fields字段Upsert一条数据
 		UpsertOneByFields(ctx context.Context, data *gorm_gen_model.DataTypeDemo, fields []string) error
@@ -1283,7 +1279,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []string
 		cacheKey := d.cache.Key(CacheDataTypeDemoByIDPrefix, v)
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.DataTypeDemo, 0)
-			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
+			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
 			if err != nil {
 				return nil, err
 			}
@@ -1389,7 +1385,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByULids(ctx context.Context, uLids []st
 		cacheKey := d.cache.Key(CacheDataTypeDemoByULidPrefix, v)
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.DataTypeDemo, 0)
-			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
+			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
 			if err != nil {
 				return nil, err
 			}
@@ -1495,7 +1491,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByBatchAPIS(ctx context.Context, batchA
 		cacheKey := d.cache.Key(CacheDataTypeDemoByBatchAPIPrefix, v)
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.DataTypeDemo, 0)
-			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
+			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
 			if err != nil {
 				return nil, err
 			}
@@ -1601,7 +1597,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByCacheKeys(ctx context.Context, _cache
 		cacheKey := d.cache.Key(CacheDataTypeDemoByCacheKeyPrefix, v)
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.DataTypeDemo, 0)
-			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
+			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
 			if err != nil {
 				return nil, err
 			}
@@ -1707,7 +1703,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByDataTypeTimes(ctx context.Context, da
 		cacheKey := d.cache.Key(CacheDataTypeDemoByDataTypeTimePrefix, v)
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.DataTypeDemo, 0)
-			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
+			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
 			if err != nil {
 				return nil, err
 			}
