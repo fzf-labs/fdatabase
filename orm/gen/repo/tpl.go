@@ -330,9 +330,6 @@ var InterfaceFindMultiCacheByFieldPlural string
 //go:embed tpl/find-multi-cache-by-field-plural.tpl
 var FindMultiCacheByFieldPlural string
 
-//go:embed tpl/interface-find-multi-by-condition.tpl
-var InterfaceFindMultiByCondition string
-
 //go:embed tpl/interface-find-one-by-fields.tpl
 var InterfaceFindOneByFields string
 
@@ -367,8 +364,10 @@ var FindMultiByFields string
 var InterfaceFindMultiCacheByFields string
 
 //go:embed tpl/find-multi-cache-by-fields.tpl
-
 var FindMultiCacheByFields string
+
+//go:embed tpl/interface-find-multi-by-condition.tpl
+var InterfaceFindMultiByCondition string
 
 //go:embed tpl/find-multi-by-condition.tpl
 var FindMultiByCondition string
