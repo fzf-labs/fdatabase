@@ -88,6 +88,20 @@ func Test_UpdateOneCache(t *testing.T) {
 	assert.Equal(t, nil, err)
 }
 
+func Test_UpdateBatchByIDS(t *testing.T) {
+	dbCache := goredisdbcache.NewGoRedisDBCache(redisClient)
+	ctx := context.Background()
+	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
+	repo := gorm_gen_repo.NewUserDemoRepo(cfg)
+	err := repo.UpdateBatchByIDS(ctx, []string{"182a65a0-ee20-4fe0-a0e8-ba30edcf402b", "2cc31ef9-7d6b-438b-874c-01d84a332b57"}, map[string]interface{}{
+		"remark": "test",
+	})
+	if err != nil {
+		return
+	}
+	assert.Equal(t, nil, err)
+}
+
 func Test_FindMultiCacheByTenantIDS(t *testing.T) {
 	dbCache := goredisdbcache.NewGoRedisDBCache(redisClient)
 	ctx := context.Background()
