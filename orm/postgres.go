@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"database/sql"
 	"fmt"
-	"log/slog"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -70,7 +70,7 @@ func DumpPostgres(db *gorm.DB, dsn, outPath string) {
 	// 查找命令的可执行文件
 	_, err := exec.LookPath("pg_dump")
 	if err != nil {
-		slog.Error("command pg_dump not found,please install")
+		log.Println("command pg_dump not found,please install")
 		return
 	}
 	tables, err := db.Migrator().GetTables()
@@ -81,7 +81,7 @@ func DumpPostgres(db *gorm.DB, dsn, outPath string) {
 	outPath = filepath.Join(strings.Trim(outPath, "/"), dsnParse.Dbname)
 	err = os.MkdirAll(outPath, os.ModePerm)
 	if err != nil {
-		slog.Error("DumpPostgres create path err:", err)
+		log.Println("DumpPostgres create path err:", err)
 		return
 	}
 	for _, v := range tables {
@@ -100,12 +100,12 @@ func DumpPostgres(db *gorm.DB, dsn, outPath string) {
 		// 执行命令，并捕获输出和错误信息
 		output, err := cmd.Output()
 		if err != nil {
-			slog.Error("cmd exec err:", err)
+			log.Println("cmd exec err:", err)
 			return
 		}
 		err = file.WriteContentCover(outFile, remove(string(output)))
 		if err != nil {
-			slog.Error("DumpPostgres err:", err)
+			log.Println("DumpPostgres err:", err)
 			return
 		}
 	}

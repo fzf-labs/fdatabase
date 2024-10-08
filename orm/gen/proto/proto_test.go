@@ -1,9 +1,9 @@
 package proto
 
 import (
-	"github.com/fzf-labs/fdatabase/orm"
 	"testing"
 
+	"github.com/fzf-labs/fdatabase/orm"
 	"gorm.io/gorm"
 )
 

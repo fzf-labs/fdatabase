@@ -3,9 +3,10 @@ package rocksdbcache
 import (
 	"context"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"testing"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/dtm-labs/rockscache"
 	"github.com/stretchr/testify/assert"

@@ -1,9 +1,9 @@
 package gen
 
 import (
-	"github.com/fzf-labs/fdatabase/orm"
 	"testing"
 
+	"github.com/fzf-labs/fdatabase/orm"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gen"
 	"gorm.io/gen/field"

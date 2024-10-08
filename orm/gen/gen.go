@@ -2,16 +2,16 @@ package gen
 
 import (
 	"fmt"
-	"github.com/fzf-labs/fdatabase/orm/gen/proto"
-	"github.com/fzf-labs/fdatabase/orm/gen/repo"
-	"github.com/fzf-labs/fdatabase/orm/utils"
-	"github.com/fzf-labs/fdatabase/orm/utils/dbfunc"
-	"github.com/fzf-labs/fdatabase/orm/utils/file"
 	"log"
 	"regexp"
 	"strings"
 	"sync"
 
+	"github.com/fzf-labs/fdatabase/orm/gen/proto"
+	"github.com/fzf-labs/fdatabase/orm/gen/repo"
+	"github.com/fzf-labs/fdatabase/orm/utils"
+	"github.com/fzf-labs/fdatabase/orm/utils/dbfunc"
+	"github.com/fzf-labs/fdatabase/orm/utils/file"
 	"github.com/iancoleman/strcase"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
@@ -289,8 +289,8 @@ func ModelOptionRemoveDefault() gen.ModelOpt {
 // DataTypeMap 自定义字段类型映射
 func DataTypeMap() map[string]func(columnType gorm.ColumnType) (dataType string) {
 	return map[string]func(columnType gorm.ColumnType) (dataType string){
-		"json":  func(columnType gorm.ColumnType) string { return "datatypes.JSON" },
-		"jsonb": func(columnType gorm.ColumnType) string { return "datatypes.JSON" },
+		"json":  func(_ gorm.ColumnType) string { return "datatypes.JSON" },
+		"jsonb": func(_ gorm.ColumnType) string { return "datatypes.JSON" },
 		"timestamptz": func(columnType gorm.ColumnType) string {
 			if utils.StrSliFind([]string{"deleted_at", "deletedAt", "deleted_time", "deletedTime"}, columnType.Name()) {
 				return "gorm.DeletedAt"
@@ -301,16 +301,16 @@ func DataTypeMap() map[string]func(columnType gorm.ColumnType) (dataType string)
 			}
 			return TimeTime
 		},
-		"character varying[]": func(columnType gorm.ColumnType) (dataType string) {
+		"character varying[]": func(_ gorm.ColumnType) (dataType string) {
 			return "pq.StringArray"
 		},
-		"smallint[]": func(columnType gorm.ColumnType) (dataType string) {
+		"smallint[]": func(_ gorm.ColumnType) (dataType string) {
 			return "pq.Int32Array"
 		},
-		"integer[]": func(columnType gorm.ColumnType) (dataType string) {
+		"integer[]": func(_ gorm.ColumnType) (dataType string) {
 			return "pq.Int32Array"
 		},
-		"bigint[]": func(columnType gorm.ColumnType) (dataType string) {
+		"bigint[]": func(_ gorm.ColumnType) (dataType string) {
 			return "pq.Int64Array"
 		},
 	}

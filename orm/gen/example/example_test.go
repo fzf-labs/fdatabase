@@ -3,6 +3,8 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/fzf-labs/fdatabase/orm"
 	"github.com/fzf-labs/fdatabase/orm/condition"
 	"github.com/fzf-labs/fdatabase/orm/dbcache/goredisdbcache"
@@ -15,7 +17,6 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-	"testing"
 )
 
 var (
@@ -206,7 +207,6 @@ func Test_Tx(t *testing.T) {
 		if err2 != nil {
 			return err2
 		}
-		//return errors.New("rollback")
 		return nil
 	})
 	if err != nil {

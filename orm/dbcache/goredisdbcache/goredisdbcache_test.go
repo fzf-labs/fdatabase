@@ -3,10 +3,10 @@ package goredisdbcache
 import (
 	"context"
 	"fmt"
-	"github.com/redis/go-redis/v9"
 	"testing"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 )
 

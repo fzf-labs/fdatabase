@@ -3,6 +3,7 @@ package orm
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	"github.com/fzf-labs/fdatabase/orm/utils"
 	"github.com/fzf-labs/fdatabase/orm/utils/file"
 	"github.com/pkg/errors"
-	"golang.org/x/exp/slog"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -70,21 +70,21 @@ func DumpMySQL(db *gorm.DB, outPath string) {
 	outPath = filepath.Join(strings.Trim(outPath, "/"), db.Migrator().CurrentDatabase())
 	err = os.MkdirAll(outPath, os.ModePerm)
 	if err != nil {
-		slog.Error("DumpMySQL create path err:", err)
+		log.Println("DumpMySQL create path err:", err)
 		return
 	}
 	for _, v := range tables {
 		result := make(map[string]any)
 		err := db.Raw(fmt.Sprintf("SHOW CREATE TABLE `%s`.`%s`", db.Migrator().CurrentDatabase(), v)).Scan(result).Error
 		if err != nil {
-			slog.Error("DumpMySQL sql err:", err)
+			log.Println("DumpMySQL sql err:", err)
 			return
 		}
 		tableContent := utils.ConvToString(result["Create Table"])
 		if tableContent != "" {
 			err := file.WriteContentCover(filepath.Join(outPath, fmt.Sprintf("%s.sql", v)), tableContent)
 			if err != nil {
-				slog.Error("DumpMySQL file write err:", err)
+				log.Println("DumpMySQL file write err:", err)
 				return
 			}
 		}

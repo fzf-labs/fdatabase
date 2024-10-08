@@ -27,7 +27,7 @@ type IDBCache interface {
 }
 
 // KeyFormat 将任意类型转换为字符串
-func KeyFormat(any interface{}) string {
+func KeyFormat(any any) string {
 	if any == nil {
 		return ""
 	}

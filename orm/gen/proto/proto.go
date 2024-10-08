@@ -2,12 +2,14 @@ package proto
 
 import (
 	"fmt"
-	"github.com/fzf-labs/fdatabase/orm/utils"
-	"github.com/fzf-labs/fdatabase/orm/utils/file"
-	"github.com/fzf-labs/fdatabase/orm/utils/template"
 	"go/token"
 	"os"
 	"path/filepath"
+
+	"github.com/fzf-labs/fdatabase/orm/utils"
+	"github.com/fzf-labs/fdatabase/orm/utils/file"
+	"github.com/fzf-labs/fdatabase/orm/utils/template"
+
 	"strings"
 	"unicode"
 

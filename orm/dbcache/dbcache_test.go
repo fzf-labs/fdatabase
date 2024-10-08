@@ -10,7 +10,7 @@ func TestKeyFormat(t *testing.T) {
 	ntStr := nt.Format("2006-01-02 15:04:05")
 	var nilTime *time.Time
 	type args struct {
-		any interface{}
+		any any
 	}
 	tests := []struct {
 		name string

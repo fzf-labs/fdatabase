@@ -1,10 +1,10 @@
 package dbfunc
 
 import (
-	"github.com/fzf-labs/fdatabase/orm"
 	"reflect"
 	"testing"
 
+	"github.com/fzf-labs/fdatabase/orm"
 	"gorm.io/gorm"
 )
 

@@ -2,10 +2,10 @@ package gorediscache
 
 import (
 	"context"
-	"github.com/pkg/errors"
 	"time"
 
 	"github.com/bsm/redislock"
+	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 )
 

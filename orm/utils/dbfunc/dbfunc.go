@@ -2,8 +2,9 @@ package dbfunc
 
 import (
 	"fmt"
-	"gorm.io/gorm"
 	"strings"
+
+	"gorm.io/gorm"
 )
 
 type Index struct {

@@ -1,12 +1,14 @@
+//nolint:gofmt
 package encoding
 
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+
 	"github.com/bytedance/sonic"
 	"github.com/klauspost/compress/zlib"
 	"github.com/vmihailenco/msgpack/v5"
-	"io"
 )
 
 type API interface {
