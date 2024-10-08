@@ -59,28 +59,20 @@ type (
 		// UpsertOneCacheByFieldsTx 根据fields字段Upsert一条数据(事务), 并删除缓存
 		UpsertOneCacheByFieldsTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo, fields []string) error
 		// UpdateOne 更新一条数据
-		// data 中主键字段必须有值，零值不会被更新
 		UpdateOne(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCache 更新一条数据，并删除缓存
-		// data 中主键字段必须有值，零值不会被更新
 		UpdateOneCache(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneByTx 更新一条数据(事务)
-		// data 中主键字段必须有值，零值不会被更新
 		UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheByTx 更新一条数据(事务)，并删除缓存
-		// data 中主键字段必须有值，零值不会被更新
 		UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
-		// data 中主键字段必须有值,并且会更新所有字段,包括零值
 		UpdateOneWithZero(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
-		// data 中主键字段必须有值,并且会更新所有字段,包括零值
 		UpdateOneCacheWithZero(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
-		// data 中主键字段必须有值,并且会更新所有字段,包括零值
 		UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
-		// data 中主键字段必须有值,并且会更新所有字段,包括零值
 		UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
 		// FindOneByID 根据ID查询一条数据
 		FindOneByID(ctx context.Context, ID string) (*gorm_gen_model.AdminRoleDemo, error)
