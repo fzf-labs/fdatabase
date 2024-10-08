@@ -176,6 +176,18 @@ var InterfaceUpdateOneCacheWithZeroByTx string
 //go:embed tpl/update-one-cache-with-zero-by-tx.tpl
 var UpdateOneCacheWithZeroByTx string
 
+//go:embed tpl/interface-update-batch-by-primary-keys.tpl
+var InterfaceUpdateBatchByPrimaryKeys string
+
+//go:embed tpl/update-batch-by-primary-keys.tpl
+var UpdateBatchByPrimaryKeys string
+
+//go:embed tpl/interface-update-batch-by-primary-keys-tx.tpl
+var InterfaceUpdateBatchByPrimaryKeysTx string
+
+//go:embed tpl/update-batch-by-primary-keys-tx.tpl
+var UpdateBatchByPrimaryKeysTx string
+
 // 删除
 
 //go:embed tpl/interface-delete-one-by-field.tpl

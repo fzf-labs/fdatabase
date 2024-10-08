@@ -79,6 +79,10 @@ type (
 		UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
 		UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error
+		// UpdateBatchByIDS 根据主键IDS批量更新
+		UpdateBatchByIDS(ctx context.Context, IDS []string, data map[string]interface{}) error
+		// UpdateBatchByIDSTx 根据主键IDS批量更新(事务)
+		UpdateBatchByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string, data map[string]interface{}) error
 		// FindOneByID 根据ID查询一条数据
 		FindOneByID(ctx context.Context, ID string) (*gorm_gen_model.UserDemo, error)
 		// FindOneCacheByID 根据ID查询一条数据，并设置缓存
@@ -557,6 +561,559 @@ func (u *UserDemoRepo) UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_
 		return err
 	}
 	return err
+}
+
+// UpdateBatchByIDS 根据主键IDS批量更新
+// 零值会被更新
+func (u *UserDemoRepo) UpdateBatchByIDS(ctx context.Context, IDS []string, data map[string]interface{}) error {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Updates(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateBatchByIDSTx 根据主键IDS批量更新(事务)
+// 零值会被更新
+func (u *UserDemoRepo) UpdateBatchByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string, data map[string]interface{}) error {
+	dao := tx.UserDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Updates(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// FindOneByID 根据ID查询一条数据
+func (u *UserDemoRepo) FindOneByID(ctx context.Context, ID string) (*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).First()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindOneCacheByID 根据ID查询一条数据，并设置缓存
+func (u *UserDemoRepo) FindOneCacheByID(ctx context.Context, ID string) (*gorm_gen_model.UserDemo, error) {
+	resp := new(gorm_gen_model.UserDemo)
+	cacheKey := u.cache.Key(CacheUserDemoByIDPrefix, ID)
+	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).First()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := u.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByIDS 根据IDS查询多条数据
+func (u *UserDemoRepo) FindMultiByIDS(ctx context.Context, IDS []string) ([]*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByIDS 根据IDS查询多条数据，并设置缓存
+func (u *UserDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []string) ([]*gorm_gen_model.UserDemo, error) {
+	resp := make([]*gorm_gen_model.UserDemo, 0)
+	cacheKeys := make([]string, 0)
+	keyToParam := make(map[string]string)
+	for _, v := range IDS {
+		cacheKey := u.cache.Key(CacheUserDemoByIDPrefix, v)
+		cacheKeys = append(cacheKeys, cacheKey)
+		keyToParam[cacheKey] = v
+	}
+	cacheValue, err := u.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
+		dbValue := make(map[string]string)
+		params := make([]string, 0)
+		for _, v := range miss {
+			dbValue[v] = ""
+			params = append(params, keyToParam[v])
+		}
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.ID.In(params...)).Find()
+		if err != nil {
+			return nil, err
+		}
+		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
+		for _, v := range result {
+			key := u.cache.Key(CacheUserDemoByIDPrefix, v.ID)
+			if keyToValues[key] == nil {
+				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
+			}
+			keyToValues[key] = append(keyToValues[key], v)
+		}
+		for k := range dbValue {
+			if keyToValues[k] != nil {
+				marshal, err := u.encoding.Marshal(keyToValues[k])
+				if err != nil {
+					return nil, err
+				}
+				dbValue[k] = string(marshal)
+			}
+		}
+		return dbValue, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range IDS {
+		cacheKey := u.cache.Key(CacheUserDemoByIDPrefix, v)
+		if cacheValue[cacheKey] != "" {
+			tmp := make([]*gorm_gen_model.UserDemo, 0)
+			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
+			if err != nil {
+				return nil, err
+			}
+			resp = append(resp, tmp...)
+		}
+	}
+	return resp, nil
+}
+
+// FindOneByUID 根据UID查询一条数据
+func (u *UserDemoRepo) FindOneByUID(ctx context.Context, UID string) (*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.UID.Eq(UID)).First()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindOneCacheByUID 根据UID查询一条数据，并设置缓存
+func (u *UserDemoRepo) FindOneCacheByUID(ctx context.Context, UID string) (*gorm_gen_model.UserDemo, error) {
+	resp := new(gorm_gen_model.UserDemo)
+	cacheKey := u.cache.Key(CacheUserDemoByUIDPrefix, UID)
+	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.UID.Eq(UID)).First()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := u.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByUIDS 根据UIDS查询多条数据
+func (u *UserDemoRepo) FindMultiByUIDS(ctx context.Context, UIDS []string) ([]*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.UID.In(UIDS...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByUIDS 根据UIDS查询多条数据，并设置缓存
+func (u *UserDemoRepo) FindMultiCacheByUIDS(ctx context.Context, UIDS []string) ([]*gorm_gen_model.UserDemo, error) {
+	resp := make([]*gorm_gen_model.UserDemo, 0)
+	cacheKeys := make([]string, 0)
+	keyToParam := make(map[string]string)
+	for _, v := range UIDS {
+		cacheKey := u.cache.Key(CacheUserDemoByUIDPrefix, v)
+		cacheKeys = append(cacheKeys, cacheKey)
+		keyToParam[cacheKey] = v
+	}
+	cacheValue, err := u.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
+		dbValue := make(map[string]string)
+		params := make([]string, 0)
+		for _, v := range miss {
+			dbValue[v] = ""
+			params = append(params, keyToParam[v])
+		}
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.UID.In(params...)).Find()
+		if err != nil {
+			return nil, err
+		}
+		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
+		for _, v := range result {
+			key := u.cache.Key(CacheUserDemoByUIDPrefix, v.UID)
+			if keyToValues[key] == nil {
+				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
+			}
+			keyToValues[key] = append(keyToValues[key], v)
+		}
+		for k := range dbValue {
+			if keyToValues[k] != nil {
+				marshal, err := u.encoding.Marshal(keyToValues[k])
+				if err != nil {
+					return nil, err
+				}
+				dbValue[k] = string(marshal)
+			}
+		}
+		return dbValue, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range UIDS {
+		cacheKey := u.cache.Key(CacheUserDemoByUIDPrefix, v)
+		if cacheValue[cacheKey] != "" {
+			tmp := make([]*gorm_gen_model.UserDemo, 0)
+			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
+			if err != nil {
+				return nil, err
+			}
+			resp = append(resp, tmp...)
+		}
+	}
+	return resp, nil
+}
+
+// FindOneByUIDStatus 根据UIDStatus查询一条数据
+func (u *UserDemoRepo) FindOneByUIDStatus(ctx context.Context, UID string, status int16) (*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.UID.Eq(UID), dao.Status.Eq(status)).First()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindOneCacheByUIDStatus 根据UIDStatus查询一条数据，并设置缓存
+func (u *UserDemoRepo) FindOneCacheByUIDStatus(ctx context.Context, UID string, status int16) (*gorm_gen_model.UserDemo, error) {
+	resp := new(gorm_gen_model.UserDemo)
+	cacheKey := u.cache.Key(CacheUserDemoByUIDStatusPrefix, UID, status)
+	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.UID.Eq(UID), dao.Status.Eq(status)).First()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := u.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByTenantIDDeptID 根据TenantIDDeptID查询多条数据
+func (u *UserDemoRepo) FindMultiByTenantIDDeptID(ctx context.Context, tenantID int64, deptID int64) ([]*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.TenantID.Eq(tenantID), dao.DeptID.Eq(deptID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByTenantIDDeptID 根据TenantIDDeptID查询多条数据，并设置缓存
+func (u *UserDemoRepo) FindMultiCacheByTenantIDDeptID(ctx context.Context, tenantID int64, deptID int64) ([]*gorm_gen_model.UserDemo, error) {
+	resp := make([]*gorm_gen_model.UserDemo, 0)
+	cacheKey := u.cache.Key(CacheUserDemoByTenantIDDeptIDPrefix, tenantID, deptID)
+	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.TenantID.Eq(tenantID), dao.DeptID.Eq(deptID)).Find()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := u.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByUsername 根据username查询多条数据
+func (u *UserDemoRepo) FindMultiByUsername(ctx context.Context, username string) ([]*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.Username.Eq(username)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByUsername 根据username查询多条数据，并设置缓存
+func (u *UserDemoRepo) FindMultiCacheByUsername(ctx context.Context, username string) ([]*gorm_gen_model.UserDemo, error) {
+	resp := make([]*gorm_gen_model.UserDemo, 0)
+	cacheKey := u.cache.Key(CacheUserDemoByUsernamePrefix, username)
+	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.Username.Eq(username)).Find()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := u.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByUsernames 根据usernames查询多条数据
+func (u *UserDemoRepo) FindMultiByUsernames(ctx context.Context, usernames []string) ([]*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.Username.In(usernames...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByUsernames 根据usernames查询多条数据，并设置缓存
+func (u *UserDemoRepo) FindMultiCacheByUsernames(ctx context.Context, usernames []string) ([]*gorm_gen_model.UserDemo, error) {
+	resp := make([]*gorm_gen_model.UserDemo, 0)
+	cacheKeys := make([]string, 0)
+	keyToParam := make(map[string]string)
+	for _, v := range usernames {
+		cacheKey := u.cache.Key(CacheUserDemoByUsernamePrefix, v)
+		cacheKeys = append(cacheKeys, cacheKey)
+		keyToParam[cacheKey] = v
+	}
+	cacheValue, err := u.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
+		dbValue := make(map[string]string)
+		params := make([]string, 0)
+		for _, v := range miss {
+			dbValue[v] = ""
+			params = append(params, keyToParam[v])
+		}
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.Username.In(params...)).Find()
+		if err != nil {
+			return nil, err
+		}
+		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
+		for _, v := range result {
+			key := u.cache.Key(CacheUserDemoByUsernamePrefix, v.Username)
+			if keyToValues[key] == nil {
+				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
+			}
+			keyToValues[key] = append(keyToValues[key], v)
+		}
+		for k := range dbValue {
+			if keyToValues[k] != nil {
+				marshal, err := u.encoding.Marshal(keyToValues[k])
+				if err != nil {
+					return nil, err
+				}
+				dbValue[k] = string(marshal)
+			}
+		}
+		return dbValue, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range usernames {
+		cacheKey := u.cache.Key(CacheUserDemoByUsernamePrefix, v)
+		if cacheValue[cacheKey] != "" {
+			tmp := make([]*gorm_gen_model.UserDemo, 0)
+			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
+			if err != nil {
+				return nil, err
+			}
+			resp = append(resp, tmp...)
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByTenantID 根据tenantID查询多条数据
+func (u *UserDemoRepo) FindMultiByTenantID(ctx context.Context, tenantID int64) ([]*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.TenantID.Eq(tenantID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByTenantID 根据tenantID查询多条数据，并设置缓存
+func (u *UserDemoRepo) FindMultiCacheByTenantID(ctx context.Context, tenantID int64) ([]*gorm_gen_model.UserDemo, error) {
+	resp := make([]*gorm_gen_model.UserDemo, 0)
+	cacheKey := u.cache.Key(CacheUserDemoByTenantIDPrefix, tenantID)
+	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.TenantID.Eq(tenantID)).Find()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := u.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByTenantIDS 根据tenantIDS查询多条数据
+func (u *UserDemoRepo) FindMultiByTenantIDS(ctx context.Context, tenantIDS []int64) ([]*gorm_gen_model.UserDemo, error) {
+	dao := gorm_gen_dao.Use(u.db).UserDemo
+	result, err := dao.WithContext(ctx).Where(dao.TenantID.In(tenantIDS...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByTenantIDS 根据tenantIDS查询多条数据，并设置缓存
+func (u *UserDemoRepo) FindMultiCacheByTenantIDS(ctx context.Context, tenantIDS []int64) ([]*gorm_gen_model.UserDemo, error) {
+	resp := make([]*gorm_gen_model.UserDemo, 0)
+	cacheKeys := make([]string, 0)
+	keyToParam := make(map[string]int64)
+	for _, v := range tenantIDS {
+		cacheKey := u.cache.Key(CacheUserDemoByTenantIDPrefix, v)
+		cacheKeys = append(cacheKeys, cacheKey)
+		keyToParam[cacheKey] = v
+	}
+	cacheValue, err := u.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
+		dbValue := make(map[string]string)
+		params := make([]int64, 0)
+		for _, v := range miss {
+			dbValue[v] = ""
+			params = append(params, keyToParam[v])
+		}
+		dao := gorm_gen_dao.Use(u.db).UserDemo
+		result, err := dao.WithContext(ctx).Where(dao.TenantID.In(params...)).Find()
+		if err != nil {
+			return nil, err
+		}
+		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
+		for _, v := range result {
+			key := u.cache.Key(CacheUserDemoByTenantIDPrefix, v.TenantID)
+			if keyToValues[key] == nil {
+				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
+			}
+			keyToValues[key] = append(keyToValues[key], v)
+		}
+		for k := range dbValue {
+			if keyToValues[k] != nil {
+				marshal, err := u.encoding.Marshal(keyToValues[k])
+				if err != nil {
+					return nil, err
+				}
+				dbValue[k] = string(marshal)
+			}
+		}
+		return dbValue, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range tenantIDS {
+		cacheKey := u.cache.Key(CacheUserDemoByTenantIDPrefix, v)
+		if cacheValue[cacheKey] != "" {
+			tmp := make([]*gorm_gen_model.UserDemo, 0)
+			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
+			if err != nil {
+				return nil, err
+			}
+			resp = append(resp, tmp...)
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByCondition 自定义查询数据(通用)
+func (u *UserDemoRepo) FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.UserDemo, *condition.Reply, error) {
+	result := make([]*gorm_gen_model.UserDemo, 0)
+	var total int64
+	whereExpressions, orderExpressions, err := conditionReq.ConvertToGormExpression(gorm_gen_model.UserDemo{})
+	if err != nil {
+		return result, nil, err
+	}
+	err = u.db.WithContext(ctx).Model(&gorm_gen_model.UserDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
+	if err != nil {
+		return result, nil, err
+	}
+	if total == 0 {
+		return result, nil, nil
+	}
+	conditionReply, err := conditionReq.ConvertToPage(int32(total))
+	if err != nil {
+		return result, nil, err
+	}
+	query := u.db.WithContext(ctx).Model(&gorm_gen_model.UserDemo{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
+	if conditionReply.Page != 0 && conditionReply.PageSize != 0 {
+		query = query.Offset(int((conditionReply.Page - 1) * conditionReply.PageSize))
+		query = query.Limit(int(conditionReply.PageSize))
+	}
+	err = query.Find(&result).Error
+	if err != nil {
+		return result, nil, err
+	}
+	return result, conditionReply, err
 }
 
 // DeleteOneByID 根据ID删除一条数据
@@ -1198,535 +1755,4 @@ func (u *UserDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_mo
 		return err
 	}
 	return nil
-}
-
-// FindOneByID 根据ID查询一条数据
-func (u *UserDemoRepo) FindOneByID(ctx context.Context, ID string) (*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).First()
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindOneCacheByID 根据ID查询一条数据，并设置缓存
-func (u *UserDemoRepo) FindOneCacheByID(ctx context.Context, ID string) (*gorm_gen_model.UserDemo, error) {
-	resp := new(gorm_gen_model.UserDemo)
-	cacheKey := u.cache.Key(CacheUserDemoByIDPrefix, ID)
-	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).First()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := u.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByIDS 根据IDS查询多条数据
-func (u *UserDemoRepo) FindMultiByIDS(ctx context.Context, IDS []string) ([]*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByIDS 根据IDS查询多条数据，并设置缓存
-func (u *UserDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []string) ([]*gorm_gen_model.UserDemo, error) {
-	resp := make([]*gorm_gen_model.UserDemo, 0)
-	cacheKeys := make([]string, 0)
-	keyToParam := make(map[string]string)
-	for _, v := range IDS {
-		cacheKey := u.cache.Key(CacheUserDemoByIDPrefix, v)
-		cacheKeys = append(cacheKeys, cacheKey)
-		keyToParam[cacheKey] = v
-	}
-	cacheValue, err := u.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
-		dbValue := make(map[string]string)
-		params := make([]string, 0)
-		for _, v := range miss {
-			dbValue[v] = ""
-			params = append(params, keyToParam[v])
-		}
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.ID.In(params...)).Find()
-		if err != nil {
-			return nil, err
-		}
-		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
-		for _, v := range result {
-			key := u.cache.Key(CacheUserDemoByIDPrefix, v.ID)
-			if keyToValues[key] == nil {
-				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
-			}
-			keyToValues[key] = append(keyToValues[key], v)
-		}
-		for k := range dbValue {
-			if keyToValues[k] != nil {
-				marshal, err := u.encoding.Marshal(keyToValues[k])
-				if err != nil {
-					return nil, err
-				}
-				dbValue[k] = string(marshal)
-			}
-		}
-		return dbValue, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range IDS {
-		cacheKey := u.cache.Key(CacheUserDemoByIDPrefix, v)
-		if cacheValue[cacheKey] != "" {
-			tmp := make([]*gorm_gen_model.UserDemo, 0)
-			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
-			if err != nil {
-				return nil, err
-			}
-			resp = append(resp, tmp...)
-		}
-	}
-	return resp, nil
-}
-
-// FindOneByUID 根据UID查询一条数据
-func (u *UserDemoRepo) FindOneByUID(ctx context.Context, UID string) (*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.UID.Eq(UID)).First()
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindOneCacheByUID 根据UID查询一条数据，并设置缓存
-func (u *UserDemoRepo) FindOneCacheByUID(ctx context.Context, UID string) (*gorm_gen_model.UserDemo, error) {
-	resp := new(gorm_gen_model.UserDemo)
-	cacheKey := u.cache.Key(CacheUserDemoByUIDPrefix, UID)
-	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.UID.Eq(UID)).First()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := u.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByUIDS 根据UIDS查询多条数据
-func (u *UserDemoRepo) FindMultiByUIDS(ctx context.Context, UIDS []string) ([]*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.UID.In(UIDS...)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByUIDS 根据UIDS查询多条数据，并设置缓存
-func (u *UserDemoRepo) FindMultiCacheByUIDS(ctx context.Context, UIDS []string) ([]*gorm_gen_model.UserDemo, error) {
-	resp := make([]*gorm_gen_model.UserDemo, 0)
-	cacheKeys := make([]string, 0)
-	keyToParam := make(map[string]string)
-	for _, v := range UIDS {
-		cacheKey := u.cache.Key(CacheUserDemoByUIDPrefix, v)
-		cacheKeys = append(cacheKeys, cacheKey)
-		keyToParam[cacheKey] = v
-	}
-	cacheValue, err := u.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
-		dbValue := make(map[string]string)
-		params := make([]string, 0)
-		for _, v := range miss {
-			dbValue[v] = ""
-			params = append(params, keyToParam[v])
-		}
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.UID.In(params...)).Find()
-		if err != nil {
-			return nil, err
-		}
-		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
-		for _, v := range result {
-			key := u.cache.Key(CacheUserDemoByUIDPrefix, v.UID)
-			if keyToValues[key] == nil {
-				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
-			}
-			keyToValues[key] = append(keyToValues[key], v)
-		}
-		for k := range dbValue {
-			if keyToValues[k] != nil {
-				marshal, err := u.encoding.Marshal(keyToValues[k])
-				if err != nil {
-					return nil, err
-				}
-				dbValue[k] = string(marshal)
-			}
-		}
-		return dbValue, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range UIDS {
-		cacheKey := u.cache.Key(CacheUserDemoByUIDPrefix, v)
-		if cacheValue[cacheKey] != "" {
-			tmp := make([]*gorm_gen_model.UserDemo, 0)
-			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
-			if err != nil {
-				return nil, err
-			}
-			resp = append(resp, tmp...)
-		}
-	}
-	return resp, nil
-}
-
-// FindOneByUIDStatus 根据UIDStatus查询一条数据
-func (u *UserDemoRepo) FindOneByUIDStatus(ctx context.Context, UID string, status int16) (*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.UID.Eq(UID), dao.Status.Eq(status)).First()
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindOneCacheByUIDStatus 根据UIDStatus查询一条数据，并设置缓存
-func (u *UserDemoRepo) FindOneCacheByUIDStatus(ctx context.Context, UID string, status int16) (*gorm_gen_model.UserDemo, error) {
-	resp := new(gorm_gen_model.UserDemo)
-	cacheKey := u.cache.Key(CacheUserDemoByUIDStatusPrefix, UID, status)
-	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.UID.Eq(UID), dao.Status.Eq(status)).First()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := u.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByTenantIDDeptID 根据TenantIDDeptID查询多条数据
-func (u *UserDemoRepo) FindMultiByTenantIDDeptID(ctx context.Context, tenantID int64, deptID int64) ([]*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.TenantID.Eq(tenantID), dao.DeptID.Eq(deptID)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByTenantIDDeptID 根据TenantIDDeptID查询多条数据，并设置缓存
-func (u *UserDemoRepo) FindMultiCacheByTenantIDDeptID(ctx context.Context, tenantID int64, deptID int64) ([]*gorm_gen_model.UserDemo, error) {
-	resp := make([]*gorm_gen_model.UserDemo, 0)
-	cacheKey := u.cache.Key(CacheUserDemoByTenantIDDeptIDPrefix, tenantID, deptID)
-	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.TenantID.Eq(tenantID), dao.DeptID.Eq(deptID)).Find()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := u.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByUsername 根据username查询多条数据
-func (u *UserDemoRepo) FindMultiByUsername(ctx context.Context, username string) ([]*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.Username.Eq(username)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByUsername 根据username查询多条数据，并设置缓存
-func (u *UserDemoRepo) FindMultiCacheByUsername(ctx context.Context, username string) ([]*gorm_gen_model.UserDemo, error) {
-	resp := make([]*gorm_gen_model.UserDemo, 0)
-	cacheKey := u.cache.Key(CacheUserDemoByUsernamePrefix, username)
-	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.Username.Eq(username)).Find()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := u.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByUsernames 根据usernames查询多条数据
-func (u *UserDemoRepo) FindMultiByUsernames(ctx context.Context, usernames []string) ([]*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.Username.In(usernames...)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByUsernames 根据usernames查询多条数据，并设置缓存
-func (u *UserDemoRepo) FindMultiCacheByUsernames(ctx context.Context, usernames []string) ([]*gorm_gen_model.UserDemo, error) {
-	resp := make([]*gorm_gen_model.UserDemo, 0)
-	cacheKeys := make([]string, 0)
-	keyToParam := make(map[string]string)
-	for _, v := range usernames {
-		cacheKey := u.cache.Key(CacheUserDemoByUsernamePrefix, v)
-		cacheKeys = append(cacheKeys, cacheKey)
-		keyToParam[cacheKey] = v
-	}
-	cacheValue, err := u.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
-		dbValue := make(map[string]string)
-		params := make([]string, 0)
-		for _, v := range miss {
-			dbValue[v] = ""
-			params = append(params, keyToParam[v])
-		}
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.Username.In(params...)).Find()
-		if err != nil {
-			return nil, err
-		}
-		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
-		for _, v := range result {
-			key := u.cache.Key(CacheUserDemoByUsernamePrefix, v.Username)
-			if keyToValues[key] == nil {
-				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
-			}
-			keyToValues[key] = append(keyToValues[key], v)
-		}
-		for k := range dbValue {
-			if keyToValues[k] != nil {
-				marshal, err := u.encoding.Marshal(keyToValues[k])
-				if err != nil {
-					return nil, err
-				}
-				dbValue[k] = string(marshal)
-			}
-		}
-		return dbValue, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range usernames {
-		cacheKey := u.cache.Key(CacheUserDemoByUsernamePrefix, v)
-		if cacheValue[cacheKey] != "" {
-			tmp := make([]*gorm_gen_model.UserDemo, 0)
-			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
-			if err != nil {
-				return nil, err
-			}
-			resp = append(resp, tmp...)
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByTenantID 根据tenantID查询多条数据
-func (u *UserDemoRepo) FindMultiByTenantID(ctx context.Context, tenantID int64) ([]*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.TenantID.Eq(tenantID)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByTenantID 根据tenantID查询多条数据，并设置缓存
-func (u *UserDemoRepo) FindMultiCacheByTenantID(ctx context.Context, tenantID int64) ([]*gorm_gen_model.UserDemo, error) {
-	resp := make([]*gorm_gen_model.UserDemo, 0)
-	cacheKey := u.cache.Key(CacheUserDemoByTenantIDPrefix, tenantID)
-	cacheValue, err := u.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.TenantID.Eq(tenantID)).Find()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := u.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByTenantIDS 根据tenantIDS查询多条数据
-func (u *UserDemoRepo) FindMultiByTenantIDS(ctx context.Context, tenantIDS []int64) ([]*gorm_gen_model.UserDemo, error) {
-	dao := gorm_gen_dao.Use(u.db).UserDemo
-	result, err := dao.WithContext(ctx).Where(dao.TenantID.In(tenantIDS...)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByTenantIDS 根据tenantIDS查询多条数据，并设置缓存
-func (u *UserDemoRepo) FindMultiCacheByTenantIDS(ctx context.Context, tenantIDS []int64) ([]*gorm_gen_model.UserDemo, error) {
-	resp := make([]*gorm_gen_model.UserDemo, 0)
-	cacheKeys := make([]string, 0)
-	keyToParam := make(map[string]int64)
-	for _, v := range tenantIDS {
-		cacheKey := u.cache.Key(CacheUserDemoByTenantIDPrefix, v)
-		cacheKeys = append(cacheKeys, cacheKey)
-		keyToParam[cacheKey] = v
-	}
-	cacheValue, err := u.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
-		dbValue := make(map[string]string)
-		params := make([]int64, 0)
-		for _, v := range miss {
-			dbValue[v] = ""
-			params = append(params, keyToParam[v])
-		}
-		dao := gorm_gen_dao.Use(u.db).UserDemo
-		result, err := dao.WithContext(ctx).Where(dao.TenantID.In(params...)).Find()
-		if err != nil {
-			return nil, err
-		}
-		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
-		for _, v := range result {
-			key := u.cache.Key(CacheUserDemoByTenantIDPrefix, v.TenantID)
-			if keyToValues[key] == nil {
-				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
-			}
-			keyToValues[key] = append(keyToValues[key], v)
-		}
-		for k := range dbValue {
-			if keyToValues[k] != nil {
-				marshal, err := u.encoding.Marshal(keyToValues[k])
-				if err != nil {
-					return nil, err
-				}
-				dbValue[k] = string(marshal)
-			}
-		}
-		return dbValue, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range tenantIDS {
-		cacheKey := u.cache.Key(CacheUserDemoByTenantIDPrefix, v)
-		if cacheValue[cacheKey] != "" {
-			tmp := make([]*gorm_gen_model.UserDemo, 0)
-			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
-			if err != nil {
-				return nil, err
-			}
-			resp = append(resp, tmp...)
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByCondition 自定义查询数据(通用)
-func (u *UserDemoRepo) FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.UserDemo, *condition.Reply, error) {
-	result := make([]*gorm_gen_model.UserDemo, 0)
-	var total int64
-	whereExpressions, orderExpressions, err := conditionReq.ConvertToGormExpression(gorm_gen_model.UserDemo{})
-	if err != nil {
-		return result, nil, err
-	}
-	err = u.db.WithContext(ctx).Model(&gorm_gen_model.UserDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
-	if err != nil {
-		return result, nil, err
-	}
-	if total == 0 {
-		return result, nil, nil
-	}
-	conditionReply, err := conditionReq.ConvertToPage(int32(total))
-	if err != nil {
-		return result, nil, err
-	}
-	query := u.db.WithContext(ctx).Model(&gorm_gen_model.UserDemo{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
-	if conditionReply.Page != 0 && conditionReply.PageSize != 0 {
-		query = query.Offset(int((conditionReply.Page - 1) * conditionReply.PageSize))
-		query = query.Limit(int(conditionReply.PageSize))
-	}
-	err = query.Find(&result).Error
-	if err != nil {
-		return result, nil, err
-	}
-	return result, conditionReply, err
 }

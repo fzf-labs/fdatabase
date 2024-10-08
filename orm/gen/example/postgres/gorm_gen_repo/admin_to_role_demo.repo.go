@@ -329,6 +329,325 @@ func (a *AdminToRoleDemoRepo) UpsertOneCacheByFieldsTx(ctx context.Context, tx *
 	return nil
 }
 
+// FindMultiByAdminIDRoleID 根据AdminIDRoleID查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByAdminIDRoleID(ctx context.Context, adminID string, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID), dao.RoleID.Eq(roleID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByAdminIDRoleID 根据AdminIDRoleID查询多条数据，并设置缓存
+func (a *AdminToRoleDemoRepo) FindMultiCacheByAdminIDRoleID(ctx context.Context, adminID string, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+	cacheKey := a.cache.Key(CacheAdminToRoleDemoByAdminIDRoleIDPrefix, adminID, roleID)
+	cacheValue, err := a.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+		result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID), dao.RoleID.Eq(roleID)).Find()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := a.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByRoleIDAdminID 根据RoleIDAdminID查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByRoleIDAdminID(ctx context.Context, roleID string, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID), dao.AdminID.Eq(adminID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByRoleIDAdminID 根据RoleIDAdminID查询多条数据，并设置缓存
+func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleIDAdminID(ctx context.Context, roleID string, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+	cacheKey := a.cache.Key(CacheAdminToRoleDemoByRoleIDAdminIDPrefix, roleID, adminID)
+	cacheValue, err := a.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+		result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID), dao.AdminID.Eq(adminID)).Find()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := a.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByAdminID 根据adminID查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByAdminID(ctx context.Context, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByAdminID 根据adminID查询多条数据，并设置缓存
+func (a *AdminToRoleDemoRepo) FindMultiCacheByAdminID(ctx context.Context, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+	cacheKey := a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, adminID)
+	cacheValue, err := a.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+		result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID)).Find()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := a.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByAdminIDS 根据adminIDS查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByAdminIDS(ctx context.Context, adminIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.AdminID.In(adminIDS...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByAdminIDS 根据adminIDS查询多条数据，并设置缓存
+func (a *AdminToRoleDemoRepo) FindMultiCacheByAdminIDS(ctx context.Context, adminIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+	cacheKeys := make([]string, 0)
+	keyToParam := make(map[string]string)
+	for _, v := range adminIDS {
+		cacheKey := a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v)
+		cacheKeys = append(cacheKeys, cacheKey)
+		keyToParam[cacheKey] = v
+	}
+	cacheValue, err := a.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
+		dbValue := make(map[string]string)
+		params := make([]string, 0)
+		for _, v := range miss {
+			dbValue[v] = ""
+			params = append(params, keyToParam[v])
+		}
+		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+		result, err := dao.WithContext(ctx).Where(dao.AdminID.In(params...)).Find()
+		if err != nil {
+			return nil, err
+		}
+		keyToValues := make(map[string][]*gorm_gen_model.AdminToRoleDemo)
+		for _, v := range result {
+			key := a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v.AdminID)
+			if keyToValues[key] == nil {
+				keyToValues[key] = make([]*gorm_gen_model.AdminToRoleDemo, 0)
+			}
+			keyToValues[key] = append(keyToValues[key], v)
+		}
+		for k := range dbValue {
+			if keyToValues[k] != nil {
+				marshal, err := a.encoding.Marshal(keyToValues[k])
+				if err != nil {
+					return nil, err
+				}
+				dbValue[k] = string(marshal)
+			}
+		}
+		return dbValue, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range adminIDS {
+		cacheKey := a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v)
+		if cacheValue[cacheKey] != "" {
+			tmp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
+			if err != nil {
+				return nil, err
+			}
+			resp = append(resp, tmp...)
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByRoleID 根据roleID查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByRoleID(ctx context.Context, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByRoleID 根据roleID查询多条数据，并设置缓存
+func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleID(ctx context.Context, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+	cacheKey := a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, roleID)
+	cacheValue, err := a.cache.Fetch(ctx, cacheKey, func() (string, error) {
+		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+		result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID)).Find()
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		marshal, err := a.encoding.Marshal(result)
+		if err != nil {
+			return "", err
+		}
+		return string(marshal), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if cacheValue != "" {
+		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByRoleIDS 根据roleIDS查询多条数据
+func (a *AdminToRoleDemoRepo) FindMultiByRoleIDS(ctx context.Context, roleIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.RoleID.In(roleIDS...)).Find()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// FindMultiCacheByRoleIDS 根据roleIDS查询多条数据，并设置缓存
+func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleIDS(ctx context.Context, roleIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
+	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+	cacheKeys := make([]string, 0)
+	keyToParam := make(map[string]string)
+	for _, v := range roleIDS {
+		cacheKey := a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v)
+		cacheKeys = append(cacheKeys, cacheKey)
+		keyToParam[cacheKey] = v
+	}
+	cacheValue, err := a.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
+		dbValue := make(map[string]string)
+		params := make([]string, 0)
+		for _, v := range miss {
+			dbValue[v] = ""
+			params = append(params, keyToParam[v])
+		}
+		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
+		result, err := dao.WithContext(ctx).Where(dao.RoleID.In(params...)).Find()
+		if err != nil {
+			return nil, err
+		}
+		keyToValues := make(map[string][]*gorm_gen_model.AdminToRoleDemo)
+		for _, v := range result {
+			key := a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v.RoleID)
+			if keyToValues[key] == nil {
+				keyToValues[key] = make([]*gorm_gen_model.AdminToRoleDemo, 0)
+			}
+			keyToValues[key] = append(keyToValues[key], v)
+		}
+		for k := range dbValue {
+			if keyToValues[k] != nil {
+				marshal, err := a.encoding.Marshal(keyToValues[k])
+				if err != nil {
+					return nil, err
+				}
+				dbValue[k] = string(marshal)
+			}
+		}
+		return dbValue, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range roleIDS {
+		cacheKey := a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v)
+		if cacheValue[cacheKey] != "" {
+			tmp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
+			if err != nil {
+				return nil, err
+			}
+			resp = append(resp, tmp...)
+		}
+	}
+	return resp, nil
+}
+
+// FindMultiByCondition 自定义查询数据(通用)
+func (a *AdminToRoleDemoRepo) FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.AdminToRoleDemo, *condition.Reply, error) {
+	result := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+	var total int64
+	whereExpressions, orderExpressions, err := conditionReq.ConvertToGormExpression(gorm_gen_model.AdminToRoleDemo{})
+	if err != nil {
+		return result, nil, err
+	}
+	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminToRoleDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
+	if err != nil {
+		return result, nil, err
+	}
+	if total == 0 {
+		return result, nil, nil
+	}
+	conditionReply, err := conditionReq.ConvertToPage(int32(total))
+	if err != nil {
+		return result, nil, err
+	}
+	query := a.db.WithContext(ctx).Model(&gorm_gen_model.AdminToRoleDemo{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
+	if conditionReply.Page != 0 && conditionReply.PageSize != 0 {
+		query = query.Offset(int((conditionReply.Page - 1) * conditionReply.PageSize))
+		query = query.Limit(int(conditionReply.PageSize))
+	}
+	err = query.Find(&result).Error
+	if err != nil {
+		return result, nil, err
+	}
+	return result, conditionReply, err
+}
+
 // DeleteMultiByAdminIDRoleID 根据adminID删除多条数据
 func (a *AdminToRoleDemoRepo) DeleteMultiByAdminIDRoleID(ctx context.Context, adminID string, roleID string) error {
 	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
@@ -718,323 +1037,4 @@ func (a *AdminToRoleDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm
 		return err
 	}
 	return nil
-}
-
-// FindMultiByAdminIDRoleID 根据AdminIDRoleID查询多条数据
-func (a *AdminToRoleDemoRepo) FindMultiByAdminIDRoleID(ctx context.Context, adminID string, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID), dao.RoleID.Eq(roleID)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByAdminIDRoleID 根据AdminIDRoleID查询多条数据，并设置缓存
-func (a *AdminToRoleDemoRepo) FindMultiCacheByAdminIDRoleID(ctx context.Context, adminID string, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-	cacheKey := a.cache.Key(CacheAdminToRoleDemoByAdminIDRoleIDPrefix, adminID, roleID)
-	cacheValue, err := a.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-		result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID), dao.RoleID.Eq(roleID)).Find()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := a.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByRoleIDAdminID 根据RoleIDAdminID查询多条数据
-func (a *AdminToRoleDemoRepo) FindMultiByRoleIDAdminID(ctx context.Context, roleID string, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID), dao.AdminID.Eq(adminID)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByRoleIDAdminID 根据RoleIDAdminID查询多条数据，并设置缓存
-func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleIDAdminID(ctx context.Context, roleID string, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-	cacheKey := a.cache.Key(CacheAdminToRoleDemoByRoleIDAdminIDPrefix, roleID, adminID)
-	cacheValue, err := a.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-		result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID), dao.AdminID.Eq(adminID)).Find()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := a.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByAdminID 根据adminID查询多条数据
-func (a *AdminToRoleDemoRepo) FindMultiByAdminID(ctx context.Context, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByAdminID 根据adminID查询多条数据，并设置缓存
-func (a *AdminToRoleDemoRepo) FindMultiCacheByAdminID(ctx context.Context, adminID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-	cacheKey := a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, adminID)
-	cacheValue, err := a.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-		result, err := dao.WithContext(ctx).Where(dao.AdminID.Eq(adminID)).Find()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := a.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByAdminIDS 根据adminIDS查询多条数据
-func (a *AdminToRoleDemoRepo) FindMultiByAdminIDS(ctx context.Context, adminIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.AdminID.In(adminIDS...)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByAdminIDS 根据adminIDS查询多条数据，并设置缓存
-func (a *AdminToRoleDemoRepo) FindMultiCacheByAdminIDS(ctx context.Context, adminIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-	cacheKeys := make([]string, 0)
-	keyToParam := make(map[string]string)
-	for _, v := range adminIDS {
-		cacheKey := a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v)
-		cacheKeys = append(cacheKeys, cacheKey)
-		keyToParam[cacheKey] = v
-	}
-	cacheValue, err := a.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
-		dbValue := make(map[string]string)
-		params := make([]string, 0)
-		for _, v := range miss {
-			dbValue[v] = ""
-			params = append(params, keyToParam[v])
-		}
-		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-		result, err := dao.WithContext(ctx).Where(dao.AdminID.In(params...)).Find()
-		if err != nil {
-			return nil, err
-		}
-		keyToValues := make(map[string][]*gorm_gen_model.AdminToRoleDemo)
-		for _, v := range result {
-			key := a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v.AdminID)
-			if keyToValues[key] == nil {
-				keyToValues[key] = make([]*gorm_gen_model.AdminToRoleDemo, 0)
-			}
-			keyToValues[key] = append(keyToValues[key], v)
-		}
-		for k := range dbValue {
-			if keyToValues[k] != nil {
-				marshal, err := a.encoding.Marshal(keyToValues[k])
-				if err != nil {
-					return nil, err
-				}
-				dbValue[k] = string(marshal)
-			}
-		}
-		return dbValue, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range adminIDS {
-		cacheKey := a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v)
-		if cacheValue[cacheKey] != "" {
-			tmp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
-			if err != nil {
-				return nil, err
-			}
-			resp = append(resp, tmp...)
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByRoleID 根据roleID查询多条数据
-func (a *AdminToRoleDemoRepo) FindMultiByRoleID(ctx context.Context, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByRoleID 根据roleID查询多条数据，并设置缓存
-func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleID(ctx context.Context, roleID string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-	cacheKey := a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, roleID)
-	cacheValue, err := a.cache.Fetch(ctx, cacheKey, func() (string, error) {
-		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-		result, err := dao.WithContext(ctx).Where(dao.RoleID.Eq(roleID)).Find()
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return "", err
-		}
-		marshal, err := a.encoding.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(marshal), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if cacheValue != "" {
-		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByRoleIDS 根据roleIDS查询多条数据
-func (a *AdminToRoleDemoRepo) FindMultiByRoleIDS(ctx context.Context, roleIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.RoleID.In(roleIDS...)).Find()
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// FindMultiCacheByRoleIDS 根据roleIDS查询多条数据，并设置缓存
-func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleIDS(ctx context.Context, roleIDS []string) ([]*gorm_gen_model.AdminToRoleDemo, error) {
-	resp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-	cacheKeys := make([]string, 0)
-	keyToParam := make(map[string]string)
-	for _, v := range roleIDS {
-		cacheKey := a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v)
-		cacheKeys = append(cacheKeys, cacheKey)
-		keyToParam[cacheKey] = v
-	}
-	cacheValue, err := a.cache.FetchBatch(ctx, cacheKeys, func(miss []string) (map[string]string, error) {
-		dbValue := make(map[string]string)
-		params := make([]string, 0)
-		for _, v := range miss {
-			dbValue[v] = ""
-			params = append(params, keyToParam[v])
-		}
-		dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-		result, err := dao.WithContext(ctx).Where(dao.RoleID.In(params...)).Find()
-		if err != nil {
-			return nil, err
-		}
-		keyToValues := make(map[string][]*gorm_gen_model.AdminToRoleDemo)
-		for _, v := range result {
-			key := a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v.RoleID)
-			if keyToValues[key] == nil {
-				keyToValues[key] = make([]*gorm_gen_model.AdminToRoleDemo, 0)
-			}
-			keyToValues[key] = append(keyToValues[key], v)
-		}
-		for k := range dbValue {
-			if keyToValues[k] != nil {
-				marshal, err := a.encoding.Marshal(keyToValues[k])
-				if err != nil {
-					return nil, err
-				}
-				dbValue[k] = string(marshal)
-			}
-		}
-		return dbValue, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range roleIDS {
-		cacheKey := a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v)
-		if cacheValue[cacheKey] != "" {
-			tmp := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
-			if err != nil {
-				return nil, err
-			}
-			resp = append(resp, tmp...)
-		}
-	}
-	return resp, nil
-}
-
-// FindMultiByCondition 自定义查询数据(通用)
-func (a *AdminToRoleDemoRepo) FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.AdminToRoleDemo, *condition.Reply, error) {
-	result := make([]*gorm_gen_model.AdminToRoleDemo, 0)
-	var total int64
-	whereExpressions, orderExpressions, err := conditionReq.ConvertToGormExpression(gorm_gen_model.AdminToRoleDemo{})
-	if err != nil {
-		return result, nil, err
-	}
-	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminToRoleDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
-	if err != nil {
-		return result, nil, err
-	}
-	if total == 0 {
-		return result, nil, nil
-	}
-	conditionReply, err := conditionReq.ConvertToPage(int32(total))
-	if err != nil {
-		return result, nil, err
-	}
-	query := a.db.WithContext(ctx).Model(&gorm_gen_model.AdminToRoleDemo{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
-	if conditionReply.Page != 0 && conditionReply.PageSize != 0 {
-		query = query.Offset(int((conditionReply.Page - 1) * conditionReply.PageSize))
-		query = query.Limit(int(conditionReply.PageSize))
-	}
-	err = query.Find(&result).Error
-	if err != nil {
-		return result, nil, err
-	}
-	return result, conditionReply, err
 }

@@ -74,6 +74,10 @@ type (
 		UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
 		UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
+		// UpdateBatchByIDS 根据主键IDS批量更新
+		UpdateBatchByIDS(ctx context.Context, IDS []string, data map[string]interface{}) error
+		// UpdateBatchByIDSTx 根据主键IDS批量更新(事务)
+		UpdateBatchByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string, data map[string]interface{}) error
 		// FindOneByID 根据ID查询一条数据
 		FindOneByID(ctx context.Context, ID string) (*gorm_gen_model.AdminRoleDemo, error)
 		// FindOneCacheByID 根据ID查询一条数据，并设置缓存
@@ -458,140 +462,22 @@ func (a *AdminRoleDemoRepo) UpdateOneCacheWithZeroByTx(ctx context.Context, tx *
 	return err
 }
 
-// DeleteOneByID 根据ID删除一条数据
-func (a *AdminRoleDemoRepo) DeleteOneByID(ctx context.Context, ID string) error {
+// UpdateBatchByIDS 根据主键IDS批量更新
+// 零值会被更新
+func (a *AdminRoleDemoRepo) UpdateBatchByIDS(ctx context.Context, IDS []string, data map[string]interface{}) error {
 	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
+	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Updates(data)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// DeleteOneCacheByID 根据ID删除一条数据，并删除缓存
-func (a *AdminRoleDemoRepo) DeleteOneCacheByID(ctx context.Context, ID string) error {
-	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).First()
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
-	}
-	if result == nil {
-		return nil
-	}
-	_, err = dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
-	if err != nil {
-		return err
-	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{result})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteOneByID 根据ID删除一条数据
-func (a *AdminRoleDemoRepo) DeleteOneByIDTx(ctx context.Context, tx *gorm_gen_dao.Query, ID string) error {
+// UpdateBatchByIDSTx 根据主键IDS批量更新(事务)
+// 零值会被更新
+func (a *AdminRoleDemoRepo) UpdateBatchByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string, data map[string]interface{}) error {
 	dao := tx.AdminRoleDemo
-	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteOneCacheByIDTx 根据ID删除一条数据，并删除缓存
-func (a *AdminRoleDemoRepo) DeleteOneCacheByIDTx(ctx context.Context, tx *gorm_gen_dao.Query, ID string) error {
-	dao := tx.AdminRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).First()
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
-	}
-	if result == nil {
-		return nil
-	}
-	_, err = dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
-	if err != nil {
-		return err
-	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{result})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteMultiByIDS 根据IDS删除多条数据
-func (a *AdminRoleDemoRepo) DeleteMultiByIDS(ctx context.Context, IDS []string) error {
-	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteMultiCacheByIDS 根据IDS删除多条数据，并删除缓存
-func (a *AdminRoleDemoRepo) DeleteMultiCacheByIDS(ctx context.Context, IDS []string) error {
-	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Find()
-	if err != nil {
-		return err
-	}
-	if len(result) == 0 {
-		return nil
-	}
-	_, err = dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
-	if err != nil {
-		return err
-	}
-	err = a.DeleteIndexCache(ctx, result)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteMultiByIDSTx 根据IDS删除多条数据
-func (a *AdminRoleDemoRepo) DeleteMultiByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error {
-	dao := tx.AdminRoleDemo
-	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteMultiCacheByIDSTx 根据IDS删除多条数据，并删除缓存
-func (a *AdminRoleDemoRepo) DeleteMultiCacheByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error {
-	dao := tx.AdminRoleDemo
-	result, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Find()
-	if err != nil {
-		return err
-	}
-	if len(result) == 0 {
-		return nil
-	}
-	_, err = dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
-	if err != nil {
-		return err
-	}
-	err = a.DeleteIndexCache(ctx, result)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// DeleteUniqueIndexCache 删除索引存在的缓存
-func (a *AdminRoleDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminRoleDemo) error {
-	keys := make([]string, 0)
-	for _, v := range data {
-		keys = append(
-			keys,
-			a.cache.Key(CacheAdminRoleDemoByIDPrefix, v.ID),
-		)
-	}
-	err := a.cache.DelBatch(ctx, keys)
+	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Updates(data)
 	if err != nil {
 		return err
 	}
@@ -733,4 +619,144 @@ func (a *AdminRoleDemoRepo) FindMultiByCondition(ctx context.Context, conditionR
 		return result, nil, err
 	}
 	return result, conditionReply, err
+}
+
+// DeleteOneByID 根据ID删除一条数据
+func (a *AdminRoleDemoRepo) DeleteOneByID(ctx context.Context, ID string) error {
+	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteOneCacheByID 根据ID删除一条数据，并删除缓存
+func (a *AdminRoleDemoRepo) DeleteOneCacheByID(ctx context.Context, ID string) error {
+	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).First()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if result == nil {
+		return nil
+	}
+	_, err = dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
+	if err != nil {
+		return err
+	}
+	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{result})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteOneByID 根据ID删除一条数据
+func (a *AdminRoleDemoRepo) DeleteOneByIDTx(ctx context.Context, tx *gorm_gen_dao.Query, ID string) error {
+	dao := tx.AdminRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteOneCacheByIDTx 根据ID删除一条数据，并删除缓存
+func (a *AdminRoleDemoRepo) DeleteOneCacheByIDTx(ctx context.Context, tx *gorm_gen_dao.Query, ID string) error {
+	dao := tx.AdminRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.ID.Eq(ID)).First()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if result == nil {
+		return nil
+	}
+	_, err = dao.WithContext(ctx).Where(dao.ID.Eq(ID)).Delete()
+	if err != nil {
+		return err
+	}
+	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{result})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByIDS 根据IDS删除多条数据
+func (a *AdminRoleDemoRepo) DeleteMultiByIDS(ctx context.Context, IDS []string) error {
+	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiCacheByIDS 根据IDS删除多条数据，并删除缓存
+func (a *AdminRoleDemoRepo) DeleteMultiCacheByIDS(ctx context.Context, IDS []string) error {
+	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Find()
+	if err != nil {
+		return err
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	_, err = dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
+	if err != nil {
+		return err
+	}
+	err = a.DeleteIndexCache(ctx, result)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiByIDSTx 根据IDS删除多条数据
+func (a *AdminRoleDemoRepo) DeleteMultiByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error {
+	dao := tx.AdminRoleDemo
+	_, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteMultiCacheByIDSTx 根据IDS删除多条数据，并删除缓存
+func (a *AdminRoleDemoRepo) DeleteMultiCacheByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error {
+	dao := tx.AdminRoleDemo
+	result, err := dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Find()
+	if err != nil {
+		return err
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	_, err = dao.WithContext(ctx).Where(dao.ID.In(IDS...)).Delete()
+	if err != nil {
+		return err
+	}
+	err = a.DeleteIndexCache(ctx, result)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteUniqueIndexCache 删除索引存在的缓存
+func (a *AdminRoleDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminRoleDemo) error {
+	keys := make([]string, 0)
+	for _, v := range data {
+		keys = append(
+			keys,
+			a.cache.Key(CacheAdminRoleDemoByIDPrefix, v.ID),
+		)
+	}
+	err := a.cache.DelBatch(ctx, keys)
+	if err != nil {
+		return err
+	}
+	return nil
 }

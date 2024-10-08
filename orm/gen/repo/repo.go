@@ -88,11 +88,11 @@ func GenerationTable(db *gorm.DB, dbname, daoPath, modelPath, repoPath, table st
 	if err != nil {
 		return err
 	}
-	generateDelFunc, err := g.generateDelFunc()
+	generateReadFunc, err := g.generateReadFunc()
 	if err != nil {
 		return err
 	}
-	generateReadFunc, err := g.generateReadFunc()
+	generateDelFunc, err := g.generateDelFunc()
 	if err != nil {
 		return err
 	}
@@ -103,8 +103,8 @@ func GenerationTable(db *gorm.DB, dbname, daoPath, modelPath, repoPath, table st
 	file += fmt.Sprintln(generateNew)
 	file += fmt.Sprintln(generateCreateFunc)
 	file += fmt.Sprintln(generateUpdateFunc)
-	file += fmt.Sprintln(generateDelFunc)
 	file += fmt.Sprintln(generateReadFunc)
+	file += fmt.Sprintln(generateDelFunc)
 	outputFile := g.repoPath + "/" + table + ".repo.go"
 	err = g.output(outputFile, []byte(file))
 	if err != nil {
@@ -444,9 +444,13 @@ func (r *Repo) generateCreateMethods() (string, error) {
 func (r *Repo) generateUpdateMethods() (string, error) {
 	// 是否有主键索引
 	havePrimaryKey := false
+	singlePrimaryKeyField := ""
 	for _, v := range r.index {
 		if v.PrimaryKey {
 			havePrimaryKey = true
+			if len(v.Columns) == 1 {
+				singlePrimaryKeyField = v.Columns[0]
+			}
 			break
 		}
 	}
@@ -455,8 +459,12 @@ func (r *Repo) generateUpdateMethods() (string, error) {
 	}
 	var updateMethods string
 	tplParams := map[string]any{
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
+		"dbName":                      r.dbName,
+		"upperTableName":              r.upperTableName,
+		"dataTypeSinglePrimaryKey":    r.columnNameToDataType[singlePrimaryKeyField],
+		"upperSinglePrimaryKey":       r.upperFieldName(singlePrimaryKeyField),
+		"upperSinglePrimaryKeyPlural": r.plural(r.upperFieldName(singlePrimaryKeyField)),
+		"lowerSinglePrimaryKeyPlural": r.plural(r.lowerFieldName(singlePrimaryKeyField)),
 	}
 	interfaceUpdateOne, err := template.NewTemplate().Parse(InterfaceUpdateOne).Execute(tplParams)
 	if err != nil {
@@ -505,6 +513,18 @@ func (r *Repo) generateUpdateMethods() (string, error) {
 		return "", err
 	}
 	updateMethods += fmt.Sprintln(interfaceUpdateOneCacheWithZeroByTx.String())
+
+	interfaceUpdateBatchByPrimaryKeys, err := template.NewTemplate().Parse(InterfaceUpdateBatchByPrimaryKeys).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateMethods += fmt.Sprintln(interfaceUpdateBatchByPrimaryKeys.String())
+
+	interfaceUpdateBatchByPrimaryKeysTx, err := template.NewTemplate().Parse(InterfaceUpdateBatchByPrimaryKeysTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateMethods += fmt.Sprintln(interfaceUpdateBatchByPrimaryKeysTx.String())
 
 	return updateMethods, nil
 }
@@ -1005,9 +1025,13 @@ func (r *Repo) generateCreateFunc() (string, error) {
 func (r *Repo) generateUpdateFunc() (string, error) {
 	// 是否有主键索引
 	havePrimaryKey := false
+	singlePrimaryKeyField := ""
 	for _, v := range r.index {
 		if v.PrimaryKey {
 			havePrimaryKey = true
+			if len(v.Columns) == 1 {
+				singlePrimaryKeyField = v.Columns[0]
+			}
 			break
 		}
 	}
@@ -1018,10 +1042,14 @@ func (r *Repo) generateUpdateFunc() (string, error) {
 	var updateFunc string
 	//参数
 	tplParams := map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
+		"firstTableChar":              r.firstTableChar,
+		"dbName":                      r.dbName,
+		"upperTableName":              r.upperTableName,
+		"lowerTableName":              r.lowerTableName,
+		"dataTypeSinglePrimaryKey":    r.columnNameToDataType[singlePrimaryKeyField],
+		"upperSinglePrimaryKey":       r.upperFieldName(singlePrimaryKeyField),
+		"upperSinglePrimaryKeyPlural": r.plural(r.upperFieldName(singlePrimaryKeyField)),
+		"lowerSinglePrimaryKeyPlural": r.plural(r.lowerFieldName(singlePrimaryKeyField)),
 	}
 	updateOneTpl, err := template.NewTemplate().Parse(UpdateOne).Execute(tplParams)
 	if err != nil {
@@ -1069,6 +1097,18 @@ func (r *Repo) generateUpdateFunc() (string, error) {
 		return "", err
 	}
 	updateFunc += fmt.Sprintln(updateOneCacheWithZeroByTx.String())
+
+	updateBatchByPrimaryKeys, err := template.NewTemplate().Parse(UpdateBatchByPrimaryKeys).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateFunc += fmt.Sprintln(updateBatchByPrimaryKeys.String())
+
+	updateBatchByPrimaryKeysTx, err := template.NewTemplate().Parse(UpdateBatchByPrimaryKeysTx).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	updateFunc += fmt.Sprintln(updateBatchByPrimaryKeysTx.String())
 
 	return updateFunc, nil
 }
