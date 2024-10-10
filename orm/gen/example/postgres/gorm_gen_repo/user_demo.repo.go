@@ -655,22 +655,12 @@ func (u *UserDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []string) ([
 		if err != nil {
 			return nil, err
 		}
-		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
 		for _, v := range result {
-			key := u.cache.Key(CacheUserDemoByIDPrefix, v.ID)
-			if keyToValues[key] == nil {
-				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
+			marshal, err := u.encoding.Marshal(v)
+			if err != nil {
+				return nil, err
 			}
-			keyToValues[key] = append(keyToValues[key], v)
-		}
-		for k := range dbValue {
-			if keyToValues[k] != nil {
-				marshal, err := u.encoding.Marshal(keyToValues[k])
-				if err != nil {
-					return nil, err
-				}
-				dbValue[k] = string(marshal)
-			}
+			dbValue[u.cache.Key(CacheUserDemoByIDPrefix, v.ID)] = string(marshal)
 		}
 		return dbValue, nil
 	})
@@ -680,12 +670,12 @@ func (u *UserDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []string) ([
 	for _, v := range IDS {
 		cacheKey := u.cache.Key(CacheUserDemoByIDPrefix, v)
 		if cacheValue[cacheKey] != "" {
-			tmp := make([]*gorm_gen_model.UserDemo, 0)
-			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
+			tmp := new(gorm_gen_model.UserDemo)
+			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
 			if err != nil {
 				return nil, err
 			}
-			resp = append(resp, tmp...)
+			resp = append(resp, tmp)
 		}
 	}
 	return resp, nil
@@ -761,22 +751,12 @@ func (u *UserDemoRepo) FindMultiCacheByUIDS(ctx context.Context, UIDS []string) 
 		if err != nil {
 			return nil, err
 		}
-		keyToValues := make(map[string][]*gorm_gen_model.UserDemo)
 		for _, v := range result {
-			key := u.cache.Key(CacheUserDemoByUIDPrefix, v.UID)
-			if keyToValues[key] == nil {
-				keyToValues[key] = make([]*gorm_gen_model.UserDemo, 0)
+			marshal, err := u.encoding.Marshal(v)
+			if err != nil {
+				return nil, err
 			}
-			keyToValues[key] = append(keyToValues[key], v)
-		}
-		for k := range dbValue {
-			if keyToValues[k] != nil {
-				marshal, err := u.encoding.Marshal(keyToValues[k])
-				if err != nil {
-					return nil, err
-				}
-				dbValue[k] = string(marshal)
-			}
+			dbValue[u.cache.Key(CacheUserDemoByUIDPrefix, v.UID)] = string(marshal)
 		}
 		return dbValue, nil
 	})
@@ -786,12 +766,12 @@ func (u *UserDemoRepo) FindMultiCacheByUIDS(ctx context.Context, UIDS []string) 
 	for _, v := range UIDS {
 		cacheKey := u.cache.Key(CacheUserDemoByUIDPrefix, v)
 		if cacheValue[cacheKey] != "" {
-			tmp := make([]*gorm_gen_model.UserDemo, 0)
-			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
+			tmp := new(gorm_gen_model.UserDemo)
+			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
 			if err != nil {
 				return nil, err
 			}
-			resp = append(resp, tmp...)
+			resp = append(resp, tmp)
 		}
 	}
 	return resp, nil

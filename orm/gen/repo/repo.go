@@ -573,11 +573,12 @@ func (r *Repo) generateReadMethods() (string, error) {
 					return "", err
 				}
 				readMethods += fmt.Sprintln(interfaceFindMultiByFieldPlural.String())
-				interfaceFindMultiCacheByFieldPlural, err := template.NewTemplate().Parse(InterfaceFindMultiCacheByFieldPlural).Execute(tplParams)
+
+				interfaceFindMultiCacheByFieldPluralUniqueTrue, err := template.NewTemplate().Parse(InterfaceFindMultiCacheByFieldPluralUniqueTrue).Execute(tplParams)
 				if err != nil {
 					return "", err
 				}
-				readMethods += fmt.Sprintln(interfaceFindMultiCacheByFieldPlural.String())
+				readMethods += fmt.Sprintln(interfaceFindMultiCacheByFieldPluralUniqueTrue.String())
 			}
 
 		}
@@ -620,11 +621,11 @@ func (r *Repo) generateReadMethods() (string, error) {
 				}
 				readMethods += fmt.Sprintln(interfaceFindMultiByFieldPlural.String())
 
-				interfaceFindMultiCacheByFieldPlural, err := template.NewTemplate().Parse(InterfaceFindMultiCacheByFieldPlural).Execute(tplParams)
+				interfaceFindMultiCacheByFieldPluralUniqueFalse, err := template.NewTemplate().Parse(InterfaceFindMultiCacheByFieldPluralUniqueFalse).Execute(tplParams)
 				if err != nil {
 					return "", err
 				}
-				readMethods += fmt.Sprintln(interfaceFindMultiCacheByFieldPlural.String())
+				readMethods += fmt.Sprintln(interfaceFindMultiCacheByFieldPluralUniqueFalse.String())
 			}
 		}
 		// 不唯一 && 字段数大于1
@@ -1175,11 +1176,11 @@ func (r *Repo) generateReadFunc() (string, error) {
 				}
 				readFunc += fmt.Sprintln(findMultiByFieldPlural.String())
 
-				findMultiCacheByFieldPlural, err := template.NewTemplate().Parse(FindMultiCacheByFieldPlural).Execute(tplParams)
+				findMultiCacheByFieldPluralUniqueTrue, err := template.NewTemplate().Parse(FindMultiCacheByFieldPluralUniqueTrue).Execute(tplParams)
 				if err != nil {
 					return "", err
 				}
-				readFunc += fmt.Sprintln(findMultiCacheByFieldPlural.String())
+				readFunc += fmt.Sprintln(findMultiCacheByFieldPluralUniqueTrue.String())
 			}
 
 		}
@@ -1240,11 +1241,11 @@ func (r *Repo) generateReadFunc() (string, error) {
 				}
 				readFunc += fmt.Sprintln(findMultiByFieldPlural.String())
 
-				findMultiCacheByFieldPlural, err := template.NewTemplate().Parse(FindMultiCacheByFieldPlural).Execute(tplParams)
+				findMultiCacheByFieldPluralUniqueFalse, err := template.NewTemplate().Parse(FindMultiCacheByFieldPluralUniqueFalse).Execute(tplParams)
 				if err != nil {
 					return "", err
 				}
-				readFunc += fmt.Sprintln(findMultiCacheByFieldPlural.String())
+				readFunc += fmt.Sprintln(findMultiCacheByFieldPluralUniqueFalse.String())
 			}
 		}
 		// 不唯一 && 字段数大于1

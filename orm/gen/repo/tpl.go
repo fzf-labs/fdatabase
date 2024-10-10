@@ -336,11 +336,17 @@ var InterfaceFindMultiByFieldPlural string
 //go:embed tpl/find-multi-by-field-plural.tpl
 var FindMultiByFieldPlural string
 
-//go:embed tpl/interface-find-multi-cache-by-field-plural.tpl
-var InterfaceFindMultiCacheByFieldPlural string
+//go:embed tpl/interface-find-multi-cache-by-field-plural-unique-true.tpl
+var InterfaceFindMultiCacheByFieldPluralUniqueTrue string
 
-//go:embed tpl/find-multi-cache-by-field-plural.tpl
-var FindMultiCacheByFieldPlural string
+//go:embed tpl/find-multi-cache-by-field-plural-unique-true.tpl
+var FindMultiCacheByFieldPluralUniqueTrue string
+
+//go:embed tpl/interface-find-multi-cache-by-field-plural-unique-false.tpl
+var InterfaceFindMultiCacheByFieldPluralUniqueFalse string
+
+//go:embed tpl/find-multi-cache-by-field-plural-unique-false.tpl
+var FindMultiCacheByFieldPluralUniqueFalse string
 
 //go:embed tpl/interface-find-one-by-fields.tpl
 var InterfaceFindOneByFields string
