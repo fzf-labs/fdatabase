@@ -32,7 +32,7 @@ var KeyWords = []string{
 	"marshal",
 }
 
-func GenerationTable(db *gorm.DB, dbname, daoPath, modelPath, repoPath, table string, columnNameToDataType, columnNameToName, columnNameToFieldType map[string]string) error {
+func GenerationTable(db *gorm.DB, dbname, daoPath, modelPath, repoPath, table string, partitionTables []string, columnNameToDataType, columnNameToName, columnNameToFieldType map[string]string) error {
 	var file string
 	g := Repo{
 		gorm:                  db,
@@ -40,11 +40,12 @@ func GenerationTable(db *gorm.DB, dbname, daoPath, modelPath, repoPath, table st
 		modelPath:             modelPath,
 		repoPath:              repoPath,
 		table:                 table,
+		partitionTables:       partitionTables,
 		columnNameToDataType:  columnNameToDataType,
 		columnNameToName:      columnNameToName,
 		columnNameToFieldType: columnNameToFieldType,
-		firstTableChar:        "",
 		dbName:                dbname,
+		firstTableChar:        "",
 		lowerTableName:        "",
 		upperTableName:        "",
 		daoPkgPath:            utils.FillModelPkgPath(daoPath),
@@ -119,6 +120,7 @@ type Repo struct {
 	modelPath             string            // model所在的路径
 	repoPath              string            // repo所在的路径
 	table                 string            // 表名称
+	partitionTables       []string          // 子分区表名称
 	columnNameToDataType  map[string]string // 字段名称对应的类型
 	columnNameToName      map[string]string // 字段名称对应的Go名称
 	columnNameToFieldType map[string]string // 字段名称对应的dao类型
@@ -144,14 +146,10 @@ func (r *Repo) processIndex() ([]DBIndex, error) {
 	result := make([]DBIndex, 0)
 	tmp := make([]DBIndex, 0)
 	repeat := make(map[string]struct{})
-	// 查询是否有分区表
-	childTableForTable, err := dbfunc.GetPartitionChildTableForTable(r.gorm, r.table)
-	if err != nil {
-		return nil, err
-	}
 	table := r.table
-	if len(childTableForTable) > 0 {
-		table = childTableForTable[0]
+	// PG 需要特殊处理
+	if len(r.partitionTables) > 0 {
+		table = r.partitionTables[0]
 	}
 	// 获取索引
 	indexes, err := dbfunc.GetIndexes(r.gorm, table)

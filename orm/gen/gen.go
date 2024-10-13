@@ -157,7 +157,7 @@ func (g *GenerationDB) Do() {
 	for _, v := range partitionTableToChildTables {
 		partitionChildTables = append(partitionChildTables, v...)
 	}
-	// 去掉tables中的partitionChildTables
+	// 去掉tables中的分区子表
 	tables = utils.SliRemove(tables, partitionChildTables)
 	models := make(map[string]any, len(tables))
 	for _, tableName := range tables {
@@ -211,7 +211,7 @@ func (g *GenerationDB) Do() {
 		go func(db *gorm.DB, table string, columnNameToDataType, columnNameToName, columnNameToFieldType map[string]string) {
 			defer wg.Done()
 			// 数据表repo代码生成
-			err2 := repo.GenerationTable(db, dbName, daoPath, modelPath, repoPath, table, columnNameToDataType, columnNameToName, columnNameToFieldType)
+			err2 := repo.GenerationTable(db, dbName, daoPath, modelPath, repoPath, table, partitionTableToChildTables[table], columnNameToDataType, columnNameToName, columnNameToFieldType)
 			if err2 != nil {
 				log.Println("repo GenerationTable err:", err2)
 				return
@@ -379,10 +379,14 @@ func (g *GenerationPb) Do() {
 	if err != nil {
 		return
 	}
-	// 查询分区所有子表
-	partitionChildTables, err := dbfunc.GetPartitionChildTable(g.db)
+	// 查询分区表父级到子表的映射
+	partitionTableToChildTables, err := dbfunc.GetPartitionTableToChildTables(g.db)
 	if err != nil {
 		return
+	}
+	partitionChildTables := make([]string, 0)
+	for _, v := range partitionTableToChildTables {
+		partitionChildTables = append(partitionChildTables, v...)
 	}
 	// 去掉tables中的partitionChildTables
 	tables = utils.SliRemove(tables, partitionChildTables)

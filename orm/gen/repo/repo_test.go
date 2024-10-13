@@ -31,6 +31,7 @@ func TestGenerationTable(t *testing.T) {
 		modelPath             string
 		repoPath              string
 		table                 string
+		partitionTable        []string
 		columnNameToDataType  map[string]string
 		columnNameToName      map[string]string
 		columnNameToFieldType map[string]string
@@ -205,12 +206,13 @@ func TestGenerationTable(t *testing.T) {
 		{
 			name: "test2",
 			args: args{
-				db:        db,
-				dbname:    "gorm_gen",
-				daoPath:   "../example/postgres/gorm_gen_dao",
-				modelPath: "../example/postgres/gorm_gen_model",
-				repoPath:  "../example/postgres/gorm_gen_repo",
-				table:     "partition_table",
+				db:             db,
+				dbname:         "gorm_gen",
+				daoPath:        "../example/postgres/gorm_gen_dao",
+				modelPath:      "../example/postgres/gorm_gen_model",
+				repoPath:       "../example/postgres/gorm_gen_repo",
+				table:          "partition_table",
+				partitionTable: []string{},
 				columnNameToDataType: map[string]string{
 					"id":         "string",
 					"user_id":    "string",
@@ -232,7 +234,7 @@ func TestGenerationTable(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := GenerationTable(tt.args.db, tt.args.dbname, tt.args.daoPath, tt.args.modelPath, tt.args.repoPath, tt.args.table, tt.args.columnNameToDataType, tt.args.columnNameToName, tt.args.columnNameToFieldType); (err != nil) != tt.wantErr {
+			if err := GenerationTable(tt.args.db, tt.args.dbname, tt.args.daoPath, tt.args.modelPath, tt.args.repoPath, tt.args.table, tt.args.partitionTable, tt.args.columnNameToDataType, tt.args.columnNameToName, tt.args.columnNameToFieldType); (err != nil) != tt.wantErr {
 				t.Errorf("GenerationTable() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
