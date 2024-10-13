@@ -57,12 +57,11 @@ func TestRocksCache_FetchBatch(t *testing.T) {
 		"RocksCache_FetchBatch_c",
 	}
 	take, err := cache.FetchBatch(ctx, keys, func(miss []string) (map[string]string, error) {
-		return map[string]string{
-			"RocksCache_FetchBatch_a": "test1",
-			"RocksCache_FetchBatch_b": "test2",
-			"RocksCache_FetchBatch_c": "test3",
-			"RocksCache_FetchBatch_d": "test4",
-		}, nil
+		resp := make(map[string]string)
+		for _, v := range miss {
+			resp[v] = v + ":result"
+		}
+		return resp, nil
 	})
 	fmt.Println(take)
 	fmt.Println(err)

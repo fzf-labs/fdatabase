@@ -8,11 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-var dbErr *gorm.DB
-
-func init() {
-	newPg, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+func newDB() *gorm.DB {
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
 		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
 		MaxIdleConn:     0,
 		MaxOpenConn:     0,
@@ -21,13 +18,14 @@ func init() {
 		Tracing:         false,
 	})
 	if err != nil {
-		return
+		panic(err)
 	}
-	db = newPg
-	dbErr = &gorm.DB{}
+	return db
 }
 
 func TestSortIndexColumns(t *testing.T) {
+	db := newDB()
+	var dbErr *gorm.DB
 	type args struct {
 		db    *gorm.DB
 		table string
@@ -71,48 +69,9 @@ func TestSortIndexColumns(t *testing.T) {
 	}
 }
 
-func TestGetPartitionTableName(t *testing.T) {
-	type args struct {
-		db *gorm.DB
-	}
-	tests := []struct {
-		name     string
-		args     args
-		wantResp []string
-		wantErr  bool
-	}{
-		{
-			name: "test1",
-			args: args{
-				db: db,
-			},
-			wantResp: []string{"partition_table"},
-			wantErr:  false,
-		},
-		{
-			name: "test-err",
-			args: args{
-				db: dbErr,
-			},
-			wantResp: nil,
-			wantErr:  true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotResp, err := GetPartitionTableName(tt.args.db)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetPartitionTableName() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(gotResp, tt.wantResp) {
-				t.Errorf("GetPartitionTableName() gotResp = %v, want %v", gotResp, tt.wantResp)
-			}
-		})
-	}
-}
-
 func TestGetPartitionChildTableForTable(t *testing.T) {
+	db := newDB()
+	var dbErr *gorm.DB
 	type args struct {
 		db        *gorm.DB
 		tableName string
@@ -157,6 +116,8 @@ func TestGetPartitionChildTableForTable(t *testing.T) {
 }
 
 func TestGetPartitionChildTable(t *testing.T) {
+	db := newDB()
+	var dbErr *gorm.DB
 	type args struct {
 		db *gorm.DB
 	}

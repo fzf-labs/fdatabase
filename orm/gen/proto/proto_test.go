@@ -4,13 +4,12 @@ import (
 	"testing"
 
 	"github.com/fzf-labs/fdatabase/orm"
+
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
-func init() {
-	newPg, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+func newDB() *gorm.DB {
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
 		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
 		MaxIdleConn:     0,
 		MaxOpenConn:     0,
@@ -19,11 +18,13 @@ func init() {
 		Tracing:         false,
 	})
 	if err != nil {
-		return
+		panic(err)
 	}
-	db = newPg
+	return db
 }
+
 func TestGenerationPB(t *testing.T) {
+	db := newDB()
 	type args struct {
 		db               *gorm.DB
 		outPutPath       string

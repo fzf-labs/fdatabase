@@ -57,7 +57,7 @@ func (r *Cache) Key(keys ...interface{}) string {
 }
 
 func (r *Cache) TTL(ttl time.Duration) time.Duration {
-	return ttl - time.Duration(rand.Float64()*0.1*float64(ttl))
+	return ttl - time.Duration(rand.Float64()*0.1*float64(ttl)) //nolint:gosec
 }
 
 func (r *Cache) Fetch(ctx context.Context, key string, fn func() (string, error)) (string, error) {

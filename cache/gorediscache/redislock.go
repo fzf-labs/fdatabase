@@ -43,7 +43,7 @@ func (r *RedisLock) LockRetry(ctx context.Context, key string, ttl time.Duration
 // LockRetryWithCustom 自动锁-重试
 // 自定义时间间隔和重试次数
 // 使用场景：常规业务中使用，使用频繁
-func (r *RedisLock) LockRetryWithCustom(ctx context.Context, key string, ttl time.Duration, retryDuration time.Duration, retryNum int, fn func() error) error {
+func (r *RedisLock) LockRetryWithCustom(ctx context.Context, key string, ttl, retryDuration time.Duration, retryNum int, fn func() error) error {
 	lock, err := r.locker.Obtain(ctx, key, ttl, &redislock.Options{
 		RetryStrategy: redislock.LimitRetry(redislock.LinearBackoff(retryDuration), retryNum),
 	})

@@ -37,12 +37,11 @@ func TestGoRedisCache_FetchBatch(t *testing.T) {
 		"GoRedisCache_Fetch_d",
 	}
 	fetch, err := cache.FetchBatch(ctx, keys, func(miss []string) (map[string]string, error) {
-		fmt.Println("do FetchBatch")
-		return map[string]string{
-			"GoRedisCache_Fetch_a": "1",
-			"GoRedisCache_Fetch_b": "2",
-			"GoRedisCache_Fetch_c": "3",
-		}, nil
+		resp := make(map[string]string)
+		for _, v := range miss {
+			resp[v] = v + ": result"
+		}
+		return resp, nil
 	})
 	fmt.Println(fetch)
 	fmt.Println(err)

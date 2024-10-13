@@ -7,6 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	Postgres = "postgres"
+	MySQL    = "mysql"
+)
+
 type Index struct {
 	TableName  string `json:"table_name" gorm:"column:table_name"`
 	IndexName  string `json:"index_name" gorm:"column:index_name"`
@@ -20,7 +25,7 @@ func GetIndexes(db *gorm.DB, table string) ([]*Index, error) {
 	resp := make([]*Index, 0)
 	var err error
 	switch db.Dialector.Name() {
-	case "postgres":
+	case Postgres:
 		resp, err = GetPgIndexes(db, table)
 		if err != nil {
 			return nil, err
@@ -63,7 +68,7 @@ func SortIndexColumns(db *gorm.DB, table string) (map[string][]string, error) {
 	resp := make(map[string][]string)
 	var err error
 	switch db.Dialector.Name() {
-	case "postgres":
+	case Postgres:
 		resp, err = pgSortIndexColumns(db, table)
 		if err != nil {
 			return nil, err
@@ -106,39 +111,24 @@ func pgSortIndexColumns(db *gorm.DB, table string) (map[string][]string, error) 
 	return resp, nil
 }
 
-// GetPartitionTableName 获取分区表
-func GetPartitionTableName(db *gorm.DB) (resp []string, err error) {
-	switch db.Dialector.Name() {
-	case "postgres":
-		resp, err = getPGPartitionTableName(db)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return resp, nil
-}
-
-// getPGPartitionTableName 获取分区表
-func getPGPartitionTableName(db *gorm.DB) ([]string, error) {
-	result := make([]string, 0)
-	sql := `SELECT c.relname AS partitioned_table FROM pg_catalog.pg_class c JOIN pg_catalog.pg_inherits i ON c.oid=i.inhparent GROUP BY c.relname`
-	err := db.Raw(sql).Pluck("partitioned_table", &result).Error
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
 // GetPartitionChildTableForTable 获取PG分区表的子表
-func GetPartitionChildTableForTable(db *gorm.DB, tableName string) (resp []string, err error) {
+func GetPartitionChildTableForTable(db *gorm.DB, tableName string) ([]string, error) {
 	switch db.Dialector.Name() {
-	case "postgres":
-		resp, err = getPGPartitionChildTableForTable(db, tableName)
+	case Postgres:
+		resp, err := getPGPartitionChildTableForTable(db, tableName)
 		if err != nil {
 			return nil, err
 		}
+		return resp, nil
+	case MySQL:
+		resp, err := getMySQLPartitionChildTableForTable(db, tableName)
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	default:
+		return nil, nil
 	}
-	return resp, nil
 }
 
 // getPGPartitionChildTableForTable 获取PG分区表的子表
@@ -152,20 +142,39 @@ func getPGPartitionChildTableForTable(db *gorm.DB, tableName string) ([]string, 
 	return result, nil
 }
 
+// getMySQLPartitionChildTableForTable 获取MySQL分区表的子表
+func getMySQLPartitionChildTableForTable(db *gorm.DB, tableName string) ([]string, error) {
+	result := make([]string, 0)
+	sql := fmt.Sprintf(`SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_SCHEMA='%s' AND TABLE_NAME LIKE '%s'`, db.Migrator().CurrentDatabase(), tableName+"%")
+	err := db.Raw(sql).Pluck("TABLE_NAME", &result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // GetPartitionChildTable 获取所有分区表的子表
 func GetPartitionChildTable(db *gorm.DB) (resp []string, err error) {
 	switch db.Dialector.Name() {
-	case "postgres":
-		resp, err = getPartitionChildTable(db)
+	case Postgres:
+		resp, err = getPGPartitionChildTable(db)
 		if err != nil {
 			return nil, err
 		}
+		return resp, nil
+	case MySQL:
+		resp, err = getMySQLPartitionChildTable(db)
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	default:
+		return nil, nil
 	}
-	return resp, nil
 }
 
-// getPartitionChildTable 获取PG获取所有分区表的子表
-func getPartitionChildTable(db *gorm.DB) ([]string, error) {
+// getPGPartitionChildTable 获取PG获取所有分区表的子表
+func getPGPartitionChildTable(db *gorm.DB) ([]string, error) {
 	result := make([]string, 0)
 	sql := `SELECT c.relname AS child_table FROM pg_catalog.pg_class c JOIN pg_catalog.pg_inherits i ON c.oid=i.inhrelid`
 	err := db.Raw(sql).Pluck("child_table", &result).Error
@@ -175,20 +184,39 @@ func getPartitionChildTable(db *gorm.DB) ([]string, error) {
 	return result, nil
 }
 
+// getMySQLPartitionChildTable 获取MySQL获取所有分区表的子表
+func getMySQLPartitionChildTable(db *gorm.DB) ([]string, error) {
+	result := make([]string, 0)
+	sql := `SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_SCHEMA='%s'`
+	err := db.Raw(sql).Pluck("TABLE_NAME", &result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // GetPartitionTableToChildTables 获取分区表到子表的映射
 func GetPartitionTableToChildTables(db *gorm.DB) (resp map[string][]string, err error) {
 	switch db.Dialector.Name() {
-	case "postgres":
-		resp, err = getPartitionTableToChildTables(db)
+	case Postgres:
+		resp, err = getPGPartitionTableToChildTables(db)
 		if err != nil {
 			return nil, err
 		}
+		return resp, nil
+	case MySQL:
+		resp, err = getMySQLPartitionTableToChildTables(db)
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	default:
+		return nil, nil
 	}
-	return resp, nil
 }
 
 // getPartitionTableToChildTable 获取PG分区表到子表的映射
-func getPartitionTableToChildTables(db *gorm.DB) (map[string][]string, error) {
+func getPGPartitionTableToChildTables(db *gorm.DB) (map[string][]string, error) {
 	resp := make(map[string][]string)
 	type tmp struct {
 		PartitionedTable string `gorm:"column:partitioned_table" json:"partitioned_table"`
@@ -196,6 +224,25 @@ func getPartitionTableToChildTables(db *gorm.DB) (map[string][]string, error) {
 	}
 	result := make([]tmp, 0)
 	sql := `SELECT p.relname AS partitioned_table,array_to_string(array_agg(c.relname),',')AS child_tables FROM pg_catalog.pg_class c JOIN pg_catalog.pg_inherits i ON c.oid=i.inhrelid JOIN pg_catalog.pg_class p ON p.oid=i.inhparent GROUP BY p.relname;`
+	err := db.Raw(sql).Scan(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range result {
+		resp[v.PartitionedTable] = append(resp[v.PartitionedTable], strings.Split(v.ChildTables, ",")...)
+	}
+	return resp, nil
+}
+
+// getMySQLPartitionTableToChildTable 获取MySQL分区表到子表的映射
+func getMySQLPartitionTableToChildTables(db *gorm.DB) (map[string][]string, error) {
+	resp := make(map[string][]string)
+	type tmp struct {
+		PartitionedTable string `gorm:"column:partitioned_table" json:"partitioned_table"`
+		ChildTables      string `gorm:"column:child_tables" json:"child_tables"`
+	}
+	result := make([]tmp, 0)
+	sql := `SELECT TABLE_NAME AS partitioned_table,GROUP_CONCAT(TABLE_NAME) AS child_tables FROM information_schema.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_SCHEMA='%s' GROUP BY TABLE_NAME;`
 	err := db.Raw(sql).Scan(&result).Error
 	if err != nil {
 		return nil, err

@@ -19,32 +19,33 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
-	db          *gorm.DB
-	redisClient *redis.Client
-	err         error
-)
-
-func init() {
-	db, err = orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+func newDB() *gorm.DB {
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
 		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
 		MaxIdleConn:     0,
 		MaxOpenConn:     0,
 		ConnMaxLifeTime: 0,
-		ShowLog:         true,
+		ShowLog:         false,
 		Tracing:         false,
 	})
 	if err != nil {
 		panic(err)
 	}
-	redisClient = redis.NewClient(&redis.Options{
+	return db
+}
+
+func newRedis() *redis.Client {
+	redisClient := redis.NewClient(&redis.Options{
 		Addr:     "0.0.0.0:6379",
 		Password: "123456",
 	})
+	return redisClient
 }
 
 // Test_FindOneCacheByID 根据ID查询单条数据
 func Test_FindOneCacheByID(t *testing.T) {
+	db := newDB()
+	redisClient := newRedis()
 	dbCache := goredisdbcache.NewGoRedisDBCache(redisClient)
 	ctx := context.Background()
 	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
@@ -58,6 +59,8 @@ func Test_FindOneCacheByID(t *testing.T) {
 }
 
 func Test_FindMultiCacheByUsernames(t *testing.T) {
+	db := newDB()
+	redisClient := newRedis()
 	dbCache := goredisdbcache.NewGoRedisDBCache(redisClient)
 	ctx := context.Background()
 	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
@@ -72,6 +75,8 @@ func Test_FindMultiCacheByUsernames(t *testing.T) {
 }
 
 func Test_UpdateOneCache(t *testing.T) {
+	db := newDB()
+	redisClient := newRedis()
 	dbCache := goredisdbcache.NewGoRedisDBCache(redisClient)
 	ctx := context.Background()
 	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
@@ -90,6 +95,8 @@ func Test_UpdateOneCache(t *testing.T) {
 }
 
 func Test_UpdateBatchByIDS(t *testing.T) {
+	db := newDB()
+	redisClient := newRedis()
 	dbCache := goredisdbcache.NewGoRedisDBCache(redisClient)
 	ctx := context.Background()
 	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
@@ -104,6 +111,8 @@ func Test_UpdateBatchByIDS(t *testing.T) {
 }
 
 func Test_FindMultiCacheByTenantIDS(t *testing.T) {
+	db := newDB()
+	redisClient := newRedis()
 	dbCache := goredisdbcache.NewGoRedisDBCache(redisClient)
 	ctx := context.Background()
 	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
@@ -119,6 +128,7 @@ func Test_FindMultiCacheByTenantIDS(t *testing.T) {
 
 // Test_FindMultiByCustom 自定义查询
 func Test_FindMultiByCondition(t *testing.T) {
+	db := newDB()
 	client, _ := redismock.NewClientMock()
 	dbCache := goredisdbcache.NewGoRedisDBCache(client)
 	ctx := context.Background()
