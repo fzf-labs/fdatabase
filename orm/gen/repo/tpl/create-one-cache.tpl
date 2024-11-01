@@ -5,7 +5,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) CreateOneCache(ctx context.C
 	if err != nil {
 		return err
 	}
-	err = {{.firstTableChar}}.DeleteIndexCache(ctx, []*{{.dbName}}_model.{{.upperTableName}}{data})
+	err = {{.firstTableChar}}.DeleteIndexCache(ctx,data)
     if err != nil {
     	return err
     }

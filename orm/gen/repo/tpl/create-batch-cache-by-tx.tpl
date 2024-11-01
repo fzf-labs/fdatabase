@@ -5,7 +5,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) CreateBatchCacheByTx(ctx con
 	if err != nil {
 		return err
 	}
-	err = {{.firstTableChar}}.DeleteIndexCache(ctx, data)
+	err = {{.firstTableChar}}.DeleteIndexCache(ctx, data...)
 	if err != nil {
 		return err
 	}

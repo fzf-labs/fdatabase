@@ -81,6 +81,10 @@ func GenerationTable(db *gorm.DB, dbname, daoPath, modelPath, repoPath, table st
 	if err != nil {
 		return err
 	}
+	generateCommonFunc, err := g.generateCommonFunc()
+	if err != nil {
+		return err
+	}
 	generateCreateFunc, err := g.generateCreateFunc()
 	if err != nil {
 		return err
@@ -102,6 +106,7 @@ func GenerationTable(db *gorm.DB, dbname, daoPath, modelPath, repoPath, table st
 	file += fmt.Sprintln(generateVar)
 	file += fmt.Sprintln(generateTypes)
 	file += fmt.Sprintln(generateNew)
+	file += fmt.Sprintln(generateCommonFunc)
 	file += fmt.Sprintln(generateCreateFunc)
 	file += fmt.Sprintln(generateUpdateFunc)
 	file += fmt.Sprintln(generateReadFunc)
@@ -311,6 +316,19 @@ func (r *Repo) generateVar() (string, error) {
 		varStr += fmt.Sprintln(varCacheKeysTpl.String())
 	}
 	return varStr, nil
+}
+func (r *Repo) generateCommonMethods() (string, error) {
+	var commonMethods string
+	tplParams := map[string]any{
+		"dbName":         r.dbName,
+		"upperTableName": r.upperTableName,
+	}
+	interfaceDeepCopy, err := template.NewTemplate().Parse(InterfaceDeepCopy).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	commonMethods += fmt.Sprintln(interfaceDeepCopy.String())
+	return commonMethods, nil
 }
 
 // generateCreateMethods
@@ -853,6 +871,10 @@ func (r *Repo) generateDelMethods() (string, error) {
 // generateTypes
 func (r *Repo) generateTypes() (string, error) {
 	var methods string
+	commonMethods, err := r.generateCommonMethods()
+	if err != nil {
+		return "", err
+	}
 	createMethods, err := r.generateCreateMethods()
 	if err != nil {
 		return "", err
@@ -869,6 +891,7 @@ func (r *Repo) generateTypes() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	methods += commonMethods
 	methods += createMethods
 	methods += updateMethods
 	methods += readMethods
@@ -898,24 +921,46 @@ func (r *Repo) generateNew() (string, error) {
 	return newTpl.String(), nil
 }
 
+// generateCommonFunc
+func (r *Repo) generateCommonFunc() (string, error) {
+	var commonFunc string
+	tplParams := map[string]any{
+		"firstTableChar": r.firstTableChar,
+		"dbName":         r.dbName,
+		"upperTableName": r.upperTableName,
+		"lowerTableName": r.lowerTableName,
+	}
+	deepCopy, err := template.NewTemplate().Parse(DeepCopy).Execute(tplParams)
+	if err != nil {
+		return "", err
+	}
+	commonFunc += fmt.Sprintln(deepCopy.String())
+	return commonFunc, nil
+}
+
 // generateCreateFunc
 func (r *Repo) generateCreateFunc() (string, error) {
 	// 是否有索引
 	haveIndex := len(r.index) > 0
 	// 是否有主键索引
 	havePrimaryKey := false
+	singlePrimaryKeyField := ""
 	for _, v := range r.index {
 		if v.PrimaryKey {
 			havePrimaryKey = true
+			if len(v.Columns) == 1 {
+				singlePrimaryKeyField = v.Columns[0]
+			}
 			break
 		}
 	}
 	var createFunc string
 	tplParams := map[string]any{
-		"firstTableChar": r.firstTableChar,
-		"dbName":         r.dbName,
-		"upperTableName": r.upperTableName,
-		"lowerTableName": r.lowerTableName,
+		"firstTableChar":        r.firstTableChar,
+		"dbName":                r.dbName,
+		"upperTableName":        r.upperTableName,
+		"lowerTableName":        r.lowerTableName,
+		"upperSinglePrimaryKey": r.upperFieldName(singlePrimaryKeyField),
 	}
 	createOne, err := template.NewTemplate().Parse(CreateOne).Execute(tplParams)
 	if err != nil {

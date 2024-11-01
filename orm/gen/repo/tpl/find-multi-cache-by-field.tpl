@@ -18,7 +18,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiCacheBy{{.upperFiel
 		return nil, err
 	}
 	if cacheValue != "" {
-		err = {{.firstTableChar}}.encoding.Unmarshal([]byte(cacheValue), resp)
+		err = {{.firstTableChar}}.encoding.Unmarshal([]byte(cacheValue), &resp)
 		if err != nil {
 			return nil, err
 		}

@@ -7,6 +7,8 @@ package gorm_gen_repo
 import (
 	"context"
 	"errors"
+	"reflect"
+	"strings"
 
 	"github.com/fzf-labs/fdatabase/orm/condition"
 	"github.com/fzf-labs/fdatabase/orm/dbcache"
@@ -31,6 +33,8 @@ var (
 
 type (
 	IUserDemoRepo interface {
+		// DeepCopy 深拷贝
+		DeepCopy(data *gorm_gen_model.UserDemo) *gorm_gen_model.UserDemo
 		// CreateOne 创建一条数据
 		CreateOne(ctx context.Context, data *gorm_gen_model.UserDemo) error
 		// CreateOneCache 创建一条数据, 并删除缓存
@@ -66,19 +70,19 @@ type (
 		// UpdateOne 更新一条数据
 		UpdateOne(ctx context.Context, data *gorm_gen_model.UserDemo) error
 		// UpdateOneCache 更新一条数据，并删除缓存
-		UpdateOneCache(ctx context.Context, data *gorm_gen_model.UserDemo) error
+		UpdateOneCache(ctx context.Context, newData *gorm_gen_model.UserDemo, oldData *gorm_gen_model.UserDemo) error
 		// UpdateOneByTx 更新一条数据(事务)
 		UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error
 		// UpdateOneCacheByTx 更新一条数据(事务)，并删除缓存
-		UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error
+		UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.UserDemo, oldData *gorm_gen_model.UserDemo) error
 		// UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
 		UpdateOneWithZero(ctx context.Context, data *gorm_gen_model.UserDemo) error
 		// UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
-		UpdateOneCacheWithZero(ctx context.Context, data *gorm_gen_model.UserDemo) error
+		UpdateOneCacheWithZero(ctx context.Context, newData *gorm_gen_model.UserDemo, oldData *gorm_gen_model.UserDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
 		UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
-		UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error
+		UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.UserDemo, oldData *gorm_gen_model.UserDemo) error
 		// UpdateBatchByIDS 根据主键IDS批量更新
 		UpdateBatchByIDS(ctx context.Context, IDS []string, data map[string]interface{}) error
 		// UpdateBatchByIDSTx 根据主键IDS批量更新(事务)
@@ -206,7 +210,7 @@ type (
 		// DeleteMultiCacheByTenantIDSTx 根据TenantIDS删除多条数据，并删除缓存(事务)
 		DeleteMultiCacheByTenantIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, tenantIDS []int64) error
 		// DeleteIndexCache 删除索引存在的缓存
-		DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.UserDemo) error
+		DeleteIndexCache(ctx context.Context, data ...*gorm_gen_model.UserDemo) error
 	}
 	UserDemoRepo struct {
 		db       *gorm.DB
@@ -221,6 +225,13 @@ func NewUserDemoRepo(cfg *config.Repo) *UserDemoRepo {
 		cache:    cfg.Cache,
 		encoding: cfg.Encoding,
 	}
+}
+
+// DeepCopy 深拷贝
+func (u *UserDemoRepo) DeepCopy(data *gorm_gen_model.UserDemo) *gorm_gen_model.UserDemo {
+	newData := new(gorm_gen_model.UserDemo)
+	*newData = *data
+	return newData
 }
 
 // CreateOne 创建一条数据
@@ -240,7 +251,7 @@ func (u *UserDemoRepo) CreateOneCache(ctx context.Context, data *gorm_gen_model.
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, data)
 	if err != nil {
 		return err
 	}
@@ -264,7 +275,7 @@ func (u *UserDemoRepo) CreateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, data)
 	if err != nil {
 		return err
 	}
@@ -288,7 +299,7 @@ func (u *UserDemoRepo) CreateBatchCache(ctx context.Context, data []*gorm_gen_mo
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, data)
+	err = u.DeleteIndexCache(ctx, data...)
 	if err != nil {
 		return err
 	}
@@ -312,7 +323,7 @@ func (u *UserDemoRepo) CreateBatchCacheByTx(ctx context.Context, tx *gorm_gen_da
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, data)
+	err = u.DeleteIndexCache(ctx, data...)
 	if err != nil {
 		return err
 	}
@@ -334,11 +345,15 @@ func (u *UserDemoRepo) UpsertOne(ctx context.Context, data *gorm_gen_model.UserD
 // Update all columns, except primary keys, to new value on conflict
 func (u *UserDemoRepo) UpsertOneCache(ctx context.Context, data *gorm_gen_model.UserDemo) error {
 	dao := gorm_gen_dao.Use(u.db).UserDemo
-	err := dao.WithContext(ctx).Save(data)
+	oldData, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).First()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	err = dao.WithContext(ctx).Save(data)
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -360,11 +375,15 @@ func (u *UserDemoRepo) UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.Query
 // Update all columns, except primary keys, to new value on conflict
 func (u *UserDemoRepo) UpsertOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error {
 	dao := tx.UserDemo
-	err := dao.WithContext(ctx).Save(data)
+	oldData, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).First()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	err = dao.WithContext(ctx).Save(data)
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -396,19 +415,44 @@ func (u *UserDemoRepo) UpsertOneCacheByFields(ctx context.Context, data *gorm_ge
 	if len(fields) == 0 {
 		return errors.New("UpsertOneByFields fields is empty")
 	}
+	fieldNameToValue := make(map[string]interface{})
+	typ := reflect.TypeOf(data).Elem()
+	val := reflect.ValueOf(data).Elem()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		gormTag := field.Tag.Get("gorm")
+		if gormTag != "" {
+			gormTags := strings.Split(gormTag, ";")
+			for _, v := range gormTags {
+				if strings.Contains(v, "column") {
+					columnName := strings.TrimPrefix(v, "column:")
+					fieldValue := val.Field(i).Interface()
+					fieldNameToValue[columnName] = fieldValue
+					break
+				}
+			}
+		}
+	}
+	whereExpressions := make([]clause.Expression, 0)
 	columns := make([]clause.Column, 0)
 	for _, v := range fields {
+		whereExpressions = append(whereExpressions, clause.And(clause.Eq{Column: v, Value: fieldNameToValue[v]}))
 		columns = append(columns, clause.Column{Name: v})
 	}
+	oldData := &gorm_gen_model.UserDemo{}
+	err := u.db.Model(&gorm_gen_model.UserDemo{}).Clauses(whereExpressions...).First(oldData).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
 	dao := gorm_gen_dao.Use(u.db).UserDemo
-	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+	err = dao.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns:   columns,
 		UpdateAll: true,
 	}).Create(data)
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -440,19 +484,44 @@ func (u *UserDemoRepo) UpsertOneCacheByFieldsTx(ctx context.Context, tx *gorm_ge
 	if len(fields) == 0 {
 		return errors.New("UpsertOneByFieldsTx fields is empty")
 	}
+	fieldNameToValue := make(map[string]interface{})
+	typ := reflect.TypeOf(data).Elem()
+	val := reflect.ValueOf(data).Elem()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		gormTag := field.Tag.Get("gorm")
+		if gormTag != "" {
+			gormTags := strings.Split(gormTag, ";")
+			for _, v := range gormTags {
+				if strings.Contains(v, "column") {
+					columnName := strings.TrimPrefix(v, "column:")
+					fieldValue := val.Field(i).Interface()
+					fieldNameToValue[columnName] = fieldValue
+					break
+				}
+			}
+		}
+	}
+	whereExpressions := make([]clause.Expression, 0)
 	columns := make([]clause.Column, 0)
 	for _, v := range fields {
+		whereExpressions = append(whereExpressions, clause.And(clause.Eq{Column: v, Value: fieldNameToValue[v]}))
 		columns = append(columns, clause.Column{Name: v})
 	}
+	oldData := &gorm_gen_model.UserDemo{}
+	err := u.db.Model(&gorm_gen_model.UserDemo{}).Clauses(whereExpressions...).First(oldData).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
 	dao := tx.UserDemo
-	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+	err = dao.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns:   columns,
 		UpdateAll: true,
 	}).Create(data)
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -461,9 +530,9 @@ func (u *UserDemoRepo) UpsertOneCacheByFieldsTx(ctx context.Context, tx *gorm_ge
 
 // UpdateOne 更新一条数据
 // data 中主键字段必须有值，零值不会被更新
-func (u *UserDemoRepo) UpdateOne(ctx context.Context, data *gorm_gen_model.UserDemo) error {
+func (u *UserDemoRepo) UpdateOne(ctx context.Context, newData *gorm_gen_model.UserDemo) error {
 	dao := gorm_gen_dao.Use(u.db).UserDemo
-	_, err := dao.WithContext(ctx).Updates(data)
+	_, err := dao.WithContext(ctx).Updates(newData)
 	if err != nil {
 		return err
 	}
@@ -472,13 +541,14 @@ func (u *UserDemoRepo) UpdateOne(ctx context.Context, data *gorm_gen_model.UserD
 
 // UpdateOneCache 更新一条数据，并删除缓存
 // data 中主键字段必须有值，零值不会被更新
-func (u *UserDemoRepo) UpdateOneCache(ctx context.Context, data *gorm_gen_model.UserDemo) error {
+// oldData 旧数据，删除缓存时使用
+func (u *UserDemoRepo) UpdateOneCache(ctx context.Context, newData *gorm_gen_model.UserDemo, oldData *gorm_gen_model.UserDemo) error {
 	dao := gorm_gen_dao.Use(u.db).UserDemo
-	_, err := dao.WithContext(ctx).Updates(data)
+	_, err := dao.WithContext(ctx).Updates(newData)
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, oldData, newData)
 	if err != nil {
 		return err
 	}
@@ -487,9 +557,9 @@ func (u *UserDemoRepo) UpdateOneCache(ctx context.Context, data *gorm_gen_model.
 
 // UpdateOneByTx 更新一条数据(事务)
 // data 中主键字段必须有值，零值不会被更新
-func (u *UserDemoRepo) UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error {
+func (u *UserDemoRepo) UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.UserDemo) error {
 	dao := tx.UserDemo
-	_, err := dao.WithContext(ctx).Updates(data)
+	_, err := dao.WithContext(ctx).Updates(newData)
 	if err != nil {
 		return err
 	}
@@ -498,13 +568,14 @@ func (u *UserDemoRepo) UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query
 
 // UpdateOneCacheByTx 更新一条数据(事务)，并删除缓存
 // data 中主键字段必须有值，零值不会被更新
-func (u *UserDemoRepo) UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error {
+// oldData 旧数据，删除缓存时使用
+func (u *UserDemoRepo) UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.UserDemo, oldData *gorm_gen_model.UserDemo) error {
 	dao := tx.UserDemo
-	_, err := dao.WithContext(ctx).Updates(data)
+	_, err := dao.WithContext(ctx).Updates(newData)
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, oldData, newData)
 	if err != nil {
 		return err
 	}
@@ -513,9 +584,9 @@ func (u *UserDemoRepo) UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.
 
 // UpdateOneWithZero 更新一条数据,包含零值
 // data 中主键字段必须有值,并且会更新所有字段,包括零值
-func (u *UserDemoRepo) UpdateOneWithZero(ctx context.Context, data *gorm_gen_model.UserDemo) error {
+func (u *UserDemoRepo) UpdateOneWithZero(ctx context.Context, newData *gorm_gen_model.UserDemo) error {
 	dao := gorm_gen_dao.Use(u.db).UserDemo
-	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(data)
+	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(newData)
 	if err != nil {
 		return err
 	}
@@ -524,13 +595,14 @@ func (u *UserDemoRepo) UpdateOneWithZero(ctx context.Context, data *gorm_gen_mod
 
 // UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
 // data 中主键字段必须有值,并且会更新所有字段,包括零值
-func (u *UserDemoRepo) UpdateOneCacheWithZero(ctx context.Context, data *gorm_gen_model.UserDemo) error {
+// oldData 旧数据，删除缓存时使用
+func (u *UserDemoRepo) UpdateOneCacheWithZero(ctx context.Context, newData *gorm_gen_model.UserDemo, oldData *gorm_gen_model.UserDemo) error {
 	dao := gorm_gen_dao.Use(u.db).UserDemo
-	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(data)
+	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(newData)
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, oldData, newData)
 	if err != nil {
 		return err
 	}
@@ -539,9 +611,9 @@ func (u *UserDemoRepo) UpdateOneCacheWithZero(ctx context.Context, data *gorm_ge
 
 // UpdateOneWithZeroByTx 更新一条数据(事务),包含零值，
 // data 中主键字段必须有值,并且会更新所有字段,包括零值
-func (u *UserDemoRepo) UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error {
+func (u *UserDemoRepo) UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.UserDemo) error {
 	dao := tx.UserDemo
-	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(data)
+	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(newData)
 	if err != nil {
 		return err
 	}
@@ -550,13 +622,14 @@ func (u *UserDemoRepo) UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_d
 
 // UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
 // data 中主键字段必须有值,并且会更新所有字段,包括零值
-func (u *UserDemoRepo) UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.UserDemo) error {
+// oldData 旧数据，删除缓存时使用
+func (u *UserDemoRepo) UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.UserDemo, oldData *gorm_gen_model.UserDemo) error {
 	dao := tx.UserDemo
-	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(data)
+	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(newData)
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{data})
+	err = u.DeleteIndexCache(ctx, oldData, newData)
 	if err != nil {
 		return err
 	}
@@ -845,7 +918,7 @@ func (u *UserDemoRepo) FindMultiCacheByTenantIDDeptID(ctx context.Context, tenan
 		return nil, err
 	}
 	if cacheValue != "" {
-		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
+		err = u.encoding.Unmarshal([]byte(cacheValue), &resp)
 		if err != nil {
 			return nil, err
 		}
@@ -883,7 +956,7 @@ func (u *UserDemoRepo) FindMultiCacheByUsername(ctx context.Context, username st
 		return nil, err
 	}
 	if cacheValue != "" {
-		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
+		err = u.encoding.Unmarshal([]byte(cacheValue), &resp)
 		if err != nil {
 			return nil, err
 		}
@@ -989,7 +1062,7 @@ func (u *UserDemoRepo) FindMultiCacheByTenantID(ctx context.Context, tenantID in
 		return nil, err
 	}
 	if cacheValue != "" {
-		err = u.encoding.Unmarshal([]byte(cacheValue), resp)
+		err = u.encoding.Unmarshal([]byte(cacheValue), &resp)
 		if err != nil {
 			return nil, err
 		}
@@ -1068,21 +1141,22 @@ func (u *UserDemoRepo) FindMultiCacheByTenantIDS(ctx context.Context, tenantIDS 
 // FindMultiByCondition 自定义查询数据(通用)
 func (u *UserDemoRepo) FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.UserDemo, *condition.Reply, error) {
 	result := make([]*gorm_gen_model.UserDemo, 0)
+	conditionReply := &condition.Reply{}
 	var total int64
 	whereExpressions, orderExpressions, err := conditionReq.ConvertToGormExpression(gorm_gen_model.UserDemo{})
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	err = u.db.WithContext(ctx).Model(&gorm_gen_model.UserDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	if total == 0 {
-		return result, nil, nil
+		return result, conditionReply, nil
 	}
-	conditionReply, err := conditionReq.ConvertToPage(int32(total))
+	conditionReply, err = conditionReq.ConvertToPage(int32(total))
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	query := u.db.WithContext(ctx).Model(&gorm_gen_model.UserDemo{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
 	if conditionReply.Page != 0 && conditionReply.PageSize != 0 {
@@ -1091,7 +1165,7 @@ func (u *UserDemoRepo) FindMultiByCondition(ctx context.Context, conditionReq *c
 	}
 	err = query.Find(&result).Error
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	return result, conditionReply, err
 }
@@ -1120,7 +1194,7 @@ func (u *UserDemoRepo) DeleteOneCacheByID(ctx context.Context, ID string) error 
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{result})
+	err = u.DeleteIndexCache(ctx, result)
 	if err != nil {
 		return err
 	}
@@ -1151,7 +1225,7 @@ func (u *UserDemoRepo) DeleteOneCacheByIDTx(ctx context.Context, tx *gorm_gen_da
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{result})
+	err = u.DeleteIndexCache(ctx, result)
 	if err != nil {
 		return err
 	}
@@ -1182,7 +1256,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByIDS(ctx context.Context, IDS []string) 
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1213,7 +1287,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByIDSTx(ctx context.Context, tx *gorm_gen
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1244,7 +1318,7 @@ func (u *UserDemoRepo) DeleteOneCacheByUID(ctx context.Context, UID string) erro
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{result})
+	err = u.DeleteIndexCache(ctx, result)
 	if err != nil {
 		return err
 	}
@@ -1275,7 +1349,7 @@ func (u *UserDemoRepo) DeleteOneCacheByUIDTx(ctx context.Context, tx *gorm_gen_d
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{result})
+	err = u.DeleteIndexCache(ctx, result)
 	if err != nil {
 		return err
 	}
@@ -1306,7 +1380,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByUIDS(ctx context.Context, UIDS []string
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1337,7 +1411,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByUIDSTx(ctx context.Context, tx *gorm_ge
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1368,7 +1442,7 @@ func (u *UserDemoRepo) DeleteOneCacheByUIDStatus(ctx context.Context, UID string
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{result})
+	err = u.DeleteIndexCache(ctx, result)
 	if err != nil {
 		return err
 	}
@@ -1399,7 +1473,7 @@ func (u *UserDemoRepo) DeleteOneCacheByUIDStatusTx(ctx context.Context, tx *gorm
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, []*gorm_gen_model.UserDemo{result})
+	err = u.DeleteIndexCache(ctx, result)
 	if err != nil {
 		return err
 	}
@@ -1430,7 +1504,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByTenantIDDeptID(ctx context.Context, ten
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1461,7 +1535,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByTenantIDDeptIDTx(ctx context.Context, t
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1492,7 +1566,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByUsername(ctx context.Context, username 
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1523,7 +1597,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByUsernameTx(ctx context.Context, tx *gor
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1554,7 +1628,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByUsernames(ctx context.Context, username
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1585,7 +1659,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByUsernamesTx(ctx context.Context, tx *go
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1616,7 +1690,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByTenantID(ctx context.Context, tenantID 
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1647,7 +1721,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByTenantIDTx(ctx context.Context, tx *gor
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1678,7 +1752,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByTenantIDS(ctx context.Context, tenantID
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1709,7 +1783,7 @@ func (u *UserDemoRepo) DeleteMultiCacheByTenantIDSTx(ctx context.Context, tx *go
 	if err != nil {
 		return err
 	}
-	err = u.DeleteIndexCache(ctx, result)
+	err = u.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1717,18 +1791,22 @@ func (u *UserDemoRepo) DeleteMultiCacheByTenantIDSTx(ctx context.Context, tx *go
 }
 
 // DeleteUniqueIndexCache 删除索引存在的缓存
-func (u *UserDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.UserDemo) error {
-	keys := make([]string, 0)
+func (u *UserDemoRepo) DeleteIndexCache(ctx context.Context, data ...*gorm_gen_model.UserDemo) error {
+	KeyMap := make(map[string]struct{})
 	for _, v := range data {
-		keys = append(
-			keys,
-			u.cache.Key(CacheUserDemoByIDPrefix, v.ID),
-			u.cache.Key(CacheUserDemoByUIDPrefix, v.UID),
-			u.cache.Key(CacheUserDemoByUIDStatusPrefix, v.UID, v.Status),
-			u.cache.Key(CacheUserDemoByTenantIDDeptIDPrefix, v.TenantID, v.DeptID),
-			u.cache.Key(CacheUserDemoByUsernamePrefix, v.Username),
-			u.cache.Key(CacheUserDemoByTenantIDPrefix, v.TenantID),
-		)
+		if v != nil {
+			KeyMap[u.cache.Key(CacheUserDemoByIDPrefix, v.ID)] = struct{}{}
+			KeyMap[u.cache.Key(CacheUserDemoByUIDPrefix, v.UID)] = struct{}{}
+			KeyMap[u.cache.Key(CacheUserDemoByUIDStatusPrefix, v.UID, v.Status)] = struct{}{}
+			KeyMap[u.cache.Key(CacheUserDemoByTenantIDDeptIDPrefix, v.TenantID, v.DeptID)] = struct{}{}
+			KeyMap[u.cache.Key(CacheUserDemoByUsernamePrefix, v.Username)] = struct{}{}
+			KeyMap[u.cache.Key(CacheUserDemoByTenantIDPrefix, v.TenantID)] = struct{}{}
+
+		}
+	}
+	keys := make([]string, 0, len(KeyMap))
+	for k := range KeyMap {
+		keys = append(keys, k)
 	}
 	err := u.cache.DelBatch(ctx, keys)
 	if err != nil {

@@ -7,6 +7,8 @@ package gorm_gen_repo
 import (
 	"context"
 	"errors"
+	"reflect"
+	"strings"
 
 	"github.com/fzf-labs/fdatabase/orm/condition"
 	"github.com/fzf-labs/fdatabase/orm/dbcache"
@@ -29,6 +31,8 @@ var (
 
 type (
 	IAdminToRoleDemoRepo interface {
+		// DeepCopy 深拷贝
+		DeepCopy(data *gorm_gen_model.AdminToRoleDemo) *gorm_gen_model.AdminToRoleDemo
 		// CreateOne 创建一条数据
 		CreateOne(ctx context.Context, data *gorm_gen_model.AdminToRoleDemo) error
 		// CreateOneCache 创建一条数据, 并删除缓存
@@ -128,7 +132,7 @@ type (
 		// DeleteMultiCacheByRoleIDSTx 根据RoleIDS删除多条数据，并删除缓存(事务)
 		DeleteMultiCacheByRoleIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, roleIDS []string) error
 		// DeleteIndexCache 删除索引存在的缓存
-		DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminToRoleDemo) error
+		DeleteIndexCache(ctx context.Context, data ...*gorm_gen_model.AdminToRoleDemo) error
 	}
 	AdminToRoleDemoRepo struct {
 		db       *gorm.DB
@@ -143,6 +147,13 @@ func NewAdminToRoleDemoRepo(cfg *config.Repo) *AdminToRoleDemoRepo {
 		cache:    cfg.Cache,
 		encoding: cfg.Encoding,
 	}
+}
+
+// DeepCopy 深拷贝
+func (a *AdminToRoleDemoRepo) DeepCopy(data *gorm_gen_model.AdminToRoleDemo) *gorm_gen_model.AdminToRoleDemo {
+	newData := new(gorm_gen_model.AdminToRoleDemo)
+	*newData = *data
+	return newData
 }
 
 // CreateOne 创建一条数据
@@ -162,7 +173,7 @@ func (a *AdminToRoleDemoRepo) CreateOneCache(ctx context.Context, data *gorm_gen
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminToRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, data)
 	if err != nil {
 		return err
 	}
@@ -186,7 +197,7 @@ func (a *AdminToRoleDemoRepo) CreateOneCacheByTx(ctx context.Context, tx *gorm_g
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminToRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, data)
 	if err != nil {
 		return err
 	}
@@ -210,7 +221,7 @@ func (a *AdminToRoleDemoRepo) CreateBatchCache(ctx context.Context, data []*gorm
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, data)
+	err = a.DeleteIndexCache(ctx, data...)
 	if err != nil {
 		return err
 	}
@@ -234,7 +245,7 @@ func (a *AdminToRoleDemoRepo) CreateBatchCacheByTx(ctx context.Context, tx *gorm
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, data)
+	err = a.DeleteIndexCache(ctx, data...)
 	if err != nil {
 		return err
 	}
@@ -266,19 +277,44 @@ func (a *AdminToRoleDemoRepo) UpsertOneCacheByFields(ctx context.Context, data *
 	if len(fields) == 0 {
 		return errors.New("UpsertOneByFields fields is empty")
 	}
+	fieldNameToValue := make(map[string]interface{})
+	typ := reflect.TypeOf(data).Elem()
+	val := reflect.ValueOf(data).Elem()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		gormTag := field.Tag.Get("gorm")
+		if gormTag != "" {
+			gormTags := strings.Split(gormTag, ";")
+			for _, v := range gormTags {
+				if strings.Contains(v, "column") {
+					columnName := strings.TrimPrefix(v, "column:")
+					fieldValue := val.Field(i).Interface()
+					fieldNameToValue[columnName] = fieldValue
+					break
+				}
+			}
+		}
+	}
+	whereExpressions := make([]clause.Expression, 0)
 	columns := make([]clause.Column, 0)
 	for _, v := range fields {
+		whereExpressions = append(whereExpressions, clause.And(clause.Eq{Column: v, Value: fieldNameToValue[v]}))
 		columns = append(columns, clause.Column{Name: v})
 	}
+	oldData := &gorm_gen_model.AdminToRoleDemo{}
+	err := a.db.Model(&gorm_gen_model.AdminToRoleDemo{}).Clauses(whereExpressions...).First(oldData).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
 	dao := gorm_gen_dao.Use(a.db).AdminToRoleDemo
-	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+	err = dao.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns:   columns,
 		UpdateAll: true,
 	}).Create(data)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminToRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -310,19 +346,44 @@ func (a *AdminToRoleDemoRepo) UpsertOneCacheByFieldsTx(ctx context.Context, tx *
 	if len(fields) == 0 {
 		return errors.New("UpsertOneByFieldsTx fields is empty")
 	}
+	fieldNameToValue := make(map[string]interface{})
+	typ := reflect.TypeOf(data).Elem()
+	val := reflect.ValueOf(data).Elem()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		gormTag := field.Tag.Get("gorm")
+		if gormTag != "" {
+			gormTags := strings.Split(gormTag, ";")
+			for _, v := range gormTags {
+				if strings.Contains(v, "column") {
+					columnName := strings.TrimPrefix(v, "column:")
+					fieldValue := val.Field(i).Interface()
+					fieldNameToValue[columnName] = fieldValue
+					break
+				}
+			}
+		}
+	}
+	whereExpressions := make([]clause.Expression, 0)
 	columns := make([]clause.Column, 0)
 	for _, v := range fields {
+		whereExpressions = append(whereExpressions, clause.And(clause.Eq{Column: v, Value: fieldNameToValue[v]}))
 		columns = append(columns, clause.Column{Name: v})
 	}
+	oldData := &gorm_gen_model.AdminToRoleDemo{}
+	err := a.db.Model(&gorm_gen_model.AdminToRoleDemo{}).Clauses(whereExpressions...).First(oldData).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
 	dao := tx.AdminToRoleDemo
-	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+	err = dao.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns:   columns,
 		UpdateAll: true,
 	}).Create(data)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminToRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -359,7 +420,7 @@ func (a *AdminToRoleDemoRepo) FindMultiCacheByAdminIDRoleID(ctx context.Context,
 		return nil, err
 	}
 	if cacheValue != "" {
-		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
+		err = a.encoding.Unmarshal([]byte(cacheValue), &resp)
 		if err != nil {
 			return nil, err
 		}
@@ -397,7 +458,7 @@ func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleIDAdminID(ctx context.Context,
 		return nil, err
 	}
 	if cacheValue != "" {
-		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
+		err = a.encoding.Unmarshal([]byte(cacheValue), &resp)
 		if err != nil {
 			return nil, err
 		}
@@ -435,7 +496,7 @@ func (a *AdminToRoleDemoRepo) FindMultiCacheByAdminID(ctx context.Context, admin
 		return nil, err
 	}
 	if cacheValue != "" {
-		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
+		err = a.encoding.Unmarshal([]byte(cacheValue), &resp)
 		if err != nil {
 			return nil, err
 		}
@@ -541,7 +602,7 @@ func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleID(ctx context.Context, roleID
 		return nil, err
 	}
 	if cacheValue != "" {
-		err = a.encoding.Unmarshal([]byte(cacheValue), resp)
+		err = a.encoding.Unmarshal([]byte(cacheValue), &resp)
 		if err != nil {
 			return nil, err
 		}
@@ -620,21 +681,22 @@ func (a *AdminToRoleDemoRepo) FindMultiCacheByRoleIDS(ctx context.Context, roleI
 // FindMultiByCondition 自定义查询数据(通用)
 func (a *AdminToRoleDemoRepo) FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.AdminToRoleDemo, *condition.Reply, error) {
 	result := make([]*gorm_gen_model.AdminToRoleDemo, 0)
+	conditionReply := &condition.Reply{}
 	var total int64
 	whereExpressions, orderExpressions, err := conditionReq.ConvertToGormExpression(gorm_gen_model.AdminToRoleDemo{})
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminToRoleDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	if total == 0 {
-		return result, nil, nil
+		return result, conditionReply, nil
 	}
-	conditionReply, err := conditionReq.ConvertToPage(int32(total))
+	conditionReply, err = conditionReq.ConvertToPage(int32(total))
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	query := a.db.WithContext(ctx).Model(&gorm_gen_model.AdminToRoleDemo{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
 	if conditionReply.Page != 0 && conditionReply.PageSize != 0 {
@@ -643,7 +705,7 @@ func (a *AdminToRoleDemoRepo) FindMultiByCondition(ctx context.Context, conditio
 	}
 	err = query.Find(&result).Error
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	return result, conditionReply, err
 }
@@ -672,7 +734,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByAdminIDRoleID(ctx context.Contex
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -703,7 +765,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByAdminIDRoleIDTx(ctx context.Cont
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -734,7 +796,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByRoleIDAdminID(ctx context.Contex
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -765,7 +827,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByRoleIDAdminIDTx(ctx context.Cont
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -796,7 +858,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByAdminID(ctx context.Context, adm
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -827,7 +889,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByAdminIDTx(ctx context.Context, t
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -858,7 +920,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByAdminIDS(ctx context.Context, ad
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -889,7 +951,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByAdminIDSTx(ctx context.Context, 
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -920,7 +982,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByRoleID(ctx context.Context, role
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -951,7 +1013,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByRoleIDTx(ctx context.Context, tx
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -982,7 +1044,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByRoleIDS(ctx context.Context, rol
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1013,7 +1075,7 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByRoleIDSTx(ctx context.Context, t
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -1021,16 +1083,20 @@ func (a *AdminToRoleDemoRepo) DeleteMultiCacheByRoleIDSTx(ctx context.Context, t
 }
 
 // DeleteUniqueIndexCache 删除索引存在的缓存
-func (a *AdminToRoleDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminToRoleDemo) error {
-	keys := make([]string, 0)
+func (a *AdminToRoleDemoRepo) DeleteIndexCache(ctx context.Context, data ...*gorm_gen_model.AdminToRoleDemo) error {
+	KeyMap := make(map[string]struct{})
 	for _, v := range data {
-		keys = append(
-			keys,
-			a.cache.Key(CacheAdminToRoleDemoByAdminIDRoleIDPrefix, v.AdminID, v.RoleID),
-			a.cache.Key(CacheAdminToRoleDemoByRoleIDAdminIDPrefix, v.RoleID, v.AdminID),
-			a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v.AdminID),
-			a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v.RoleID),
-		)
+		if v != nil {
+			KeyMap[a.cache.Key(CacheAdminToRoleDemoByAdminIDRoleIDPrefix, v.AdminID, v.RoleID)] = struct{}{}
+			KeyMap[a.cache.Key(CacheAdminToRoleDemoByRoleIDAdminIDPrefix, v.RoleID, v.AdminID)] = struct{}{}
+			KeyMap[a.cache.Key(CacheAdminToRoleDemoByAdminIDPrefix, v.AdminID)] = struct{}{}
+			KeyMap[a.cache.Key(CacheAdminToRoleDemoByRoleIDPrefix, v.RoleID)] = struct{}{}
+
+		}
+	}
+	keys := make([]string, 0, len(KeyMap))
+	for k := range KeyMap {
+		keys = append(keys, k)
 	}
 	err := a.cache.DelBatch(ctx, keys)
 	if err != nil {

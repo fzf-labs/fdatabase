@@ -12,7 +12,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) DeleteMultiCacheBy{{.upperFi
 	if err != nil {
 		return err
 	}
-	err = {{.firstTableChar}}.DeleteIndexCache(ctx, result)
+	err = {{.firstTableChar}}.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}

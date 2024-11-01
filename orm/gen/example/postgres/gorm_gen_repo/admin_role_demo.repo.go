@@ -7,6 +7,8 @@ package gorm_gen_repo
 import (
 	"context"
 	"errors"
+	"reflect"
+	"strings"
 
 	"github.com/fzf-labs/fdatabase/orm/condition"
 	"github.com/fzf-labs/fdatabase/orm/dbcache"
@@ -26,6 +28,8 @@ var (
 
 type (
 	IAdminRoleDemoRepo interface {
+		// DeepCopy 深拷贝
+		DeepCopy(data *gorm_gen_model.AdminRoleDemo) *gorm_gen_model.AdminRoleDemo
 		// CreateOne 创建一条数据
 		CreateOne(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error
 		// CreateOneCache 创建一条数据, 并删除缓存
@@ -61,19 +65,19 @@ type (
 		// UpdateOne 更新一条数据
 		UpdateOne(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCache 更新一条数据，并删除缓存
-		UpdateOneCache(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error
+		UpdateOneCache(ctx context.Context, newData *gorm_gen_model.AdminRoleDemo, oldData *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneByTx 更新一条数据(事务)
 		UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheByTx 更新一条数据(事务)，并删除缓存
-		UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
+		UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminRoleDemo, oldData *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
 		UpdateOneWithZero(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
-		UpdateOneCacheWithZero(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error
+		UpdateOneCacheWithZero(ctx context.Context, newData *gorm_gen_model.AdminRoleDemo, oldData *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
 		UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
-		UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error
+		UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminRoleDemo, oldData *gorm_gen_model.AdminRoleDemo) error
 		// UpdateBatchByIDS 根据主键IDS批量更新
 		UpdateBatchByIDS(ctx context.Context, IDS []string, data map[string]interface{}) error
 		// UpdateBatchByIDSTx 根据主键IDS批量更新(事务)
@@ -105,7 +109,7 @@ type (
 		// DeleteMultiCacheByIDSTx 根据IDS删除多条数据，并删除缓存(事务)
 		DeleteMultiCacheByIDSTx(ctx context.Context, tx *gorm_gen_dao.Query, IDS []string) error
 		// DeleteIndexCache 删除索引存在的缓存
-		DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminRoleDemo) error
+		DeleteIndexCache(ctx context.Context, data ...*gorm_gen_model.AdminRoleDemo) error
 	}
 	AdminRoleDemoRepo struct {
 		db       *gorm.DB
@@ -120,6 +124,13 @@ func NewAdminRoleDemoRepo(cfg *config.Repo) *AdminRoleDemoRepo {
 		cache:    cfg.Cache,
 		encoding: cfg.Encoding,
 	}
+}
+
+// DeepCopy 深拷贝
+func (a *AdminRoleDemoRepo) DeepCopy(data *gorm_gen_model.AdminRoleDemo) *gorm_gen_model.AdminRoleDemo {
+	newData := new(gorm_gen_model.AdminRoleDemo)
+	*newData = *data
+	return newData
 }
 
 // CreateOne 创建一条数据
@@ -139,7 +150,7 @@ func (a *AdminRoleDemoRepo) CreateOneCache(ctx context.Context, data *gorm_gen_m
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, data)
 	if err != nil {
 		return err
 	}
@@ -163,7 +174,7 @@ func (a *AdminRoleDemoRepo) CreateOneCacheByTx(ctx context.Context, tx *gorm_gen
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, data)
 	if err != nil {
 		return err
 	}
@@ -187,7 +198,7 @@ func (a *AdminRoleDemoRepo) CreateBatchCache(ctx context.Context, data []*gorm_g
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, data)
+	err = a.DeleteIndexCache(ctx, data...)
 	if err != nil {
 		return err
 	}
@@ -211,7 +222,7 @@ func (a *AdminRoleDemoRepo) CreateBatchCacheByTx(ctx context.Context, tx *gorm_g
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, data)
+	err = a.DeleteIndexCache(ctx, data...)
 	if err != nil {
 		return err
 	}
@@ -233,11 +244,15 @@ func (a *AdminRoleDemoRepo) UpsertOne(ctx context.Context, data *gorm_gen_model.
 // Update all columns, except primary keys, to new value on conflict
 func (a *AdminRoleDemoRepo) UpsertOneCache(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error {
 	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	err := dao.WithContext(ctx).Save(data)
+	oldData, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).First()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	err = dao.WithContext(ctx).Save(data)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -259,11 +274,15 @@ func (a *AdminRoleDemoRepo) UpsertOneByTx(ctx context.Context, tx *gorm_gen_dao.
 // Update all columns, except primary keys, to new value on conflict
 func (a *AdminRoleDemoRepo) UpsertOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error {
 	dao := tx.AdminRoleDemo
-	err := dao.WithContext(ctx).Save(data)
+	oldData, err := dao.WithContext(ctx).Where(dao.ID.Eq(data.ID)).First()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	err = dao.WithContext(ctx).Save(data)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -295,19 +314,44 @@ func (a *AdminRoleDemoRepo) UpsertOneCacheByFields(ctx context.Context, data *go
 	if len(fields) == 0 {
 		return errors.New("UpsertOneByFields fields is empty")
 	}
+	fieldNameToValue := make(map[string]interface{})
+	typ := reflect.TypeOf(data).Elem()
+	val := reflect.ValueOf(data).Elem()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		gormTag := field.Tag.Get("gorm")
+		if gormTag != "" {
+			gormTags := strings.Split(gormTag, ";")
+			for _, v := range gormTags {
+				if strings.Contains(v, "column") {
+					columnName := strings.TrimPrefix(v, "column:")
+					fieldValue := val.Field(i).Interface()
+					fieldNameToValue[columnName] = fieldValue
+					break
+				}
+			}
+		}
+	}
+	whereExpressions := make([]clause.Expression, 0)
 	columns := make([]clause.Column, 0)
 	for _, v := range fields {
+		whereExpressions = append(whereExpressions, clause.And(clause.Eq{Column: v, Value: fieldNameToValue[v]}))
 		columns = append(columns, clause.Column{Name: v})
 	}
+	oldData := &gorm_gen_model.AdminRoleDemo{}
+	err := a.db.Model(&gorm_gen_model.AdminRoleDemo{}).Clauses(whereExpressions...).First(oldData).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
 	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+	err = dao.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns:   columns,
 		UpdateAll: true,
 	}).Create(data)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -339,19 +383,44 @@ func (a *AdminRoleDemoRepo) UpsertOneCacheByFieldsTx(ctx context.Context, tx *go
 	if len(fields) == 0 {
 		return errors.New("UpsertOneByFieldsTx fields is empty")
 	}
+	fieldNameToValue := make(map[string]interface{})
+	typ := reflect.TypeOf(data).Elem()
+	val := reflect.ValueOf(data).Elem()
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		gormTag := field.Tag.Get("gorm")
+		if gormTag != "" {
+			gormTags := strings.Split(gormTag, ";")
+			for _, v := range gormTags {
+				if strings.Contains(v, "column") {
+					columnName := strings.TrimPrefix(v, "column:")
+					fieldValue := val.Field(i).Interface()
+					fieldNameToValue[columnName] = fieldValue
+					break
+				}
+			}
+		}
+	}
+	whereExpressions := make([]clause.Expression, 0)
 	columns := make([]clause.Column, 0)
 	for _, v := range fields {
+		whereExpressions = append(whereExpressions, clause.And(clause.Eq{Column: v, Value: fieldNameToValue[v]}))
 		columns = append(columns, clause.Column{Name: v})
 	}
+	oldData := &gorm_gen_model.AdminRoleDemo{}
+	err := a.db.Model(&gorm_gen_model.AdminRoleDemo{}).Clauses(whereExpressions...).First(oldData).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return err
+	}
 	dao := tx.AdminRoleDemo
-	err := dao.WithContext(ctx).Clauses(clause.OnConflict{
+	err = dao.WithContext(ctx).Clauses(clause.OnConflict{
 		Columns:   columns,
 		UpdateAll: true,
 	}).Create(data)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, data)
 	if err != nil {
 		return err
 	}
@@ -360,9 +429,9 @@ func (a *AdminRoleDemoRepo) UpsertOneCacheByFieldsTx(ctx context.Context, tx *go
 
 // UpdateOne 更新一条数据
 // data 中主键字段必须有值，零值不会被更新
-func (a *AdminRoleDemoRepo) UpdateOne(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error {
+func (a *AdminRoleDemoRepo) UpdateOne(ctx context.Context, newData *gorm_gen_model.AdminRoleDemo) error {
 	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	_, err := dao.WithContext(ctx).Updates(data)
+	_, err := dao.WithContext(ctx).Updates(newData)
 	if err != nil {
 		return err
 	}
@@ -371,13 +440,14 @@ func (a *AdminRoleDemoRepo) UpdateOne(ctx context.Context, data *gorm_gen_model.
 
 // UpdateOneCache 更新一条数据，并删除缓存
 // data 中主键字段必须有值，零值不会被更新
-func (a *AdminRoleDemoRepo) UpdateOneCache(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error {
+// oldData 旧数据，删除缓存时使用
+func (a *AdminRoleDemoRepo) UpdateOneCache(ctx context.Context, newData *gorm_gen_model.AdminRoleDemo, oldData *gorm_gen_model.AdminRoleDemo) error {
 	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	_, err := dao.WithContext(ctx).Updates(data)
+	_, err := dao.WithContext(ctx).Updates(newData)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, newData)
 	if err != nil {
 		return err
 	}
@@ -386,9 +456,9 @@ func (a *AdminRoleDemoRepo) UpdateOneCache(ctx context.Context, data *gorm_gen_m
 
 // UpdateOneByTx 更新一条数据(事务)
 // data 中主键字段必须有值，零值不会被更新
-func (a *AdminRoleDemoRepo) UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error {
+func (a *AdminRoleDemoRepo) UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminRoleDemo) error {
 	dao := tx.AdminRoleDemo
-	_, err := dao.WithContext(ctx).Updates(data)
+	_, err := dao.WithContext(ctx).Updates(newData)
 	if err != nil {
 		return err
 	}
@@ -397,13 +467,14 @@ func (a *AdminRoleDemoRepo) UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.
 
 // UpdateOneCacheByTx 更新一条数据(事务)，并删除缓存
 // data 中主键字段必须有值，零值不会被更新
-func (a *AdminRoleDemoRepo) UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error {
+// oldData 旧数据，删除缓存时使用
+func (a *AdminRoleDemoRepo) UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminRoleDemo, oldData *gorm_gen_model.AdminRoleDemo) error {
 	dao := tx.AdminRoleDemo
-	_, err := dao.WithContext(ctx).Updates(data)
+	_, err := dao.WithContext(ctx).Updates(newData)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, newData)
 	if err != nil {
 		return err
 	}
@@ -412,9 +483,9 @@ func (a *AdminRoleDemoRepo) UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen
 
 // UpdateOneWithZero 更新一条数据,包含零值
 // data 中主键字段必须有值,并且会更新所有字段,包括零值
-func (a *AdminRoleDemoRepo) UpdateOneWithZero(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error {
+func (a *AdminRoleDemoRepo) UpdateOneWithZero(ctx context.Context, newData *gorm_gen_model.AdminRoleDemo) error {
 	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(data)
+	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(newData)
 	if err != nil {
 		return err
 	}
@@ -423,13 +494,14 @@ func (a *AdminRoleDemoRepo) UpdateOneWithZero(ctx context.Context, data *gorm_ge
 
 // UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
 // data 中主键字段必须有值,并且会更新所有字段,包括零值
-func (a *AdminRoleDemoRepo) UpdateOneCacheWithZero(ctx context.Context, data *gorm_gen_model.AdminRoleDemo) error {
+// oldData 旧数据，删除缓存时使用
+func (a *AdminRoleDemoRepo) UpdateOneCacheWithZero(ctx context.Context, newData *gorm_gen_model.AdminRoleDemo, oldData *gorm_gen_model.AdminRoleDemo) error {
 	dao := gorm_gen_dao.Use(a.db).AdminRoleDemo
-	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(data)
+	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(newData)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, newData)
 	if err != nil {
 		return err
 	}
@@ -438,9 +510,9 @@ func (a *AdminRoleDemoRepo) UpdateOneCacheWithZero(ctx context.Context, data *go
 
 // UpdateOneWithZeroByTx 更新一条数据(事务),包含零值，
 // data 中主键字段必须有值,并且会更新所有字段,包括零值
-func (a *AdminRoleDemoRepo) UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error {
+func (a *AdminRoleDemoRepo) UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminRoleDemo) error {
 	dao := tx.AdminRoleDemo
-	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(data)
+	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(newData)
 	if err != nil {
 		return err
 	}
@@ -449,13 +521,14 @@ func (a *AdminRoleDemoRepo) UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_
 
 // UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
 // data 中主键字段必须有值,并且会更新所有字段,包括零值
-func (a *AdminRoleDemoRepo) UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminRoleDemo) error {
+// oldData 旧数据，删除缓存时使用
+func (a *AdminRoleDemoRepo) UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminRoleDemo, oldData *gorm_gen_model.AdminRoleDemo) error {
 	dao := tx.AdminRoleDemo
-	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(data)
+	_, err := dao.WithContext(ctx).Select(dao.ALL.WithTable("")).Updates(newData)
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{data})
+	err = a.DeleteIndexCache(ctx, oldData, newData)
 	if err != nil {
 		return err
 	}
@@ -583,21 +656,22 @@ func (a *AdminRoleDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []strin
 // FindMultiByCondition 自定义查询数据(通用)
 func (a *AdminRoleDemoRepo) FindMultiByCondition(ctx context.Context, conditionReq *condition.Req) ([]*gorm_gen_model.AdminRoleDemo, *condition.Reply, error) {
 	result := make([]*gorm_gen_model.AdminRoleDemo, 0)
+	conditionReply := &condition.Reply{}
 	var total int64
 	whereExpressions, orderExpressions, err := conditionReq.ConvertToGormExpression(gorm_gen_model.AdminRoleDemo{})
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	err = a.db.WithContext(ctx).Model(&gorm_gen_model.AdminRoleDemo{}).Select([]string{"*"}).Clauses(whereExpressions...).Count(&total).Error
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	if total == 0 {
-		return result, nil, nil
+		return result, conditionReply, nil
 	}
-	conditionReply, err := conditionReq.ConvertToPage(int32(total))
+	conditionReply, err = conditionReq.ConvertToPage(int32(total))
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	query := a.db.WithContext(ctx).Model(&gorm_gen_model.AdminRoleDemo{}).Clauses(whereExpressions...).Clauses(orderExpressions...)
 	if conditionReply.Page != 0 && conditionReply.PageSize != 0 {
@@ -606,7 +680,7 @@ func (a *AdminRoleDemoRepo) FindMultiByCondition(ctx context.Context, conditionR
 	}
 	err = query.Find(&result).Error
 	if err != nil {
-		return result, nil, err
+		return result, conditionReply, err
 	}
 	return result, conditionReply, err
 }
@@ -635,7 +709,7 @@ func (a *AdminRoleDemoRepo) DeleteOneCacheByID(ctx context.Context, ID string) e
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{result})
+	err = a.DeleteIndexCache(ctx, result)
 	if err != nil {
 		return err
 	}
@@ -666,7 +740,7 @@ func (a *AdminRoleDemoRepo) DeleteOneCacheByIDTx(ctx context.Context, tx *gorm_g
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, []*gorm_gen_model.AdminRoleDemo{result})
+	err = a.DeleteIndexCache(ctx, result)
 	if err != nil {
 		return err
 	}
@@ -697,7 +771,7 @@ func (a *AdminRoleDemoRepo) DeleteMultiCacheByIDS(ctx context.Context, IDS []str
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -728,7 +802,7 @@ func (a *AdminRoleDemoRepo) DeleteMultiCacheByIDSTx(ctx context.Context, tx *gor
 	if err != nil {
 		return err
 	}
-	err = a.DeleteIndexCache(ctx, result)
+	err = a.DeleteIndexCache(ctx, result...)
 	if err != nil {
 		return err
 	}
@@ -736,13 +810,17 @@ func (a *AdminRoleDemoRepo) DeleteMultiCacheByIDSTx(ctx context.Context, tx *gor
 }
 
 // DeleteUniqueIndexCache 删除索引存在的缓存
-func (a *AdminRoleDemoRepo) DeleteIndexCache(ctx context.Context, data []*gorm_gen_model.AdminRoleDemo) error {
-	keys := make([]string, 0)
+func (a *AdminRoleDemoRepo) DeleteIndexCache(ctx context.Context, data ...*gorm_gen_model.AdminRoleDemo) error {
+	KeyMap := make(map[string]struct{})
 	for _, v := range data {
-		keys = append(
-			keys,
-			a.cache.Key(CacheAdminRoleDemoByIDPrefix, v.ID),
-		)
+		if v != nil {
+			KeyMap[a.cache.Key(CacheAdminRoleDemoByIDPrefix, v.ID)] = struct{}{}
+
+		}
+	}
+	keys := make([]string, 0, len(KeyMap))
+	for k := range KeyMap {
+		keys = append(keys, k)
 	}
 	err := a.cache.DelBatch(ctx, keys)
 	if err != nil {

@@ -1,1 +1,1 @@
-    {{.firstTableChar}}.cache.Key(Cache{{.upperTableName}}By{{.cacheFields}}Prefix, {{.delCacheFieldsParam}}),
+    KeyMap[{{.firstTableChar}}.cache.Key(Cache{{.upperTableName}}By{{.cacheFields}}Prefix, {{.delCacheFieldsParam}})] = struct{}{}

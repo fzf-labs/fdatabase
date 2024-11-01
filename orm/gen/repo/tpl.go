@@ -28,6 +28,12 @@ var Types string
 //go:embed tpl/new.tpl
 var New string
 
+//go:embed tpl/interface-deep-copy.tpl
+var InterfaceDeepCopy string
+
+//go:embed tpl/deep-copy.tpl
+var DeepCopy string
+
 // 创建
 
 //go:embed tpl/interface-create-one.tpl
