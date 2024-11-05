@@ -64,19 +64,19 @@ type (
 		// UpsertOneCacheByFieldsTx 根据fields字段Upsert一条数据(事务), 并删除缓存
 		UpsertOneCacheByFieldsTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminDemo, fields []string) error
 		// UpdateOne 更新一条数据
-		UpdateOne(ctx context.Context, data *gorm_gen_model.AdminDemo) error
+		UpdateOne(ctx context.Context, newData *gorm_gen_model.AdminDemo) error
 		// UpdateOneCache 更新一条数据，并删除缓存
 		UpdateOneCache(ctx context.Context, newData *gorm_gen_model.AdminDemo, oldData *gorm_gen_model.AdminDemo) error
 		// UpdateOneByTx 更新一条数据(事务)
-		UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminDemo) error
+		UpdateOneByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminDemo) error
 		// UpdateOneCacheByTx 更新一条数据(事务)，并删除缓存
 		UpdateOneCacheByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminDemo, oldData *gorm_gen_model.AdminDemo) error
 		// UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
-		UpdateOneWithZero(ctx context.Context, data *gorm_gen_model.AdminDemo) error
+		UpdateOneWithZero(ctx context.Context, newData *gorm_gen_model.AdminDemo) error
 		// UpdateOneCacheWithZero 更新一条数据,包含零值，并删除缓存
 		UpdateOneCacheWithZero(ctx context.Context, newData *gorm_gen_model.AdminDemo, oldData *gorm_gen_model.AdminDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
-		UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, data *gorm_gen_model.AdminDemo) error
+		UpdateOneWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminDemo) error
 		// UpdateOneCacheWithZeroByTx 更新一条数据(事务),包含零值，并删除缓存
 		UpdateOneCacheWithZeroByTx(ctx context.Context, tx *gorm_gen_dao.Query, newData *gorm_gen_model.AdminDemo, oldData *gorm_gen_model.AdminDemo) error
 		// UpdateBatchByIDS 根据主键IDS批量更新

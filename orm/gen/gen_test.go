@@ -55,7 +55,7 @@ func TestGenerationPostgres(t *testing.T) {
 		"./example/postgres/",
 		WithGenerateModel(func(g *gen.Generator) map[string]any { // 设置表关联关系(1对多,多对多...)
 			adminLogDemo := g.GenerateModel("admin_log_demo")
-			AdminRoleDemo := g.GenerateModel("admin_role_demo",
+			adminRoleDemo := g.GenerateModel("admin_role_demo",
 				gen.FieldRelate(field.Many2Many, "Admins", g.GenerateModel("admin_demo"),
 					&field.RelateConfig{
 						RelateSlicePointer: true,
@@ -72,7 +72,7 @@ func TestGenerationPostgres(t *testing.T) {
 						GORMTag:            field.GormTag{"foreignKey": []string{"admin_id"}},
 					},
 				),
-				gen.FieldRelate(field.Many2Many, "AdminRoles", AdminRoleDemo,
+				gen.FieldRelate(field.Many2Many, "AdminRoles", adminRoleDemo,
 					&field.RelateConfig{
 						RelateSlicePointer: true,
 						JSONTag:            JSONTagNameStrategy("AdminRoles"),
@@ -83,7 +83,7 @@ func TestGenerationPostgres(t *testing.T) {
 			return map[string]any{
 				"admin_demo":      adminDemo,
 				"admin_log_demo":  adminLogDemo,
-				"admin_role_demo": AdminRoleDemo,
+				"admin_role_demo": adminRoleDemo,
 			}
 		}),
 		WithDataMap(DataTypeMap()), // 设置数据类型映射

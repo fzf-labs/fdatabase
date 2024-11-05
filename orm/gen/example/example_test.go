@@ -85,8 +85,9 @@ func Test_UpdateOneCache(t *testing.T) {
 	if err != nil {
 		return
 	}
+	oldData := repo.DeepCopy(data)
 	data.Remark = "123"
-	err = repo.UpdateOneCache(ctx, data)
+	err = repo.UpdateOneCache(ctx, data, oldData)
 	if err != nil {
 		fmt.Println(err)
 		return
