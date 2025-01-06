@@ -2,21 +2,18 @@ package proto
 
 import (
 	"fmt"
-	"go/token"
-	"os"
-	"path/filepath"
-
 	"github.com/fzf-labs/fdatabase/orm/utils"
 	"github.com/fzf-labs/fdatabase/orm/utils/file"
 	"github.com/fzf-labs/fdatabase/orm/utils/template"
-
-	"strings"
-	"unicode"
-
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 	"github.com/pkg/errors"
+	"go/token"
 	"gorm.io/gorm"
+	"os"
+	"path/filepath"
+	"strings"
+	"unicode"
 )
 
 // GenerationPB 生成
@@ -58,7 +55,6 @@ type Proto struct {
 	lowerTableName      string            // 表名称首字母小写
 	upperTableName      string            // 表名称首字母大写
 	columnNameToName    map[string]string // 字段名称对应的Go名称
-
 }
 
 func (p *Proto) output(filePath, content string) error {

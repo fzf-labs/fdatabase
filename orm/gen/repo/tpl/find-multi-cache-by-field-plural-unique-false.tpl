@@ -42,8 +42,7 @@ func ({{.firstTableChar}} *{{.upperTableName}}Repo) FindMultiCacheBy{{.upperFiel
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range {{.lowerFieldPlural}} {
-	    cacheKey := {{.firstTableChar}}.cache.Key(Cache{{.upperTableName}}By{{.upperField}}Prefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != ""{
 			tmp := make([]*{{.dbName}}_model.{{.upperTableName}}, 0)
 			err := {{.firstTableChar}}.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)

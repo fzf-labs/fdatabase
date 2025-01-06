@@ -2,6 +2,10 @@ package dbfunc
 
 import (
 	"fmt"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm/logger"
+	"log"
 	"strings"
 
 	"gorm.io/gorm"
@@ -18,6 +22,30 @@ type Index struct {
 	ColumnName string `json:"column_name" gorm:"column:column_name"`
 	IsUnique   bool   `json:"is_unique" gorm:"column:is_unique"`
 	Primary    bool   `json:"primary" gorm:"column:primary"`
+}
+
+// NewSimpleDB 创建数据库连接
+func NewSimpleDB(db, dsn string) *gorm.DB {
+	switch db {
+	case MySQL:
+		db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
+		if err != nil {
+			log.Fatalf("open db err:%s", err.Error())
+		}
+		return db
+	case Postgres:
+		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
+		if err != nil {
+			log.Fatalf("open db err:%s", err.Error())
+		}
+		return db
+	default:
+		panic("db not support")
+	}
 }
 
 // GetIndexes 获取索引

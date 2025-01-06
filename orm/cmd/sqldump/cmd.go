@@ -12,6 +12,7 @@ var CmdSQLDump = &cobra.Command{
 }
 
 var (
+	db            string // 数据库类型 mysql postgres
 	dsn           string // 数据库连接
 	outPutPath    string // 输出路径
 	targetTables  string // 指定表
@@ -27,5 +28,5 @@ func init() {
 }
 
 func Run(_ *cobra.Command, _ []string) {
-	NewSQLDump(dsn, outPutPath, targetTables, fileOverwrite).Run()
+	NewSQLDump(db, dsn, outPutPath, targetTables, fileOverwrite).Run()
 }

@@ -1,28 +1,31 @@
 package gen
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/fzf-labs/fdatabase/orm"
+
+	"github.com/stretchr/testify/assert"
 )
 
-func TestNewGenerationPB(t *testing.T) {
-	type args struct {
-		db           *gorm.DB
-		outPutPath   string
-		packageStr   string
-		goPackageStr string
-		opts         []OptionPB
+func TestNewGenerationPb(t *testing.T) {
+	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
+		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
+		MaxIdleConn:     0,
+		MaxOpenConn:     0,
+		ConnMaxLifeTime: 0,
+		ShowLog:         false,
+		Tracing:         false,
+	})
+	if err != nil {
+		return
 	}
-	tests := []struct {
-		name string
-		args args
-		want *GenerationPb
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, NewGenerationPB(tt.args.db, tt.args.outPutPath, tt.args.packageStr, tt.args.goPackageStr, tt.args.opts...), "NewGenerationPB(%v, %v, %v, %v, %v)", tt.args.db, tt.args.outPutPath, tt.args.packageStr, tt.args.goPackageStr, tt.args.opts...)
-		})
-	}
+	NewGenerationPB(
+		db,
+		"./example/postgres/pb",
+		"api.gorm_gen.v1",
+		"api/gorm_gen/v1;v1",
+		WithPBOpts(ModelOptionRemoveDefault(), ModelOptionUnderline("ul_")),
+	).Do()
+	assert.Equal(t, nil, err)
 }

@@ -12,16 +12,19 @@ import (
 type Exp string // 操作
 
 const (
-	EQ      Exp = "="
-	NEQ     Exp = "!="
-	GT      Exp = ">"
-	GTE     Exp = ">="
-	LT      Exp = "<"
-	LTE     Exp = "<="
-	IN      Exp = "IN"
-	NOTIN   Exp = "NOT IN"
-	LIKE    Exp = "LIKE"
-	NOTLIKE Exp = "NOT LIKE"
+	RAW       Exp = "RAW" // 原始表达式
+	EQ        Exp = "="
+	NEQ       Exp = "!="
+	GT        Exp = ">"
+	GTE       Exp = ">="
+	LT        Exp = "<"
+	LTE       Exp = "<="
+	IN        Exp = "IN"
+	NOTIN     Exp = "NOT IN"
+	LIKE      Exp = "LIKE"
+	NOTLIKE   Exp = "NOT LIKE"
+	ISNULL    Exp = "IS NULL"
+	ISNOTNULL Exp = "IS NOT NULL"
 )
 
 type Logic string // 逻辑关系
@@ -40,10 +43,10 @@ const (
 
 // QueryParam 查询条件
 type QueryParam struct {
-	Field string `json:"field"` // 字段
-	Value any    `json:"value"` // 值（当Exp为IN, NOTIN 时为[]any）
-	Exp   Exp    `json:"exp"`   // 操作 "=", "!=", ">", ">=", "<", "<=", "IN", "NOT IN", "LIKE", "NOT LIKE"
-	Logic Logic  `json:"logic"` // 逻辑关系 AND OR
+	Field string      `json:"field"` // 字段
+	Value interface{} `json:"value"` // 值（当Exp为IN, NOTIN 时为[]interface{}）
+	Exp   Exp         `json:"exp"`   // 操作 "=", "!=", ">", ">=", "<", "<=", "IN", "NOT IN", "LIKE", "NOT LIKE"
+	Logic Logic       `json:"logic"` // 逻辑关系 AND OR
 }
 
 // OrderParam 排序条件
@@ -54,26 +57,26 @@ type OrderParam struct {
 
 // Req 请求-自定义查询
 type Req struct {
-	Page     int32         `json:"page"`     // 页码
-	PageSize int32         `json:"pageSize"` // 页数
-	Query    []*QueryParam `json:"query"`    // 查询条件
-	Order    []*OrderParam `json:"order"`    // 排序条件
+	Page     int32         `json:"page"`     //页码
+	PageSize int32         `json:"pageSize"` //页数
+	Query    []*QueryParam `json:"query"`    //查询条件
+	Order    []*OrderParam `json:"order"`    //排序条件
 }
 
 // Reply 返回-自定义查询
 type Reply struct {
-	Page      int32 `json:"page"`      // 第几页
-	PageSize  int32 `json:"pageSize"`  // 页大小
-	Total     int32 `json:"total"`     // 总数
-	PrevPage  int32 `json:"prevPage"`  // 上一页
-	NextPage  int32 `json:"nextPage"`  // 下一页
-	TotalPage int32 `json:"totalPage"` // 总页数
+	Page      int32 `json:"page"`      //第几页
+	PageSize  int32 `json:"pageSize"`  //页大小
+	Total     int32 `json:"total"`     //总数
+	PrevPage  int32 `json:"prevPage"`  //上一页
+	NextPage  int32 `json:"nextPage"`  //下一页
+	TotalPage int32 `json:"totalPage"` //总页数
 }
 
 // ExpValidate 验证Exp是否合法
 func ExpValidate(s Exp) bool {
 	switch s {
-	case EQ, NEQ, GT, GTE, LT, LTE, IN, NOTIN, LIKE, NOTLIKE:
+	case EQ, NEQ, GT, GTE, LT, LTE, IN, NOTIN, LIKE, NOTLIKE, ISNULL, ISNOTNULL, RAW:
 		return true
 	default:
 		return false
@@ -101,7 +104,7 @@ func OrderValidate(s Order) bool {
 }
 
 // ConvertToGormExpression 根据SearchColumn参数转换为符合gorm where clause.Expression
-func (p *Req) ConvertToGormExpression(model any) (whereExpressions, orderExpressions []clause.Expression, err error) {
+func (p *Req) ConvertToGormExpression(model interface{}) (whereExpressions, orderExpressions []clause.Expression, err error) {
 	whereExpressions = make([]clause.Expression, 0)
 	orderExpressions = make([]clause.Expression, 0)
 	column := fieldToColumn(model)
@@ -141,13 +144,13 @@ func (p *Req) ConvertToGormExpression(model any) (whereExpressions, orderExpress
 			case LTE:
 				expression = clause.Lte{Column: field, Value: v.Value}
 			case IN:
-				values, ok := v.Value.([]any)
+				values, ok := v.Value.([]interface{})
 				if !ok {
 					return nil, nil, fmt.Errorf("IN value is not a slice")
 				}
 				expression = clause.IN{Column: field, Values: values}
 			case NOTIN:
-				values, ok := v.Value.([]any)
+				values, ok := v.Value.([]interface{})
 				if !ok {
 					return nil, nil, fmt.Errorf("NOTIN value is not a slice")
 				}
@@ -156,6 +159,15 @@ func (p *Req) ConvertToGormExpression(model any) (whereExpressions, orderExpress
 				expression = clause.Like{Column: field, Value: v.Value}
 			case NOTLIKE:
 				expression = clause.Not(clause.Like{Column: field, Value: v.Value})
+			case ISNULL:
+				expression = clause.Eq{Column: field, Value: nil}
+			case ISNOTNULL:
+				expression = clause.Neq{Column: field, Value: nil}
+			case RAW:
+				expression, ok = v.Value.(clause.Expr)
+				if !ok {
+					return nil, nil, fmt.Errorf("CUSTOM value is not a clause.Expr")
+				}
 			}
 			if v.Logic == AND {
 				whereExpressions = append(whereExpressions, clause.And(expression))
@@ -230,7 +242,7 @@ func (p *Req) ConvertToPage(total int32) (*Reply, error) {
 }
 
 // fieldToColumn 将model的tag中gorm的tag的Column转换为map[string]string
-func fieldToColumn(model any) map[string]string {
+func fieldToColumn(model interface{}) map[string]string {
 	m := make(map[string]string)
 	t := reflect.TypeOf(model)
 	for i := 0; i < t.NumField(); i++ {

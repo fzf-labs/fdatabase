@@ -11,25 +11,86 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fzf-labs/fctl/utils"
+	"github.com/fzf-labs/fdatabase/orm/utils/dbfunc"
+	"github.com/fzf-labs/fdatabase/orm/utils/file"
 )
 
 type SQLDump struct {
+	db            string // 数据库类型 mysql postgres
 	dsn           string // 数据库连接
 	outPutPath    string // 输出路径
 	targetTables  string // 指定表
 	fileOverwrite bool   // 是否覆盖
 }
 
-func NewSQLDump(dsn, outPutPath, targetTables string, fileCover bool) *SQLDump {
-	return &SQLDump{dsn: dsn, outPutPath: outPutPath, targetTables: targetTables, fileOverwrite: fileCover}
+func NewSQLDump(db, dsn, outPutPath, targetTables string, fileCover bool) *SQLDump {
+	return &SQLDump{
+		db:            db,
+		dsn:           dsn,
+		outPutPath:    outPutPath,
+		targetTables:  targetTables,
+		fileOverwrite: fileCover,
+	}
 }
 
 func (s *SQLDump) Run() {
+	switch s.db {
+	case "mysql":
+		s.mysqlRun()
+	case "postgres":
+		s.postgresRun()
+	default:
+		log.Print("db type not support")
+	}
+}
+
+func (s *SQLDump) mysqlRun() {
 	// 连接数据库
-	db := utils.NewDB(s.dsn)
+	db := dbfunc.NewSimpleDB(s.db, s.dsn)
+	var tableList []string
+	var err error
+	if s.targetTables != "" {
+		tableList = strings.Split(s.targetTables, ",")
+	} else {
+		tableList, err = db.Migrator().GetTables()
+		if err != nil {
+			return
+		}
+	}
+	type tmp struct {
+		Table       string `gorm:"column:Table"`
+		CreateTable string `gorm:"column:Create Table"`
+	}
+	for _, table := range tableList {
+		fmt.Println(table, fmt.Sprintf(`SHOW CREATE TABLE %s;`, table))
+		var t tmp
+		err = db.Raw(fmt.Sprintf(`SHOW CREATE TABLE %s`, table)).Scan(&t).Error
+		if err != nil {
+			log.Print("mysql sql err:", err)
+			return
+		}
+		outFile := filepath.Join(outPutPath, fmt.Sprintf("%s.sql", table))
+		if _, err = os.Stat(outFile); !os.IsNotExist(err) {
+			if !s.fileOverwrite {
+				log.Printf("mysql sql file %s already exists,if you want new,please manually delete!\n", outFile)
+				return
+			}
+		}
+		// 写入文件
+		err = file.WriteContentCover(outFile, t.CreateTable)
+		if err != nil {
+			log.Print("mysql sql file write err:", err)
+			return
+		}
+	}
+}
+
+func (s *SQLDump) postgresRun() {
+	// 连接数据库
+	db := dbfunc.NewSimpleDB(s.db, s.dsn)
+	var err error
 	// 查找命令的可执行文件
-	_, err := exec.LookPath("pg_dump")
+	_, err = exec.LookPath("pg_dump")
 	if err != nil {
 		log.Print("command pg_dump not found,please install")
 		return
@@ -43,7 +104,7 @@ func (s *SQLDump) Run() {
 			return
 		}
 	}
-	dsnParse := PostgresDsnParse(s.dsn)
+	dsnParse := postgresDsnParse(s.dsn)
 	outPutPath := filepath.Join(strings.Trim(s.outPutPath, "/"), dsnParse.Dbname)
 	err = os.MkdirAll(outPutPath, os.ModePerm)
 	if err != nil {
@@ -66,24 +127,24 @@ func (s *SQLDump) Run() {
 		// 执行命令，并捕获输出和错误信息
 		output, err := cmd.Output()
 		if err != nil {
-			log.Print("cmd exec err2:", err)
+			log.Print("cmd exec err:", err)
 			return
 		}
-		if _, err2 := os.Stat(outFile); !os.IsNotExist(err2) {
+		if _, err := os.Stat(outFile); !os.IsNotExist(err) {
 			if !s.fileOverwrite {
 				log.Printf("postgres sql file %s already exists,if you want new,please manually delete!\n", outFile)
 				return
 			}
 		}
-		err2 := utils.WriteContentCover(outFile, remove(string(output)))
-		if err2 != nil {
-			log.Print("postgres sql file write err2:", err2)
+		err = file.WriteContentCover(outFile, remove(string(output)))
+		if err != nil {
+			log.Print("postgres sql file write err:", err)
 			return
 		}
 	}
 }
 
-type PostgresDsn struct {
+type postgresDsn struct {
 	Host     string
 	Port     int
 	User     string
@@ -91,9 +152,9 @@ type PostgresDsn struct {
 	Dbname   string
 }
 
-// PostgresDsnParse  数据库解析
-func PostgresDsnParse(dsn string) *PostgresDsn {
-	result := new(PostgresDsn)
+// postgresDsnParse  数据库解析
+func postgresDsnParse(dsn string) *postgresDsn {
+	result := new(postgresDsn)
 	// 分割连接字符串
 	params := strings.Split(dsn, " ")
 
