@@ -1,0 +1,22 @@
+CREATE TABLE `user` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+  `uid` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '全局唯一ID(账户ID)',
+  `nickname` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '昵称',
+  `sex` tinyint DEFAULT '0' COMMENT '性别0未知1男2女',
+  `phone` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '手机号',
+  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '用户头像',
+  `profile` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '简介',
+  `level` tinyint DEFAULT '0' COMMENT '会员级别',
+  `vip` tinyint DEFAULT '0' COMMENT '会员等级',
+  `is_auth` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否认证 0:否 1:是',
+  `other` json DEFAULT NULL COMMENT '其他数据',
+  `status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '状态 1 正常 2锁定 3注销',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted_at` datetime DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `member_id_idx` (`uid`) USING BTREE,
+  KEY `status` (`status`) USING BTREE,
+  KEY `phone` (`phone`) USING BTREE,
+  KEY `user_phone_status_idx` (`phone`,`status`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1403 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户信息表'
