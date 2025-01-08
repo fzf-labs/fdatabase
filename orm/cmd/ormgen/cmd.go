@@ -4,10 +4,9 @@ import (
 	"strings"
 
 	"github.com/fzf-labs/fdatabase/orm/gen"
-
-	gormGen "gorm.io/gen"
-
+	"github.com/fzf-labs/fdatabase/orm/gormx"
 	"github.com/spf13/cobra"
+	gormGen "gorm.io/gen"
 )
 
 var CmdOrmGen = &cobra.Command{
@@ -18,6 +17,7 @@ var CmdOrmGen = &cobra.Command{
 }
 
 var (
+	db                      string // 数据库类型 mysql postgres
 	dsn                     string // 数据库自定义连接
 	targetTables            string // 数据库指定表
 	outPutPath              string // 输出路径
@@ -27,8 +27,8 @@ var (
 	optionRemoveGormTypeTag bool   // 选项：移除gorm tag :type (默认是 false)
 )
 
-//nolint:gochecknoinits
 func init() {
+	CmdOrmGen.Flags().StringVarP(&db, "db", "d", "", "db type")
 	CmdOrmGen.Flags().StringVarP(&dsn, "dsn", "d", "", "db dsn")
 	CmdOrmGen.Flags().StringVarP(&targetTables, "tables", "t", "", "db tables")
 	CmdOrmGen.Flags().StringVarP(&outPutPath, "outPutPath", "o", "./internal/data/gorm", "output path")
@@ -57,7 +57,7 @@ func Run(_ *cobra.Command, _ []string) {
 		tables = strings.Split(targetTables, ",")
 	}
 	gen.NewGenerationDB(
-		utils.NewDB(dsn),
+		gormx.NewSimpleGormClient(db, dsn),
 		outPutPath,
 		gen.WithDataMap(gen.DataTypeMap()),
 		gen.WithTables(tables),

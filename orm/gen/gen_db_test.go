@@ -3,23 +3,15 @@ package gen
 import (
 	"testing"
 
-	"github.com/fzf-labs/fdatabase/orm"
-	"github.com/stretchr/testify/assert"
+	"github.com/fzf-labs/fdatabase/orm/gormx"
 	"gorm.io/gen"
 	"gorm.io/gen/field"
 )
 
 func TestGenerationPostgresWithOutRepo(t *testing.T) {
 	// 初始化数据库
-	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
-		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
-		MaxIdleConn:     0,
-		MaxOpenConn:     0,
-		ConnMaxLifeTime: 0,
-		ShowLog:         false,
-		Tracing:         false,
-	})
-	if err != nil {
+	db := gormx.NewSimpleGormClient(gormx.Postgres, "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai")
+	if db == nil {
 		return
 	}
 	// 生成代码
@@ -33,20 +25,12 @@ func TestGenerationPostgresWithOutRepo(t *testing.T) {
 		WithDBOpts(ModelOptionRemoveDefault(), ModelOptionPgDefaultString(), ModelOptionRemoveGormTypeTag(), ModelOptionUnderline("UL")), // 设置自定义选项
 		WithFieldNullable(),
 	).Do()
-	assert.Equal(t, nil, err)
 }
 
 func TestGenerationPostgres(t *testing.T) {
 	// 初始化数据库
-	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
-		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
-		MaxIdleConn:     0,
-		MaxOpenConn:     0,
-		ConnMaxLifeTime: 0,
-		ShowLog:         false,
-		Tracing:         false,
-	})
-	if err != nil {
+	db := gormx.NewSimpleGormClient(gormx.Postgres, "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai")
+	if db == nil {
 		return
 	}
 	// 生成代码
@@ -89,20 +73,12 @@ func TestGenerationPostgres(t *testing.T) {
 		WithDataMap(DataTypeMap()), // 设置数据类型映射
 		WithDBOpts(ModelOptionRemoveDefault(), ModelOptionUnderline("UL")), // 设置自定义选项
 	).Do()
-	assert.Equal(t, nil, err)
 }
 
 func TestGenerationPostgresFieldNullable(t *testing.T) {
 	// 初始化数据库
-	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
-		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
-		MaxIdleConn:     0,
-		MaxOpenConn:     0,
-		ConnMaxLifeTime: 0,
-		ShowLog:         false,
-		Tracing:         false,
-	})
-	if err != nil {
+	db := gormx.NewSimpleGormClient(gormx.Postgres, "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai")
+	if db == nil {
 		return
 	}
 	// 生成代码
@@ -146,5 +122,4 @@ func TestGenerationPostgresFieldNullable(t *testing.T) {
 		WithDBOpts(ModelOptionRemoveDefault(), ModelOptionUnderline("UL")), // 设置自定义选项
 		WithFieldNullable(),
 	).Do()
-	assert.Equal(t, nil, err)
 }

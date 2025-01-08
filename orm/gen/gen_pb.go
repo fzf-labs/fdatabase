@@ -5,8 +5,8 @@ import (
 	"sync"
 
 	"github.com/fzf-labs/fdatabase/orm/gen/proto"
+	"github.com/fzf-labs/fdatabase/orm/gormx"
 	"github.com/fzf-labs/fdatabase/orm/utils"
-	"github.com/fzf-labs/fdatabase/orm/utils/dbfunc"
 	"gorm.io/gen"
 	"gorm.io/gorm"
 )
@@ -61,7 +61,7 @@ func (g *GenerationPb) Do() {
 		return
 	}
 	// 查询分区表父级到子表的映射
-	partitionTableToChildTables, err := dbfunc.GetPartitionTableToChildTables(g.gorm)
+	partitionTableToChildTables, err := gormx.GetPartitionTableToChildTables(g.gorm)
 	if err != nil {
 		return
 	}

@@ -2,18 +2,19 @@ package proto
 
 import (
 	"fmt"
+	"go/token"
+	"os"
+	"path/filepath"
+	"strings"
+	"unicode"
+
 	"github.com/fzf-labs/fdatabase/orm/utils"
 	"github.com/fzf-labs/fdatabase/orm/utils/file"
 	"github.com/fzf-labs/fdatabase/orm/utils/template"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 	"github.com/pkg/errors"
-	"go/token"
 	"gorm.io/gorm"
-	"os"
-	"path/filepath"
-	"strings"
-	"unicode"
 )
 
 // GenerationPB 生成

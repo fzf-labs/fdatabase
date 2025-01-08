@@ -10,12 +10,10 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/fzf-labs/fdatabase/orm/gormx"
 	"github.com/fzf-labs/fdatabase/orm/utils"
-	"github.com/fzf-labs/fdatabase/orm/utils/dbfunc"
 	"github.com/fzf-labs/fdatabase/orm/utils/template"
-
 	"github.com/jinzhu/inflection"
-
 	"golang.org/x/tools/imports"
 	"gorm.io/gorm"
 )
@@ -157,12 +155,12 @@ func (r *Repo) processIndex() ([]DBIndex, error) {
 		table = r.partitionTables[0]
 	}
 	// 获取索引
-	indexes, err := dbfunc.GetIndexes(r.gorm, table)
+	indexes, err := gormx.GetIndexes(r.gorm, table)
 	if err != nil {
 		return nil, err
 	}
 	// 获取排序的索引字段
-	sortIndexColumns, err := dbfunc.SortIndexColumns(r.gorm, table)
+	sortIndexColumns, err := gormx.SortIndexColumns(r.gorm, table)
 	if err != nil {
 		return nil, err
 	}

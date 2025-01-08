@@ -3,21 +3,14 @@ package repo
 import (
 	"testing"
 
-	"github.com/fzf-labs/fdatabase/orm"
+	"github.com/fzf-labs/fdatabase/orm/gormx"
 	"gorm.io/gorm"
 )
 
 func newDB() *gorm.DB {
-	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
-		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
-		MaxIdleConn:     0,
-		MaxOpenConn:     0,
-		ConnMaxLifeTime: 0,
-		ShowLog:         false,
-		Tracing:         false,
-	})
-	if err != nil {
-		panic(err)
+	db := gormx.NewSimpleGormClient(gormx.Postgres, "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai")
+	if db == nil {
+		return nil
 	}
 	return db
 }

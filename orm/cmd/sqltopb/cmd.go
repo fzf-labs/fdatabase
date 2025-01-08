@@ -2,7 +2,7 @@ package sqltopb
 
 import (
 	"github.com/fzf-labs/fdatabase/orm/gen"
-	"github.com/fzf-labs/fdatabase/orm/utils/dbfunc"
+	"github.com/fzf-labs/fdatabase/orm/gormx"
 	"github.com/spf13/cobra"
 )
 
@@ -25,11 +25,11 @@ var (
 func init() {
 	CmdSQLToPb.Flags().StringVarP(&dsn, "db", "", "", "db：mysql postgres")
 	CmdSQLToPb.Flags().StringVarP(&dsn, "dsn", "", "", "dsn")
-	CmdSQLToPb.Flags().StringVarP(&pbPackage, "pbPackage", "", "kratos_demo.v1", "pbPackage")
-	CmdSQLToPb.Flags().StringVarP(&pbGoPackage, "pbGoPackage", "", "gitlab.yc345.tv/backend/kratos-demo/api/kratos_demo/v1;v1", "pbGoPackage")
-	CmdSQLToPb.Flags().StringVarP(&outPutPath, "outPutPath", "", "./api/kratos_demo/v1", "outPutPath")
+	CmdSQLToPb.Flags().StringVarP(&pbPackage, "pbPackage", "", "pb", "pbPackage")
+	CmdSQLToPb.Flags().StringVarP(&pbGoPackage, "pbGoPackage", "", "github.com/fzf-labs/fdatabase/orm/example/pb;pb", "pbGoPackage")
+	CmdSQLToPb.Flags().StringVarP(&outPutPath, "outPutPath", "", "./pb", "outPutPath")
 }
 
 func Run(_ *cobra.Command, _ []string) {
-	gen.NewGenerationPB(dbfunc.NewSimpleDB(db, dsn), outPutPath, pbPackage, pbGoPackage, gen.WithPBOpts(gen.ModelOptionRemoveDefault(), gen.ModelOptionUnderline("UL"))).Do()
+	gen.NewGenerationPB(gormx.NewSimpleGormClient(db, dsn), outPutPath, pbPackage, pbGoPackage, gen.WithPBOpts(gen.ModelOptionRemoveDefault(), gen.ModelOptionUnderline("UL"))).Do()
 }

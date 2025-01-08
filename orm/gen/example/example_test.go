@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/fzf-labs/fdatabase/orm"
 	"github.com/fzf-labs/fdatabase/orm/condition"
 	"github.com/fzf-labs/fdatabase/orm/dbcache/goredisdbcache"
 	"github.com/fzf-labs/fdatabase/orm/encoding"
@@ -13,6 +12,7 @@ import (
 	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_dao"
 	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_model"
 	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_repo"
+	"github.com/fzf-labs/fdatabase/orm/gormx"
 	"github.com/go-redis/redismock/v9"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
@@ -20,16 +20,9 @@ import (
 )
 
 func newDB() *gorm.DB {
-	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
-		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
-		MaxIdleConn:     0,
-		MaxOpenConn:     0,
-		ConnMaxLifeTime: 0,
-		ShowLog:         false,
-		Tracing:         false,
-	})
-	if err != nil {
-		panic(err)
+	db := gormx.NewSimpleGormClient(gormx.Postgres, "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai")
+	if db == nil {
+		return nil
 	}
 	return db
 }
@@ -176,15 +169,8 @@ func Test_FindMultiByCondition(t *testing.T) {
 
 // Test_Tx 使用事务
 func Test_Tx(t *testing.T) {
-	db, err := orm.NewGormPostgresClient(&orm.GormPostgresClientConfig{
-		DataSourceName:  "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai",
-		MaxIdleConn:     0,
-		MaxOpenConn:     0,
-		ConnMaxLifeTime: 0,
-		ShowLog:         false,
-		Tracing:         false,
-	})
-	if err != nil {
+	db := gormx.NewSimpleGormClient(gormx.Postgres, "host=0.0.0.0 port=5432 user=postgres password=123456 dbname=gorm_gen sslmode=disable TimeZone=Asia/Shanghai")
+	if db == nil {
 		return
 	}
 	client, _ := redismock.NewClientMock()
@@ -193,7 +179,7 @@ func Test_Tx(t *testing.T) {
 	cfg := config.NewRepoConfig(db, dbCache, encoding.NewMsgPack())
 	adminDemoRepo := gorm_gen_repo.NewAdminDemoRepo(cfg)
 	adminLogDemoRepo := gorm_gen_repo.NewAdminLogDemoRepo(cfg)
-	err = gorm_gen_dao.Use(db).Transaction(func(tx *gorm_gen_dao.Query) error {
+	err := gorm_gen_dao.Use(db).Transaction(func(tx *gorm_gen_dao.Query) error {
 		err2 := adminDemoRepo.UpsertOneByTx(ctx, tx, &gorm_gen_model.AdminDemo{
 			ID:       "c8ddd930-339a-408b-8acb-fac22f5b43aa",
 			Username: "admin",
@@ -220,8 +206,5 @@ func Test_Tx(t *testing.T) {
 		}
 		return nil
 	})
-	if err != nil {
-		return
-	}
 	assert.Equal(t, nil, err)
 }
