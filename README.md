@@ -9,14 +9,12 @@ FDatabase 是一个 Go 语言数据库工具集合，提供了对 MySQL、Postgr
 
 ## ✨ 功能特性
 
-- 🔌 支持 MySQL 和 PostgreSQL 数据库
 - 🛠 基于 GORM 的数据库操作封装
-- 🔍 数据库连接健康检查
-- 📊 数据库状态监控
-- 📁 数据库结构导出工具
-- ⚡️ 代码生成器(支持生成 DAO、Model、Repository、Proto 文件)
-- 📦 缓存支持(Redis、RocksDB)
-
+- 🔌 支持 MySQL 和 PostgreSQL 数据库
+- 📦 查询缓存支持
+- ⚡️ 代码生成器(支持生成 dao、model、repo 文件)
+- 📁 数据表结构导出工具
+- 📁 数据表生成proto文件工具
 ## 📦 安装
 
 ```bash
@@ -71,32 +69,28 @@ func main() {
 }
 ```
 
-## 📚 使用文档
-
+## 📚 工具使用文档
+### 工具安装
+```
+go install github.com/fzf-labs/fdatabase/orm/cmd/fdatabase
+```
 ### 代码生成
 
 ```go
-// 生成 DAO、Model、Repository 代码
-db.NewGenerationDB(db,
-    "./example/postgres/",
-    WithOutRepo(),
-    WithDBNameOpts(DBNameOpts()),
-    WithTables([]string{"users", "orders"}),
-).Do()
-
-// 生成 Proto 文件
-db.NewGenerationPB(db,
-    "./api/proto/",
-    "myapp.v1",
-    "myapp/api/proto/v1;v1",
-).Do()
+fdatabse ormgen -d "user:password@tcp(localhost:3306)/dbname" -o "./doc/gorm"
 ```
 
 ### 数据库导出
 
 ```go
 // 导出数据库结构
-make sqldump -d "user:password@tcp(localhost:3306)/dbname" -o "./doc/sql"
+fdatabse sqldump -d "user:password@tcp(localhost:3306)/dbname" -o "./doc/sql"
+```
+
+### 数据库表生成proto文件
+
+```go
+fdatabse sqltopb -d "user:password@tcp(localhost:3306)/dbname" -o "./doc/pb"
 ```
 
 ## 🤝 贡献
