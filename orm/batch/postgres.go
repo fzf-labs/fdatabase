@@ -3,16 +3,15 @@ package batch
 import (
 	"errors"
 	"fmt"
-	"math"
 	"reflect"
 	"strconv"
 	"strings"
 )
 
-// MysqlBatchUpdateToSQLArray 批量更新
+// PostgresBatchUpdateToSQLArray 批量更新
 // tableName: 表名
 // dataList: 需要更新的数据列表,必须是指向结构体的切片
-func MysqlBatchUpdateToSQLArray(tableName string, dataList any) ([]string, error) {
+func PostgresBatchUpdateToSQLArray(tableName string, dataList any) ([]string, error) {
 	if tableName == "" {
 		return nil, errors.New("tableName cannot be empty")
 	}
@@ -55,11 +54,24 @@ func MysqlBatchUpdateToSQLArray(tableName string, dataList any) ([]string, error
 			return nil, fmt.Errorf("id field not found in struct at index %d", i)
 		}
 
-		id, err := strconv.ParseInt(idField.String(), 10, 64)
-		if err != nil || id < 1 {
-			return nil, fmt.Errorf("invalid id value at index %d", i)
+		// 根据字段类型格式化 ID 值
+		var idStr string
+		switch idField.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			idStr = strconv.FormatInt(idField.Int(), 10)
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			idStr = strconv.FormatUint(idField.Uint(), 10)
+		case reflect.String:
+			idStr = fmt.Sprintf("'%s'", strings.ReplaceAll(idField.String(), "'", "''")) // PostgreSQL 使用两个单引号转义
+		default:
+			idStr = fmt.Sprintf("'%v'", idField.Interface())
 		}
-		ids = append(ids, strconv.FormatInt(id, 10))
+
+		if idStr == "" {
+			return nil, fmt.Errorf("empty id value at index %d", i)
+		}
+
+		ids = append(ids, idStr)
 
 		// 处理其他字段
 		for fieldName, fieldInfo := range fields {
@@ -71,7 +83,7 @@ func MysqlBatchUpdateToSQLArray(tableName string, dataList any) ([]string, error
 				return nil, fmt.Errorf("field %s not found in struct at index %d", fieldName, i)
 			}
 
-			valStr, err := formatFieldValue(fieldValue)
+			valStr, err := formatPostgresFieldValue(fieldValue)
 			if err != nil {
 				return nil, fmt.Errorf("format field %s error at index %d: %w", fieldName, i, err)
 			}
@@ -90,7 +102,7 @@ func MysqlBatchUpdateToSQLArray(tableName string, dataList any) ([]string, error
 		batchStart := i * batchSize
 		batchEnd := min((i+1)*batchSize, length)
 
-		sql, err := buildBatchUpdateSQL(tableName, updateMap, ids[batchStart:batchEnd])
+		sql, err := buildPostgresBatchUpdateSQL(tableName, updateMap, ids[batchStart:batchEnd])
 		if err != nil {
 			return nil, fmt.Errorf("build batch update SQL error: %w", err)
 		}
@@ -100,72 +112,41 @@ func MysqlBatchUpdateToSQLArray(tableName string, dataList any) ([]string, error
 	return sqlArray, nil
 }
 
-// 辅助函数：获取结构体字段信息
-func getStructFields(structType reflect.Type) (map[string]structField, error) {
-	fields := make(map[string]structField)
-	for i := 0; i < structType.NumField(); i++ {
-		field := structType.Field(i)
-		jsonTag := field.Tag.Get("json")
-		if jsonTag == "" {
-			return nil, fmt.Errorf("field %s must have a json tag", field.Name)
-		}
-		if _, ok := fields[jsonTag]; ok {
-			return nil, fmt.Errorf("duplicate json tag '%s' in struct", jsonTag)
-		}
-		fields[jsonTag] = structField{
-			name:     field.Name,
-			typeKind: field.Type.Kind(),
-		}
-	}
-	return fields, nil
-}
-
-type structField struct {
-	name     string
-	typeKind reflect.Kind
-}
-
-// 辅助函数：格式化字段值
-func formatFieldValue(field reflect.Value) (string, error) {
+// formatPostgresFieldValue 格式化 PostgreSQL 字段值
+func formatPostgresFieldValue(field reflect.Value) (string, error) {
 	switch field.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return strconv.FormatInt(field.Int(), 10), nil
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return strconv.FormatUint(field.Uint(), 10), nil
 	case reflect.String:
-		return fmt.Sprintf("'%s'", strings.ReplaceAll(field.String(), "'", "\\'")), nil
+		return fmt.Sprintf("'%s'", strings.ReplaceAll(field.String(), "'", "''")), nil
 	case reflect.Float32, reflect.Float64:
 		return strconv.FormatFloat(field.Float(), 'f', -1, 64), nil
 	case reflect.Bool:
-		return strconv.FormatBool(field.Bool()), nil
+		if field.Bool() {
+			return "true", nil
+		}
+		return "false", nil
 	default:
 		return "", fmt.Errorf("unsupported field type: %v", field.Kind())
 	}
 }
 
-// 辅助函数：计算 SQL 语句数量
-func getSQLQuantity(length, batchSize int) int {
-	return int(math.Ceil(float64(length) / float64(batchSize)))
-}
-
-// 辅助函数：生成每批次的 SQL 语句
-func buildBatchUpdateSQL(tableName string, updateMap map[string][]string, batchIDs []string) (string, error) {
+// buildPostgresBatchUpdateSQL 生成 PostgreSQL 批量更新 SQL
+func buildPostgresBatchUpdateSQL(tableName string, updateMap map[string][]string, batchIDs []string) (string, error) {
 	if len(batchIDs) == 0 {
 		return "", errors.New("batchIDs cannot be empty")
 	}
 
 	var sqlBuilder strings.Builder
-	sqlBuilder.Grow(4096) // 预分配空间
+	sqlBuilder.Grow(4096)
 
-	sqlBuilder.WriteString("UPDATE " + escapeIdentifier(tableName) + " SET ")
+	sqlBuilder.WriteString(`UPDATE "` + tableName + `" SET `)
 
 	setClauses := make([]string, 0, len(updateMap))
 	for fieldName, fieldValueList := range updateMap {
-		if len(fieldValueList) != len(batchIDs) {
-			return "", fmt.Errorf("field %s values count does not match IDs count", fieldName)
-		}
-
-		clause := escapeIdentifier(fieldName) + " = CASE id"
+		clause := `"` + fieldName + `" = CASE "id"`
 		for i, id := range batchIDs {
 			clause += " WHEN " + id + " THEN " + fieldValueList[i]
 		}
@@ -174,18 +155,7 @@ func buildBatchUpdateSQL(tableName string, updateMap map[string][]string, batchI
 	}
 
 	sqlBuilder.WriteString(strings.Join(setClauses, ", "))
-	sqlBuilder.WriteString(" WHERE id IN (" + strings.Join(batchIDs, ",") + ")")
+	sqlBuilder.WriteString(` WHERE "id" IN (` + strings.Join(batchIDs, ",") + ")")
 
 	return sqlBuilder.String(), nil
-}
-
-func escapeIdentifier(name string) string {
-	return "`" + strings.ReplaceAll(name, "`", "``") + "`"
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
