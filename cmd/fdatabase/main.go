@@ -3,16 +3,17 @@ package main
 import (
 	"log"
 
-	"github.com/fzf-labs/fdatabase/orm/cmd/ormgen"
-	"github.com/fzf-labs/fdatabase/orm/cmd/sqldump"
-	"github.com/fzf-labs/fdatabase/orm/cmd/sqltopb"
 	"github.com/spf13/cobra"
+
+	"github.com/fzf-labs/fdatabase/cmd/fdatabase/ormgen"
+	"github.com/fzf-labs/fdatabase/cmd/fdatabase/sqldump"
+	"github.com/fzf-labs/fdatabase/cmd/fdatabase/sqltopb"
 )
 
 var rootCmd = &cobra.Command{
 	Use:     "fdatabase",
 	Short:   "fdatabase: an db toolkit",
-	Long:    `fdatabase: An toolkit.`,
+	Long:    `fdatabase: an db toolkit`,
 	Version: "v0.0.1",
 }
 

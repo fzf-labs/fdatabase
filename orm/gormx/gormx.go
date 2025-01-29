@@ -63,7 +63,7 @@ func NewSimpleGormClient(db, dsn string) *gorm.DB {
 
 // NewGormClient 初始化gorm客户端
 // mysql: "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-// postgres: "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable TimeZone=Asia/Shanghai"
+// postgres: "host=localhost user=postgres password=123456 dbname=fdatabase port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 func NewGormClient(cfg *ClientConfig) (*gorm.DB, error) {
 	switch cfg.DB {
 	case MySQL:

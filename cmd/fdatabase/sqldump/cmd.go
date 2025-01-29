@@ -6,8 +6,8 @@ import (
 
 var CmdSQLDump = &cobra.Command{
 	Use:   "sqldump",
-	Short: "sql dump",
-	Long:  "sql dump.",
+	Short: "Export database table structure",
+	Long:  "Export database table structure",
 	Run:   Run,
 }
 
@@ -21,7 +21,8 @@ var (
 
 //nolint:gochecknoinits
 func init() {
-	CmdSQLDump.Flags().StringVarP(&dsn, "dsn", "d", "", "dsn")
+	CmdSQLDump.Flags().StringVarP(&db, "db", "d", "", "db")
+	CmdSQLDump.Flags().StringVarP(&dsn, "dsn", "s", "", "dsn")
 	CmdSQLDump.Flags().StringVarP(&outPutPath, "outPutPath", "o", "./doc/sql", "outPutPath")
 	CmdSQLDump.Flags().StringVarP(&targetTables, "tables", "t", "", "tables")
 	CmdSQLDump.Flags().BoolVarP(&fileOverwrite, "fileOverwrite", "f", false, "file overwrite")

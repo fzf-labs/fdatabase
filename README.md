@@ -12,7 +12,7 @@ FDatabase 是一个 Go 语言数据库工具集合，提供了对 MySQL、Postgr
 - 🛠 基于 GORM 的数据库操作封装
 - 🔌 支持 MySQL 和 PostgreSQL 数据库
 - 📦 查询缓存支持
-- ⚡️ 代码生成器(支持生成 dao、model、repo 文件)
+- 📁 代码生成器(支持生成 dao、model、repo 文件)
 - 📁 数据表结构导出工具
 - 📁 数据表生成proto文件工具
 ## 📦 安装

@@ -69,3 +69,42 @@ func getMySQLPartitionTableToChildTables(db *gorm.DB) (map[string][]string, erro
 	}
 	return resp, nil
 }
+
+// GetTableComments 获取数据库中所有表对应的 comment
+func GetTableComments(db *gorm.DB) (map[string]string, error) {
+	resp := make(map[string]string)
+	switch db.Dialector.Name() {
+	case MySQL:
+		type tmp struct {
+			TableName    string `gorm:"column:TABLE_NAME"`
+			TableComment string `gorm:"column:TABLE_COMMENT"`
+		}
+		result := make([]tmp, 0)
+		sql := fmt.Sprintf(`SELECT TABLE_NAME,TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='%s'`, db.Name())
+		err := db.Raw(sql).Scan(&result).Error
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range result {
+			resp[v.TableName] = v.TableComment
+		}
+		return resp, nil
+	case Postgres:
+		type tmp struct {
+			TableName    string `gorm:"column:table_name"`
+			TableComment string `gorm:"column:table_comment"`
+		}
+		result := make([]tmp, 0)
+		sql := `SELECT c.relname AS table_name, obj_description(c.oid) AS table_comment FROM pg_class c WHERE c.relkind = 'r' AND c.relname NOT LIKE 'pg_%' AND c.relname NOT LIKE 'sql_%'`
+		err := db.Raw(sql).Scan(&result).Error
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range result {
+			resp[v.TableName] = v.TableComment
+		}
+		return resp, nil
+	default:
+		return nil, nil
+	}
+}

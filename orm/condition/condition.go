@@ -103,6 +103,20 @@ func OrderValidate(s Order) bool {
 	}
 }
 
+// ToInterfaceSlice 将任意类型的切片转换为 []interface{}
+func (p *Req) ToInterfaceSlice(val interface{}) ([]interface{}, error) {
+	rv := reflect.ValueOf(val)
+	if rv.Kind() != reflect.Slice {
+		return nil, fmt.Errorf("value is not a slice")
+	}
+
+	values := make([]interface{}, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		values[i] = rv.Index(i).Interface()
+	}
+	return values, nil
+}
+
 // ConvertToGormExpression 根据SearchColumn参数转换为符合gorm where clause.Expression
 func (p *Req) ConvertToGormExpression(model interface{}) (whereExpressions, orderExpressions []clause.Expression, err error) {
 	whereExpressions = make([]clause.Expression, 0)
@@ -144,15 +158,15 @@ func (p *Req) ConvertToGormExpression(model interface{}) (whereExpressions, orde
 			case LTE:
 				expression = clause.Lte{Column: field, Value: v.Value}
 			case IN:
-				values, ok := v.Value.([]interface{})
-				if !ok {
-					return nil, nil, fmt.Errorf("IN value is not a slice")
+				values, err := p.ToInterfaceSlice(v.Value)
+				if err != nil {
+					return nil, nil, err
 				}
 				expression = clause.IN{Column: field, Values: values}
 			case NOTIN:
-				values, ok := v.Value.([]interface{})
-				if !ok {
-					return nil, nil, fmt.Errorf("NOTIN value is not a slice")
+				values, err := p.ToInterfaceSlice(v.Value)
+				if err != nil {
+					return nil, nil, err
 				}
 				expression = clause.Not(clause.IN{Column: field, Values: values})
 			case LIKE:

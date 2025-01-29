@@ -1,9 +1,10 @@
 package sqltopb
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/fzf-labs/fdatabase/orm/gen"
 	"github.com/fzf-labs/fdatabase/orm/gormx"
-	"github.com/spf13/cobra"
 )
 
 var CmdSQLToPb = &cobra.Command{
@@ -23,11 +24,11 @@ var (
 
 //nolint:gochecknoinits
 func init() {
-	CmdSQLToPb.Flags().StringVarP(&dsn, "db", "", "", "db：mysql postgres")
-	CmdSQLToPb.Flags().StringVarP(&dsn, "dsn", "", "", "dsn")
-	CmdSQLToPb.Flags().StringVarP(&pbPackage, "pbPackage", "", "pb", "pbPackage")
-	CmdSQLToPb.Flags().StringVarP(&pbGoPackage, "pbGoPackage", "", "github.com/fzf-labs/fdatabase/orm/example/pb;pb", "pbGoPackage")
-	CmdSQLToPb.Flags().StringVarP(&outPutPath, "outPutPath", "", "./pb", "outPutPath")
+	CmdSQLToPb.Flags().StringVarP(&db, "db", "d", "", "db: mysql postgres")
+	CmdSQLToPb.Flags().StringVarP(&dsn, "dsn", "s", "", "dsn")
+	CmdSQLToPb.Flags().StringVarP(&pbPackage, "pbPackage", "p", "pb", "pbPackage")
+	CmdSQLToPb.Flags().StringVarP(&pbGoPackage, "pbGoPackage", "g", "github.com/fzf-labs/fdatabase/orm/example/pb;pb", "pbGoPackage")
+	CmdSQLToPb.Flags().StringVarP(&outPutPath, "outPutPath", "o", "./pb", "outPutPath")
 }
 
 func Run(_ *cobra.Command, _ []string) {

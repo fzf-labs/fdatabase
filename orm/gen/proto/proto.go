@@ -8,13 +8,15 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/fzf-labs/fdatabase/orm/utils"
-	"github.com/fzf-labs/fdatabase/orm/utils/file"
-	"github.com/fzf-labs/fdatabase/orm/utils/template"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+
+	"github.com/fzf-labs/fdatabase/orm/gormx"
+	"github.com/fzf-labs/fdatabase/orm/utils"
+	"github.com/fzf-labs/fdatabase/orm/utils/file"
+	"github.com/fzf-labs/fdatabase/orm/utils/template"
 )
 
 // GenerationPB 生成
@@ -79,13 +81,16 @@ func (p *Proto) output(filePath, content string) error {
 }
 
 func (p *Proto) getTableComment(table string) string {
-	type result struct {
-		Comment string `json:"comment"`
+	tableComments, err := gormx.GetTableComments(p.gorm)
+	if err != nil {
+		return ""
 	}
-	var res result
-	sql := fmt.Sprintf(`SELECT obj_description(relfilenode,'pg_class')AS comment FROM pg_class WHERE relname='%s'`, table)
-	p.gorm.Raw(sql).Scan(&res)
-	return res.Comment
+	for k, v := range tableComments {
+		if k == table {
+			return v
+		}
+	}
+	return ""
 }
 
 func (p *Proto) genSyntax() string {
