@@ -745,8 +745,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []string
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range IDS {
-		cacheKey := d.cache.Key(CacheDataTypeDemoByIDPrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := new(gorm_gen_model.DataTypeDemo)
 			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
@@ -841,8 +840,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByULids(ctx context.Context, uLids []st
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range uLids {
-		cacheKey := d.cache.Key(CacheDataTypeDemoByULidPrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := new(gorm_gen_model.DataTypeDemo)
 			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
@@ -947,8 +945,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByBatchAPIS(ctx context.Context, batchA
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range batchAPIS {
-		cacheKey := d.cache.Key(CacheDataTypeDemoByBatchAPIPrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.DataTypeDemo, 0)
 			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
@@ -1053,8 +1050,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByCacheKeys(ctx context.Context, _cache
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range _cacheKeys {
-		cacheKey := d.cache.Key(CacheDataTypeDemoByCacheKeyPrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.DataTypeDemo, 0)
 			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
@@ -1197,8 +1193,7 @@ func (d *DataTypeDemoRepo) FindMultiCacheByDataTypeTimes(ctx context.Context, da
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range dataTypeTimes {
-		cacheKey := d.cache.Key(CacheDataTypeDemoByDataTypeTimePrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.DataTypeDemo, 0)
 			err := d.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)

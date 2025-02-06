@@ -1,10 +1,9 @@
 package sqltopb
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/fzf-labs/fdatabase/orm/gen"
 	"github.com/fzf-labs/fdatabase/orm/gormx"
+	"github.com/spf13/cobra"
 )
 
 var CmdSQLToPb = &cobra.Command{

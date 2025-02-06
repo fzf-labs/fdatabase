@@ -3,11 +3,10 @@ package ormgen
 import (
 	"strings"
 
-	"github.com/spf13/cobra"
-	gormGen "gorm.io/gen"
-
 	"github.com/fzf-labs/fdatabase/orm/gen"
 	"github.com/fzf-labs/fdatabase/orm/gormx"
+	"github.com/spf13/cobra"
+	gormGen "gorm.io/gen"
 )
 
 var CmdOrmGen = &cobra.Command{

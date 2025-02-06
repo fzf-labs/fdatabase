@@ -3,11 +3,10 @@ package main
 import (
 	"log"
 
-	"github.com/spf13/cobra"
-
 	"github.com/fzf-labs/fdatabase/cmd/fdatabase/ormgen"
 	"github.com/fzf-labs/fdatabase/cmd/fdatabase/sqldump"
 	"github.com/fzf-labs/fdatabase/cmd/fdatabase/sqltopb"
+	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{

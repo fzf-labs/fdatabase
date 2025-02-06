@@ -10,7 +10,7 @@ import (
 )
 
 func TestLocker_AutoLock(t *testing.T) {
-	client, err := NewRueidis(&rueidis.ClientOption{
+	client, err := NewRueidisClient(&rueidis.ClientOption{
 		Username:    "",
 		Password:    "123456",
 		InitAddress: []string{"127.0.0.1:6379"},

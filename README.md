@@ -83,7 +83,6 @@ fdatabse ormgen -d "user:password@tcp(localhost:3306)/dbname" -o "./doc/gorm"
 ### 数据库导出
 
 ```go
-// 导出数据库结构
 fdatabse sqldump -d "user:password@tcp(localhost:3306)/dbname" -o "./doc/sql"
 ```
 

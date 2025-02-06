@@ -57,20 +57,20 @@ type OrderParam struct {
 
 // Req 请求-自定义查询
 type Req struct {
-	Page     int32         `json:"page"`     //页码
-	PageSize int32         `json:"pageSize"` //页数
-	Query    []*QueryParam `json:"query"`    //查询条件
-	Order    []*OrderParam `json:"order"`    //排序条件
+	Page     int32         `json:"page"`     // 页码
+	PageSize int32         `json:"pageSize"` // 页数
+	Query    []*QueryParam `json:"query"`    // 查询条件
+	Order    []*OrderParam `json:"order"`    // 排序条件
 }
 
 // Reply 返回-自定义查询
 type Reply struct {
-	Page      int32 `json:"page"`      //第几页
-	PageSize  int32 `json:"pageSize"`  //页大小
-	Total     int32 `json:"total"`     //总数
-	PrevPage  int32 `json:"prevPage"`  //上一页
-	NextPage  int32 `json:"nextPage"`  //下一页
-	TotalPage int32 `json:"totalPage"` //总页数
+	Page      int32 `json:"page"`      // 第几页
+	PageSize  int32 `json:"pageSize"`  // 页大小
+	Total     int32 `json:"total"`     // 总数
+	PrevPage  int32 `json:"prevPage"`  // 上一页
+	NextPage  int32 `json:"nextPage"`  // 下一页
+	TotalPage int32 `json:"totalPage"` // 总页数
 }
 
 // ExpValidate 验证Exp是否合法

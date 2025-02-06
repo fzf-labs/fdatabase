@@ -639,8 +639,7 @@ func (a *AdminRoleDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []strin
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range IDS {
-		cacheKey := a.cache.Key(CacheAdminRoleDemoByIDPrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := new(gorm_gen_model.AdminRoleDemo)
 			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)

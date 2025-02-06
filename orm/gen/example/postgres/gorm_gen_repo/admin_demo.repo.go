@@ -664,8 +664,7 @@ func (a *AdminDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []string) (
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range IDS {
-		cacheKey := a.cache.Key(CacheAdminDemoByIDPrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := new(gorm_gen_model.AdminDemo)
 			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
@@ -760,8 +759,7 @@ func (a *AdminDemoRepo) FindMultiCacheByUsernames(ctx context.Context, usernames
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range usernames {
-		cacheKey := a.cache.Key(CacheAdminDemoByUsernamePrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := new(gorm_gen_model.AdminDemo)
 			err := a.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)

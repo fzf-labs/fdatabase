@@ -3,13 +3,12 @@ package rueidiscache
 import (
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/rueidisaside"
-	"github.com/redis/rueidis/rueidiscompat"
 	"github.com/redis/rueidis/rueidisotel"
 )
 
-// NewRueidis  redis客户端rueidis
+// NewRueidisClient  redis客户端rueidis
 // redis > 6.0
-func NewRueidis(clientOption *rueidis.ClientOption) (rueidis.Client, error) {
+func NewRueidisClient(clientOption *rueidis.ClientOption) (rueidis.Client, error) {
 	client, err := rueidisotel.NewClient(*clientOption)
 	if err != nil {
 		return nil, err
@@ -17,14 +16,9 @@ func NewRueidis(clientOption *rueidis.ClientOption) (rueidis.Client, error) {
 	return client, nil
 }
 
-func NewRueidisAdapter(client rueidis.Client) (rueidiscompat.Cmdable, error) {
-	compat := rueidiscompat.NewAdapter(client)
-	return compat, nil
-}
-
-// NewRueidisAside 缓存和数据一起存储
+// NewRueidisAsideClient 增强的 Cache-Aside 模式客户端
 // redis > 7.0
-func NewRueidisAside(clientOption *rueidis.ClientOption) (rueidisaside.CacheAsideClient, error) {
+func NewRueidisAsideClient(clientOption *rueidis.ClientOption) (rueidisaside.CacheAsideClient, error) {
 	return rueidisaside.NewClient(rueidisaside.ClientOption{
 		ClientOption: *clientOption,
 	})

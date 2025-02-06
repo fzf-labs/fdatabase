@@ -8,15 +8,14 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/iancoleman/strcase"
-	"github.com/jinzhu/inflection"
-	"github.com/pkg/errors"
-	"gorm.io/gorm"
-
 	"github.com/fzf-labs/fdatabase/orm/gormx"
 	"github.com/fzf-labs/fdatabase/orm/utils"
 	"github.com/fzf-labs/fdatabase/orm/utils/file"
 	"github.com/fzf-labs/fdatabase/orm/utils/template"
+	"github.com/iancoleman/strcase"
+	"github.com/jinzhu/inflection"
+	"github.com/pkg/errors"
+	"gorm.io/gorm"
 )
 
 // GenerationPB 生成

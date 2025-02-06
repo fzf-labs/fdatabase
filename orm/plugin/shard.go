@@ -3,8 +3,8 @@ package plugin
 import (
 	"time"
 
+	"github.com/dromara/carbon/v2"
 	"github.com/fzf-labs/fdatabase/orm/utils"
-	"github.com/golang-module/carbon/v2"
 	"gorm.io/sharding"
 )
 

@@ -75,7 +75,6 @@ func TestPostgresBatchUpdateToSQLArray_LargeBatch(t *testing.T) {
 			IsActive: i%2 == 0,
 		}
 	}
-
 	got, err := PostgresBatchUpdateToSQLArray("users", dataList)
 	if err != nil {
 		t.Errorf("PostgresBatchUpdateToSQLArray() error = %v", err)
@@ -85,19 +84,15 @@ func TestPostgresBatchUpdateToSQLArray_LargeBatch(t *testing.T) {
 	for _, sql := range got {
 		t.Log(sql)
 	}
-
-	// 应该生成2个SQL语句(200 + 50)
 	if len(got) != 2 {
 		t.Errorf("PostgresBatchUpdateToSQLArray() got %d SQL statements, want 2", len(got))
 		return
 	}
-
 	// 验证第一个批次包含200条记录
 	ids := strings.Count(got[0], "WHEN")
 	if ids != 200 {
 		t.Errorf("First batch contains %d records, want 200", ids)
 	}
-
 	// 验证第二个批次包含50条记录
 	ids = strings.Count(got[1], "WHEN")
 	if ids != 50 {

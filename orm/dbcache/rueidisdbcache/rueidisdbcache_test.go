@@ -11,7 +11,7 @@ import (
 )
 
 func TestRueidisCache_Take(t *testing.T) {
-	client, err := rueidiscache.NewRueidis(&rueidis.ClientOption{
+	client, err := rueidiscache.NewRueidisClient(&rueidis.ClientOption{
 		Username:    "",
 		Password:    "123456",
 		InitAddress: []string{"127.0.0.1:6379"},
@@ -31,7 +31,7 @@ func TestRueidisCache_Take(t *testing.T) {
 }
 
 func TestRueidisCache_TakeBatch(t *testing.T) {
-	client, err := rueidiscache.NewRueidis(&rueidis.ClientOption{
+	client, err := rueidiscache.NewRueidisClient(&rueidis.ClientOption{
 		Username:    "",
 		Password:    "123456",
 		InitAddress: []string{"127.0.0.1:6379"},
@@ -63,7 +63,7 @@ func TestRueidisCache_TakeBatch(t *testing.T) {
 }
 
 func TestRueidisCache_Del(t *testing.T) {
-	client, err := rueidiscache.NewRueidis(&rueidis.ClientOption{
+	client, err := rueidiscache.NewRueidisClient(&rueidis.ClientOption{
 		Username:    "",
 		Password:    "123456",
 		InitAddress: []string{"127.0.0.1:6379"},
@@ -82,7 +82,7 @@ func TestRueidisCache_Del(t *testing.T) {
 }
 
 func TestRueidisCache_DelBatch(t *testing.T) {
-	client, err := rueidiscache.NewRueidis(&rueidis.ClientOption{
+	client, err := rueidiscache.NewRueidisClient(&rueidis.ClientOption{
 		Username:    "",
 		Password:    "123456",
 		InitAddress: []string{"127.0.0.1:6379"},

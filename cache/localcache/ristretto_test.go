@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewRistretto(t *testing.T) {
-	cache, err := NewRistretto()
+	cache, err := NewRistrettoStringCache()
 	if err != nil {
 		return
 	}

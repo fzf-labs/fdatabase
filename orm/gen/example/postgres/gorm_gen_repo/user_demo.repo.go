@@ -740,8 +740,7 @@ func (u *UserDemoRepo) FindMultiCacheByIDS(ctx context.Context, IDS []string) ([
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range IDS {
-		cacheKey := u.cache.Key(CacheUserDemoByIDPrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := new(gorm_gen_model.UserDemo)
 			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
@@ -836,8 +835,7 @@ func (u *UserDemoRepo) FindMultiCacheByUIDS(ctx context.Context, UIDS []string) 
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range UIDS {
-		cacheKey := u.cache.Key(CacheUserDemoByUIDPrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := new(gorm_gen_model.UserDemo)
 			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), tmp)
@@ -1018,8 +1016,7 @@ func (u *UserDemoRepo) FindMultiCacheByUsernames(ctx context.Context, usernames 
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range usernames {
-		cacheKey := u.cache.Key(CacheUserDemoByUsernamePrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.UserDemo, 0)
 			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)
@@ -1124,8 +1121,7 @@ func (u *UserDemoRepo) FindMultiCacheByTenantIDS(ctx context.Context, tenantIDS 
 	if err != nil {
 		return nil, err
 	}
-	for _, v := range tenantIDS {
-		cacheKey := u.cache.Key(CacheUserDemoByTenantIDPrefix, v)
+	for _, cacheKey := range cacheKeys {
 		if cacheValue[cacheKey] != "" {
 			tmp := make([]*gorm_gen_model.UserDemo, 0)
 			err := u.encoding.Unmarshal([]byte(cacheValue[cacheKey]), &tmp)

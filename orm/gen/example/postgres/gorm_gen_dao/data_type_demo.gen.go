@@ -7,13 +7,16 @@ package gorm_gen_dao
 import (
 	"context"
 
-	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_model"
-	"gorm.io/gen"
-	"gorm.io/gen/field"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
+
+	"gorm.io/gen"
+	"gorm.io/gen/field"
+
 	"gorm.io/plugin/dbresolver"
+
+	"github.com/fzf-labs/fdatabase/orm/gen/example/postgres/gorm_gen_model"
 )
 
 func newDataTypeDemo(db *gorm.DB, opts ...gen.DOOption) dataTypeDemo {
